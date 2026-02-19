@@ -93,9 +93,9 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Preços — todos os perfis */}
+        {/* Preços — ADMIN, SUPERVISAO, COMERCIAL (catálogo comercial) */}
         <Route path="/precos" element={
-          <PrivateRoute>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL']}>
             <LayoutBase><Precos /></LayoutBase>
           </PrivateRoute>
         } />

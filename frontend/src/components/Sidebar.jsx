@@ -17,8 +17,8 @@ const menu = [
   { label: 'Dashboard',  icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN'] },
   // Todos veem Produtos
   { label: 'Produtos',   icon: LucideBox,              to: '/produtos'      },
-  // Todos veem Preços
-  { label: 'Preços',     icon: LucideTag,              to: '/precos'        },
+  // ADMIN + SUPERVISAO + COMERCIAL (catálogo comercial)
+  { label: 'Preços',     icon: LucideTag,              to: '/precos',        allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL'] },
   // ADMIN + EXPEDICAO + SUPERVISAO
   { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
   // ADMIN + COMPRAS (não EXPEDICAO, não SUPERVISAO)
