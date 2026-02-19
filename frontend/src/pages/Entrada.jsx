@@ -1,13 +1,16 @@
-// Página de ENTRADA — ADMIN e EXPEDICAO
-// Fluxo: COMPRAS marca pedido nos Alertas → pedido aparece aqui → EXPEDICAO confirma chegada
-// Divergência: qty recebida ≠ qty pedida → notifica ADMIN + COMPRAS
-import React, { useState, useMemo } from 'react';
+// Módulo ENTRADA — ADMIN e EXPEDICAO
+// Fluxo principal: preenche formulário → sistema soma no estoque
+//   Se produto não existir → cria automaticamente
+//   Se existir → atualiza quantidade
+// Aba secundária: Pedidos Pendentes (criados pela equipe COMPRAS)
+// Aba terciária:  Histórico de entradas recentes
+import React, { useState, useMemo, useRef } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  LucidePackageCheck, LucideClipboardList, LucideCheck,
-  LucideX, LucideClock, LucideBoxes, LucidePlus, LucideAlertTriangle,
-  LucideCheckCircle, LucideHistory,
+  LucidePackagePlus, LucideClipboardList, LucideHistory,
+  LucideCheck, LucideX, LucideSearch, LucideAlertTriangle,
+  LucideCheckCircle, LucidePlus, LucideArrowDownToLine,
 } from 'lucide-react';
 
 const PENDENTES_KEY = 'zkPendentes';
@@ -18,7 +21,7 @@ function loadPendentes() {
 }
 function savePendentes(lista) { localStorage.setItem(PENDENTES_KEY, JSON.stringify(lista)); }
 
-function addNotificacao(msg, tipo = 'alerta') {
+function addNotif(msg, tipo = 'alerta') {
   try {
     const lista = JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
     lista.unshift({ id: Date.now(), mensagem: msg, tipo, lida: false, criadoEm: new Date().toISOString() });
@@ -26,447 +29,711 @@ function addNotificacao(msg, tipo = 'alerta') {
   } catch {}
 }
 
+function fmt(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+const FORM_VAZIO = {
+  categoria: '', nome: '', modelo: '', tamanho: '', material: '', cor: '',
+  quantidade: '', data: '', hora: '', observacao: '',
+};
+
+const TABS = [
+  { id: 'nova',      label: 'Nova Entrada',       icon: LucidePackagePlus },
+  { id: 'pendentes', label: 'Pedidos Pendentes',   icon: LucideClipboardList },
+  { id: 'historico', label: 'Histórico',            icon: LucideHistory },
+];
+
 export default function Entrada() {
-  const { produtos, editarProduto } = useEstoque();
+  const { produtos, criarProduto, editarProduto, registrarMovimentacao } = useEstoque();
   const { user } = useAuth();
 
+  const [aba, setAba]           = useState('nova');
+  const [form, setForm]         = useState(() => {
+    const agora = new Date();
+    return {
+      ...FORM_VAZIO,
+      data: agora.toISOString().slice(0, 10),
+      hora: agora.toTimeString().slice(0, 5),
+    };
+  });
+  const [busca, setBusca]       = useState('');
+  const [resultados, setResultados] = useState([]);
+  const [prodSelecionado, setProdSelecionado] = useState(null);
+  const [modoNovo, setModoNovo] = useState(false);
   const [pendentes, setPendentes] = useState(loadPendentes);
-  const [aba, setAba] = useState('pendentes');
-  const [toast, setToast] = useState(null);
-
-  // Modal confirmar chegada de pedido pendente
-  const [modalPedido, setModalPedido] = useState(null);
-  const [formConfirmar, setFormConfirmar] = useState({ quantidade: '', cor: '', observacao: '', data: '', hora: '' });
-
-  // Modal entrada direta (sem pedido prévio)
-  const [showDireta, setShowDireta] = useState(false);
-  const [formDireta, setFormDireta] = useState({ produtoId: '', quantidade: '', cor: '', observacao: '' });
-
-  const pendentesAtivos = useMemo(
-    () => [...pendentes.filter(p => p.status === 'PENDENTE')].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)),
-    [pendentes]
-  );
-  const historico = useMemo(
-    () => [...pendentes.filter(p => ['RECEBIDO','DIVERGENCIA','REALIZADA'].includes(p.status))]
-            .sort((a, b) => new Date(b.realizadaEm || b.criadoEm) - new Date(a.realizadaEm || a.criadoEm)),
-    [pendentes]
-  );
+  const [modalConfirmar, setModalConfirmar] = useState(null);
+  const [formConfirmar, setFormConfirmar]   = useState({ quantidade: '', cor: '', observacao: '', data: '', hora: '' });
+  const [toast, setToast]       = useState(null);
+  const buscaRef = useRef(null);
 
   function mostrarToast(msg, tipo = 'ok') {
     setToast({ msg, tipo });
     setTimeout(() => setToast(null), 4000);
   }
 
-  function abrirConfirmar(pedido) {
-    const agora = new Date();
-    const dataHoje = agora.toISOString().slice(0, 10);
-    const horaAgora = agora.toTimeString().slice(0, 5);
-    setFormConfirmar({ quantidade: String(pedido.quantidadePedida || ''), cor: '', observacao: '', data: dataHoje, hora: horaAgora });
-    setModalPedido(pedido);
+  // ── BUSCA DE PRODUTOS ────────────────────────────────────────────────────
+  function pesquisar(q) {
+    setBusca(q);
+    if (!q.trim()) { setResultados([]); return; }
+    const lower = q.toLowerCase();
+    const found = produtos
+      .filter(p => p.ativo &&
+        (p.nome?.toLowerCase().includes(lower) ||
+         p.codigo?.toLowerCase().includes(lower) ||
+         p.modelo?.toLowerCase().includes(lower) ||
+         p.categoria?.toLowerCase().includes(lower))
+      )
+      .slice(0, 8);
+    setResultados(found);
   }
 
-  function confirmarEntrada(e) {
+  function selecionarProduto(p) {
+    setProdSelecionado(p);
+    setModoNovo(false);
+    setBusca(p.nome);
+    setResultados([]);
+    setForm(f => ({
+      ...f,
+      nome:      p.nome,
+      categoria: p.categoria,
+      modelo:    p.modelo || '',
+      tamanho:   p.tamanho || '',
+      material:  p.material || '',
+      cor:       p.cor || '',
+    }));
+  }
+
+  function naoEncontrado() {
+    setProdSelecionado(null);
+    setModoNovo(true);
+    setResultados([]);
+    setForm(f => ({ ...f, nome: busca }));
+  }
+
+  function limparSelecao() {
+    setProdSelecionado(null);
+    setModoNovo(false);
+    setBusca('');
+    setResultados([]);
+    setForm({ ...FORM_VAZIO, data: form.data, hora: form.hora });
+  }
+
+  // ── REGISTRAR ENTRADA ─────────────────────────────────────────────────────
+  function handleEntrada(e) {
+    e.preventDefault();
+    const qtd = Number(form.quantidade);
+    if (!qtd || qtd < 1) { mostrarToast('Informe uma quantidade válida.', 'erro'); return; }
+    if (!form.nome.trim()) { mostrarToast('Informe o nome do produto.', 'erro'); return; }
+
+    if (modoNovo) {
+      // Cria novo produto
+      const nowIso = new Date().toISOString();
+      const codigo = `ENT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+      const novoProd = {
+        nome:            form.nome.trim(),
+        codigo,
+        categoria:       form.categoria.trim() || 'Sem categoria',
+        modelo:          form.modelo.trim(),
+        tamanho:         form.tamanho.trim(),
+        material:        form.material.trim(),
+        cor:             form.cor.trim(),
+        estoqueAtual:    qtd,
+        estoqueMinimo:   0,
+        controlaEstoque: true,
+        geraAlerta:      false,
+        ativo:           true,
+        imagem:          '',
+        criadoEm:        nowIso,
+        atualizadoEm:    nowIso,
+        ultimaAtualizacao: `${form.data} ${form.hora}`,
+        atualizadoPor:   user?.email || '',
+      };
+      const criado = criarProduto(novoProd, user);
+      // Registra movimentação também
+      registrarMovimentacao({
+        produtoId:  criado.id,
+        tipo:       'ENTRADA',
+        quantidade: qtd,
+        observacao: form.observacao.trim() || 'Entrada direta via módulo Entrada',
+      }, user);
+      mostrarToast(`✅ Produto "${novoProd.nome}" criado e estoque adicionado (${qtd} unid.)!`);
+      limparSelecao();
+      return;
+    }
+
+    if (prodSelecionado) {
+      // Atualiza produto existente
+      const { erro } = registrarMovimentacao({
+        produtoId:  prodSelecionado.id,
+        tipo:       'ENTRADA',
+        quantidade: qtd,
+        observacao: form.observacao.trim() || 'Entrada direta',
+      }, user);
+      if (erro) { mostrarToast(`Erro: ${erro}`, 'erro'); return; }
+      // Atualiza campo ultimaAtualizacao e atualizadoPor
+      editarProduto(prodSelecionado.id, {
+        ultimaAtualizacao: `${form.data} ${form.hora}`,
+        atualizadoPor: user?.email || '',
+        ...(form.cor && form.cor !== prodSelecionado.cor ? { cor: form.cor } : {}),
+      }, user);
+      mostrarToast(`✅ Entrada de ${qtd} unid. registrada em "${prodSelecionado.nome}"!`);
+      limparSelecao();
+      return;
+    }
+
+    mostrarToast('Selecione um produto ou marque como novo.', 'erro');
+  }
+
+  // ── CONFIRMAR PEDIDO PENDENTE ────────────────────────────────────────────
+  function abrirConfirmar(pedido) {
+    const agora = new Date();
+    setFormConfirmar({
+      quantidade: String(pedido.quantidadePedida || ''),
+      cor: '', observacao: '',
+      data: agora.toISOString().slice(0, 10),
+      hora: agora.toTimeString().slice(0, 5),
+    });
+    setModalConfirmar(pedido);
+  }
+
+  function confirmarPedido(e) {
     e.preventDefault();
     const qtdRecebida = Number(formConfirmar.quantidade);
     if (!qtdRecebida || qtdRecebida < 1) return;
-    const pedido = modalPedido;
-
-    // Atualiza estoque
+    const pedido = modalConfirmar;
     const produto = produtos.find(p => p.id === pedido.produtoId);
+
     if (produto) {
-      const atualizado = {
-        ...produto,
-        estoqueAtual: produto.estoqueAtual + qtdRecebida,
-        ...(formConfirmar.cor ? { cor: formConfirmar.cor } : {}),
-      };
-      editarProduto(produto.id, atualizado, user);
+      const { erro } = registrarMovimentacao({
+        produtoId:  produto.id,
+        tipo:       'ENTRADA',
+        quantidade: qtdRecebida,
+        observacao: formConfirmar.observacao || `Pedido confirmado — solicitado: ${pedido.quantidadePedida}`,
+      }, user);
+      if (erro) { mostrarToast(`Erro: ${erro}`, 'erro'); setModalConfirmar(null); return; }
+      editarProduto(produto.id, {
+        ultimaAtualizacao: `${formConfirmar.data} ${formConfirmar.hora}`,
+        atualizadoPor: user?.email || '',
+      }, user);
     }
 
-    const isDivergencia = qtdRecebida !== pedido.quantidadePedida;
-    const novoStatus = isDivergencia ? 'DIVERGENCIA' : 'RECEBIDO';
-    const realizadaEm = formConfirmar.data && formConfirmar.hora
-      ? new Date(`${formConfirmar.data}T${formConfirmar.hora}`).toISOString()
-      : new Date().toISOString();
-
-    const nova = pendentes.map(p =>
+    const divergencia = pedido.quantidadePedida && qtdRecebida !== pedido.quantidadePedida;
+    const novo = pendentes.map(p =>
       p.id === pedido.id
-        ? {
-            ...p,
-            status: novoStatus,
-            realizadaEm,
-            realizadaPor: user.nome,
+        ? { ...p, status: divergencia ? 'DIVERGENCIA' : 'RECEBIDO',
             quantidadeRecebida: qtdRecebida,
-            corRecebida: formConfirmar.cor,
-            observacaoEntrada: formConfirmar.observacao,
-          }
+            realizadaPor: user?.nome || '',
+            realizadaEm: new Date().toISOString() }
         : p
     );
-    setPendentes(nova);
-    savePendentes(nova);
+    setPendentes(novo);
+    savePendentes(novo);
 
-    if (isDivergencia) {
-      const diff = qtdRecebida - pedido.quantidadePedida;
-      const msg = `⚠️ DIVERGÊNCIA na entrada de "${pedido.produtoNome}": pedido ${pedido.quantidadePedida} unid., recebido ${qtdRecebida} unid. (${diff > 0 ? '+' : ''}${diff}). Registrado por ${user.nome}.`;
-      addNotificacao(msg, 'divergencia');
-      mostrarToast(`Divergência registrada! Qtd pedida: ${pedido.quantidadePedida} · Recebida: ${qtdRecebida}. Admin e Compras foram notificados.`, 'warn');
-    } else {
-      mostrarToast(`✅ "${pedido.produtoNome}" recebido com sucesso! Estoque atualizado.`, 'ok');
+    if (divergencia) {
+      addNotif(
+        `⚠️ Divergência em "${pedido.produtoNome}": pedido ${pedido.quantidadePedida}, recebido ${qtdRecebida}.`,
+        'divergencia'
+      );
     }
 
-    setModalPedido(null);
+    mostrarToast(divergencia
+      ? `⚠️ Entrada com divergência registrada para "${pedido.produtoNome}".`
+      : `✅ Pedido confirmado — ${qtdRecebida} unid. de "${pedido.produtoNome}"!`
+    );
+    setModalConfirmar(null);
   }
 
-  function salvarEntradaDireta(e) {
-    e.preventDefault();
-    const qtd = Number(formDireta.quantidade);
-    if (!formDireta.produtoId || !qtd || qtd < 1) return;
-    const produto = produtos.find(p => p.id === formDireta.produtoId);
-    if (!produto) return;
-    editarProduto(produto.id, {
-      ...produto,
-      estoqueAtual: produto.estoqueAtual + qtd,
-      ...(formDireta.cor ? { cor: formDireta.cor } : {}),
-    }, user);
-    const registro = {
-      id: Date.now(),
-      produtoId: produto.id, produtoNome: produto.nome,
-      produtoCodigo: produto.codigo, produtoCategoria: produto.categoria,
-      quantidadePedida: qtd, quantidadeRecebida: qtd,
-      autor: user.nome, autorPerfil: user.perfil,
-      criadoEm: new Date().toISOString(),
-      status: 'RECEBIDO',
-      realizadaEm: new Date().toISOString(), realizadaPor: user.nome,
-      corRecebida: formDireta.cor, observacaoEntrada: formDireta.observacao,
-      entradaDireta: true,
-    };
-    const nova = [registro, ...pendentes];
-    setPendentes(nova);
-    savePendentes(nova);
-    setShowDireta(false);
-    setFormDireta({ produtoId: '', quantidade: '', cor: '', observacao: '' });
-    mostrarToast(`✅ Entrada direta de ${qtd}x "${produto.nome}" registrada!`, 'ok');
-  }
+  // ── DADOS DAS ABAS ────────────────────────────────────────────────────────
+  const pendentesAtivos = useMemo(
+    () => [...pendentes.filter(p => p.status === 'PENDENTE')]
+      .sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)),
+    [pendentes]
+  );
+
+  const historico = useMemo(
+    () => [...pendentes.filter(p => ['RECEBIDO', 'DIVERGENCIA'].includes(p.status))]
+      .sort((a, b) => new Date(b.realizadaEm || b.criadoEm) - new Date(a.realizadaEm || a.criadoEm)),
+    [pendentes]
+  );
+
+  const categorias = useMemo(() => [...new Set(produtos.map(p => p.categoria))].sort(), [produtos]);
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
 
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-xl font-semibold flex items-center gap-2 text-sm transition-all
-          ${toast.tipo === 'ok' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
-          {toast.tipo === 'ok'
-            ? <LucideCheckCircle className="w-4 h-4 flex-shrink-0" />
-            : <LucideAlertTriangle className="w-4 h-4 flex-shrink-0" />}
+        <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-xl font-semibold flex items-center gap-2 text-white transition
+          ${toast.tipo === 'erro' ? 'bg-red-500' : 'bg-emerald-500'}`}>
+          {toast.tipo === 'erro'
+            ? <LucideX className="w-4 h-4" />
+            : <LucideCheck className="w-4 h-4" />}
           {toast.msg}
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow">
-            <LucidePackageCheck className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Entrada de Mercadoria</h1>
-            <p className="text-sm text-gray-500">Confirme chegadas físicas e atualize o estoque</p>
-          </div>
-        </div>
-        <button
-          onClick={() => { setShowDireta(true); setFormDireta({ produtoId: '', quantidade: '', cor: '', observacao: '' }); }}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-semibold shadow transition"
-        >
-          <LucidePlus className="w-4 h-4" /> Nova Entrada
-        </button>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <LucideArrowDownToLine className="w-6 h-6 text-emerald-600" />
+          Entrada de Materiais
+        </h1>
+        <p className="text-gray-500 text-sm mt-1">Registre recebimentos e atualize o estoque automaticamente.</p>
       </div>
 
-      {/* Abas */}
-      <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
-        <button
-          onClick={() => setAba('pendentes')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition ${aba === 'pendentes' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          <LucideClock className="w-4 h-4" />
-          Aguardando Chegada
-          {pendentesAtivos.length > 0 && (
-            <span className="bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full">{pendentesAtivos.length}</span>
-          )}
-        </button>
-        <button
-          onClick={() => setAba('historico')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition ${aba === 'historico' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          <LucideHistory className="w-4 h-4" />
-          Histórico de Entradas
-          <span className="bg-gray-300 text-gray-700 text-xs px-1.5 py-0.5 rounded-full">{historico.length}</span>
-        </button>
+      {/* Tabs */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl mb-6 w-fit">
+        {TABS.map(t => {
+          const Icon = t.icon;
+          const count = t.id === 'pendentes' ? pendentesAtivos.length : null;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setAba(t.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition
+                ${aba === t.id ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              <Icon className="w-4 h-4" />
+              {t.label}
+              {count != null && count > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 leading-none">{count}</span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* ── ABA PENDENTES ─────────────────────────────────────── */}
-      {aba === 'pendentes' && (
-        <div className="space-y-4">
-          {pendentesAtivos.length === 0 ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-12 text-center">
-              <LucideClipboardList className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-              <p className="text-gray-500 font-medium">Nenhum pedido aguardando chegada</p>
-              <p className="text-sm text-gray-400 mt-1">Pedidos registrados pelo Compras aparecerão aqui.</p>
-            </div>
-          ) : pendentesAtivos.map(pedido => {
-            const produto = produtos.find(p => p.id === pedido.produtoId);
-            return (
-              <div key={pedido.id} className="bg-white border border-orange-200 rounded-2xl p-5 shadow-sm flex gap-4 items-start">
-                {produto?.imagem
-                  ? <img src={produto.imagem} alt={produto.nome} className="w-16 h-16 object-contain rounded-xl border flex-shrink-0" />
-                  : <div className="w-16 h-16 bg-orange-50 rounded-xl border border-orange-200 flex items-center justify-center text-orange-300 flex-shrink-0"><LucideBoxes className="w-6 h-6" /></div>}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-bold text-gray-800">{pedido.produtoNome}</h3>
-                      <p className="text-xs text-gray-400">{pedido.produtoCodigo} · {pedido.produtoCategoria}</p>
+      {/* ═══ ABA: NOVA ENTRADA ═══ */}
+      {aba === 'nova' && (
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-emerald-50 border-b border-emerald-100 px-6 py-4">
+            <h2 className="font-bold text-emerald-800 flex items-center gap-2">
+              <LucidePackagePlus className="w-5 h-5" />
+              Registrar Recebimento
+            </h2>
+            <p className="text-emerald-600 text-xs mt-0.5">
+              Busque um produto existente ou cadastre um novo. O estoque será atualizado automaticamente.
+            </p>
+          </div>
+
+          <form onSubmit={handleEntrada} className="p-6 space-y-5">
+
+            {/* Busca de produto */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Produto <span className="text-red-500">*</span>
+              </label>
+
+              {!prodSelecionado && !modoNovo ? (
+                <div className="relative">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <LucideSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        ref={buscaRef}
+                        className="border border-gray-300 rounded-lg pl-9 pr-3 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-emerald-300 text-sm"
+                        placeholder="Buscar por nome, código ou modelo..."
+                        value={busca}
+                        onChange={e => pesquisar(e.target.value)}
+                        autoFocus
+                      />
                     </div>
-                    <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full border border-orange-200">
-                      ⏳ Aguardando chegada
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-4 mt-3 text-sm">
-                    <div>
-                      <span className="text-gray-400 text-xs">Qtd pedida</span>
-                      <p className="font-bold text-lg text-orange-600">{pedido.quantidadePedida}</p>
-                    </div>
-                    {produto && (
-                      <div>
-                        <span className="text-gray-400 text-xs">Estoque atual</span>
-                        <p className="font-bold text-lg text-gray-700">{produto.estoqueAtual}</p>
-                      </div>
+                    {busca && (
+                      <button
+                        type="button"
+                        onClick={naoEncontrado}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition whitespace-nowrap"
+                      >
+                        <LucidePlus className="w-4 h-4" />
+                        Cadastrar novo
+                      </button>
                     )}
-                    <div>
-                      <span className="text-gray-400 text-xs">Pedido por</span>
-                      <p className="font-semibold text-gray-700">{pedido.autor}</p>
-                    </div>
-                    <div>
-                      <span className="text-gray-400 text-xs">Data do pedido</span>
-                      <p className="font-semibold text-gray-700">{new Date(pedido.criadoEm).toLocaleString('pt-BR')}</p>
-                    </div>
                   </div>
-                  {pedido.observacaoPedido && (
-                    <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-sm text-amber-800">
-                      💬 <span className="font-medium">Obs. do pedido:</span> {pedido.observacaoPedido}
+
+                  {resultados.length > 0 && (
+                    <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                      {resultados.map(p => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => selecionarProduto(p)}
+                          className="w-full px-4 py-3 text-left hover:bg-emerald-50 flex items-center justify-between gap-4 border-b border-gray-50 last:border-0"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-800 text-sm truncate">{p.nome}</p>
+                            <p className="text-xs text-gray-400 truncate">
+                              {[p.codigo, p.categoria, p.modelo, p.tamanho].filter(Boolean).join(' · ')}
+                            </p>
+                          </div>
+                          <span className={`text-sm font-bold flex-shrink-0 ${p.estoqueAtual <= p.estoqueMinimo ? 'text-red-500' : 'text-emerald-600'}`}>
+                            {p.estoqueAtual} un.
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   )}
-                  <button
-                    onClick={() => abrirConfirmar(pedido)}
-                    className="mt-3 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow transition"
-                  >
-                    <LucideCheck className="w-4 h-4" />
-                    Confirmar Chegada
+
+                  {busca && resultados.length === 0 && (
+                    <p className="text-xs text-gray-400 mt-1.5 px-1">
+                      Nenhum produto encontrado para "{busca}". Clique em "Cadastrar novo" para criar.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 ${modoNovo ? 'border-blue-200 bg-blue-50' : 'border-emerald-200 bg-emerald-50'}`}>
+                  <div className="flex-1 min-w-0">
+                    {modoNovo
+                      ? <>
+                          <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">Novo produto</span>
+                          <p className="font-semibold text-gray-800 text-sm truncate">{busca || form.nome}</p>
+                        </>
+                      : <>
+                          <span className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Produto encontrado</span>
+                          <p className="font-semibold text-gray-800 text-sm truncate">{prodSelecionado.nome}</p>
+                          <p className="text-xs text-gray-400">{prodSelecionado.codigo} · Estoque atual: <strong>{prodSelecionado.estoqueAtual}</strong></p>
+                        </>
+                    }
+                  </div>
+                  <button type="button" onClick={limparSelecao} className="p-2 rounded-lg hover:bg-gray-200 text-gray-500 transition">
+                    <LucideX className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-            );
-          })}
+              )}
+            </div>
+
+            {/* Campos do formulário - mostrados após selecionar ou marcar como novo */}
+            {(prodSelecionado || modoNovo) && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {modoNovo && (
+                    <>
+                      <div>
+                        <label className="text-sm font-semibold text-gray-700">Nome do Produto *</label>
+                        <input
+                          required
+                          className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          value={form.nome}
+                          onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
+                          placeholder="Nome completo do produto"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-gray-700">Categoria</label>
+                        <input
+                          className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          value={form.categoria}
+                          onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))}
+                          list="cats-list"
+                          placeholder="Ex: Cadeados, Lacres..."
+                        />
+                        <datalist id="cats-list">{categorias.map(c => <option key={c} value={c} />)}</datalist>
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-gray-700">Modelo</label>
+                        <input
+                          className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          value={form.modelo}
+                          onChange={e => setForm(f => ({ ...f, modelo: e.target.value }))}
+                          placeholder="Ex: Dupla Trava, Tradicional..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-gray-700">Tamanho / Variação</label>
+                        <input
+                          className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          value={form.tamanho}
+                          onChange={e => setForm(f => ({ ...f, tamanho: e.target.value }))}
+                          placeholder="Ex: 16mm, 30x40, M..."
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-semibold text-gray-700">Material</label>
+                        <input
+                          className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                          value={form.material}
+                          onChange={e => setForm(f => ({ ...f, material: e.target.value }))}
+                          placeholder="Ex: PP, Nylon, Latão..."
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Cor</label>
+                    <input
+                      className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                      value={form.cor}
+                      onChange={e => setForm(f => ({ ...f, cor: e.target.value }))}
+                      placeholder="Ex: Amarelo, Azul, Natural..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Quantidade Recebida *</label>
+                    <input
+                      required
+                      type="number"
+                      min="1"
+                      className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                      value={form.quantidade}
+                      onChange={e => setForm(f => ({ ...f, quantidade: e.target.value }))}
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Data *</label>
+                    <input
+                      required
+                      type="date"
+                      className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                      value={form.data}
+                      onChange={e => setForm(f => ({ ...f, data: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700">Hora *</label>
+                    <input
+                      required
+                      type="time"
+                      className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                      value={form.hora}
+                      onChange={e => setForm(f => ({ ...f, hora: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">Observação</label>
+                  <textarea
+                    rows={2}
+                    className="border border-gray-300 rounded-lg px-3 py-2.5 w-full mt-1 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                    value={form.observacao}
+                    onChange={e => setForm(f => ({ ...f, observacao: e.target.value }))}
+                    placeholder="Nota fiscal, fornecedor, observações..."
+                  />
+                </div>
+
+                {modoNovo && (
+                  <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                    <LucideAlertTriangle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-blue-700 text-xs">
+                      Produto novo será <strong>cadastrado automaticamente</strong> no sistema com o estoque informado.
+                      Você pode editar os detalhes depois na aba <strong>Produtos</strong>.
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="submit"
+                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl transition shadow-sm"
+                  >
+                    <LucideArrowDownToLine className="w-4 h-4" />
+                    Registrar Entrada
+                  </button>
+                  <button type="button" onClick={limparSelecao} className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-50 font-medium transition text-sm">
+                    Cancelar
+                  </button>
+                </div>
+              </>
+            )}
+          </form>
         </div>
       )}
 
-      {/* ── ABA HISTÓRICO ─────────────────────────────────────── */}
-      {aba === 'historico' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          {historico.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <LucideHistory className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">Nenhuma entrada realizada ainda</p>
+      {/* ═══ ABA: PEDIDOS PENDENTES ═══ */}
+      {aba === 'pendentes' && (
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-amber-50 border-b border-amber-100 px-6 py-4 flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-amber-800 flex items-center gap-2">
+                <LucideClipboardList className="w-5 h-5" />
+                Pedidos Pendentes
+              </h2>
+              <p className="text-amber-600 text-xs mt-0.5">
+                Pedidos criados pela equipe de Compras aguardando confirmação de chegada.
+              </p>
+            </div>
+            {pendentesAtivos.length > 0 && (
+              <span className="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                {pendentesAtivos.length}
+              </span>
+            )}
+          </div>
+
+          {pendentesAtivos.length === 0 ? (
+            <div className="text-center py-16">
+              <LucideCheckCircle className="w-12 h-12 text-emerald-300 mx-auto mb-3" />
+              <p className="text-gray-500 font-medium">Nenhum pedido pendente</p>
+              <p className="text-gray-400 text-sm mt-1">Todos os pedidos foram confirmados.</p>
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
-                  <th className="p-3 text-left">Produto</th>
-                  <th className="p-3 text-center">Pedido</th>
-                  <th className="p-3 text-center">Recebido</th>
-                  <th className="p-3 text-center">Status</th>
-                  <th className="p-3 text-left">Observação</th>
-                  <th className="p-3 text-left">Realizado por</th>
-                  <th className="p-3 text-left">Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {historico.map(r => {
-                  const isDivergencia = r.status === 'DIVERGENCIA';
-                  return (
-                    <tr key={r.id} className={`border-t hover:bg-gray-50 ${isDivergencia ? 'bg-red-50/40' : ''}`}>
-                      <td className="p-3">
-                        <p className="font-medium text-gray-800">{r.produtoNome}</p>
-                        <p className="text-xs text-gray-400">{r.produtoCodigo}</p>
-                        {r.entradaDireta && <span className="text-xs text-indigo-500 font-medium">Entrada direta</span>}
-                      </td>
-                      <td className="p-3 text-center text-gray-500">{r.quantidadePedida ?? '—'}</td>
-                      <td className="p-3 text-center">
-                        <span className={`font-bold px-2 py-0.5 rounded-full text-sm ${isDivergencia ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                          +{r.quantidadeRecebida}
-                        </span>
-                      </td>
-                      <td className="p-3 text-center">
-                        {isDivergencia
-                          ? <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-red-200">
-                              <LucideAlertTriangle className="w-3 h-3" /> Divergência
-                            </span>
-                          : <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
-                              <LucideCheckCircle className="w-3 h-3" /> Recebido
-                            </span>}
-                      </td>
-                      <td className="p-3 text-gray-500 max-w-[180px] truncate">{r.observacaoEntrada || <span className="text-gray-300">—</span>}</td>
-                      <td className="p-3 text-gray-600 text-xs">{r.realizadaPor}</td>
-                      <td className="p-3 text-gray-400 text-xs whitespace-nowrap">{new Date(r.realizadaEm || r.criadoEm).toLocaleString('pt-BR')}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="divide-y divide-gray-100">
+              {pendentesAtivos.map(pedido => (
+                <div key={pedido.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800">{pedido.produtoNome}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {pedido.produtoCodigo} · {pedido.produtoCategoria}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      <span className="font-medium">Qtd solicitada:</span> {pedido.quantidadePedida} ·{' '}
+                      <span className="font-medium">Por:</span> {pedido.autor} ·{' '}
+                      {fmt(pedido.criadoEm)}
+                    </p>
+                    {pedido.observacaoPedido && (
+                      <p className="text-xs text-gray-400 italic mt-0.5">"{pedido.observacaoPedido}"</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => abrirConfirmar(pedido)}
+                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap"
+                  >
+                    <LucideCheck className="w-4 h-4" />
+                    Confirmar
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       )}
 
-      {/* ── MODAL CONFIRMAR CHEGADA ───────────────────────────── */}
-      {modalPedido && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <LucidePackageCheck className="w-5 h-5 text-emerald-600" />
-                Confirmar Chegada
-              </h2>
-              <button onClick={() => setModalPedido(null)} className="text-gray-400 hover:text-gray-600"><LucideX className="w-5 h-5" /></button>
-            </div>
+      {/* ═══ ABA: HISTÓRICO ═══ */}
+      {aba === 'historico' && (
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="border-b border-gray-100 px-6 py-4">
+            <h2 className="font-bold text-gray-800 flex items-center gap-2">
+              <LucideHistory className="w-5 h-5 text-blue-500" />
+              Histórico de Entradas Confirmadas
+            </h2>
+          </div>
 
-            <div className="bg-gray-50 rounded-xl p-3 mb-4 text-sm">
-              <p className="font-semibold text-gray-700">{modalPedido.produtoNome}</p>
-              <p className="text-gray-400 text-xs mt-0.5">
-                {modalPedido.produtoCodigo} · Pedido: <strong className="text-orange-600">{modalPedido.quantidadePedida} unid.</strong> por {modalPedido.autor}
-              </p>
+          {historico.length === 0 ? (
+            <div className="text-center py-16">
+              <LucideHistory className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+              <p className="text-gray-400 font-medium">Nenhuma entrada confirmada ainda.</p>
             </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-gray-500 font-medium text-xs">Produto</th>
+                    <th className="px-4 py-3 text-center text-gray-500 font-medium text-xs">Pedido</th>
+                    <th className="px-4 py-3 text-center text-gray-500 font-medium text-xs">Recebido</th>
+                    <th className="px-4 py-3 text-left text-gray-500 font-medium text-xs">Status</th>
+                    <th className="px-4 py-3 text-left text-gray-500 font-medium text-xs">Confirmado por</th>
+                    <th className="px-4 py-3 text-left text-gray-500 font-medium text-xs">Data</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {historico.map(p => (
+                    <tr key={p.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-gray-800 text-xs">{p.produtoNome}</p>
+                        <p className="text-gray-400 text-xs">{p.produtoCodigo}</p>
+                      </td>
+                      <td className="px-4 py-3 text-center text-xs text-gray-600">{p.quantidadePedida}</td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`font-bold text-sm ${p.quantidadeRecebida !== p.quantidadePedida ? 'text-orange-500' : 'text-emerald-600'}`}>
+                          {p.quantidadeRecebida}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {p.status === 'DIVERGENCIA'
+                          ? <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-0.5 rounded-full">Divergência</span>
+                          : <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">Recebido</span>
+                        }
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500">{p.realizadaPor}</td>
+                      <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{fmt(p.realizadaEm)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
-            <form onSubmit={confirmarEntrada} className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-gray-600">Quantidade Recebida *</label>
-                <input
-                  required type="number" min="1"
-                  className="mt-1 w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300"
-                  value={formConfirmar.quantidade}
-                  onChange={e => setFormConfirmar(f => ({ ...f, quantidade: e.target.value }))}
-                />
-                {formConfirmar.quantidade && Number(formConfirmar.quantidade) !== modalPedido.quantidadePedida && (
-                  <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                    <LucideAlertTriangle className="w-3 h-3" />
-                    Divergência detectada (pedido: {modalPedido.quantidadePedida}). Será notificado Admin e Compras.
-                  </p>
-                )}
+      {/* ═══ MODAL CONFIRMAR PEDIDO ═══ */}
+      {modalConfirmar && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-5 border-b">
+              <h3 className="font-bold text-gray-900">Confirmar Chegada</h3>
+              <button onClick={() => setModalConfirmar(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <LucideX className="w-4 h-4" />
+              </button>
+            </div>
+            <form onSubmit={confirmarPedido} className="p-5 space-y-4">
+              <div className="bg-gray-50 rounded-xl p-4 text-sm">
+                <p className="font-semibold text-gray-800">{modalConfirmar.produtoNome}</p>
+                <p className="text-gray-500 text-xs">{modalConfirmar.produtoCodigo}</p>
+                <p className="text-gray-600 mt-1">Solicitado: <strong>{modalConfirmar.quantidadePedida} unid.</strong></p>
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-semibold text-gray-600">Data *</label>
+                  <label className="text-sm font-semibold text-gray-700">Qtd Recebida *</label>
                   <input
-                    required type="date"
-                    className="mt-1 w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-300"
+                    required type="number" min="1"
+                    className="border rounded-lg px-3 py-2 w-full mt-1 text-sm font-bold"
+                    value={formConfirmar.quantidade}
+                    onChange={e => setFormConfirmar(f => ({ ...f, quantidade: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">Cor</label>
+                  <input
+                    className="border rounded-lg px-3 py-2 w-full mt-1 text-sm"
+                    value={formConfirmar.cor}
+                    onChange={e => setFormConfirmar(f => ({ ...f, cor: e.target.value }))}
+                    placeholder="Opcional"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">Data</label>
+                  <input
+                    type="date"
+                    className="border rounded-lg px-3 py-2 w-full mt-1 text-sm"
                     value={formConfirmar.data}
                     onChange={e => setFormConfirmar(f => ({ ...f, data: e.target.value }))}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-gray-600">Hora *</label>
+                  <label className="text-sm font-semibold text-gray-700">Hora</label>
                   <input
-                    required type="time"
-                    className="mt-1 w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-300"
+                    type="time"
+                    className="border rounded-lg px-3 py-2 w-full mt-1 text-sm"
                     value={formConfirmar.hora}
                     onChange={e => setFormConfirmar(f => ({ ...f, hora: e.target.value }))}
                   />
                 </div>
               </div>
+
               <div>
-                <label className="text-sm font-semibold text-gray-600">Cor (opcional)</label>
+                <label className="text-sm font-semibold text-gray-700">Observação</label>
                 <input
-                  className="mt-1 w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300"
-                  placeholder="ex: Amarelo, Azul..."
-                  value={formConfirmar.cor}
-                  onChange={e => setFormConfirmar(f => ({ ...f, cor: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-600">Observação (opcional)</label>
-                <textarea
-                  rows={2}
-                  className="mt-1 w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 resize-none"
-                  placeholder="NF, estado do produto, divergência..."
+                  className="border rounded-lg px-3 py-2 w-full mt-1 text-sm"
                   value={formConfirmar.observacao}
                   onChange={e => setFormConfirmar(f => ({ ...f, observacao: e.target.value }))}
+                  placeholder="Opcional..."
                 />
               </div>
-              <div className="flex gap-3 justify-end pt-1">
-                <button type="button" onClick={() => setModalPedido(null)}
-                  className="px-4 py-2 rounded-xl border text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
-                <button type="submit"
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow flex items-center gap-2">
-                  <LucideCheck className="w-4 h-4" /> Confirmar e Atualizar Estoque
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* ── MODAL NOVA ENTRADA DIRETA ─────────────────────────── */}
-      {showDireta && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <LucidePlus className="w-5 h-5 text-emerald-600" />
-                Nova Entrada Direta
-              </h2>
-              <button onClick={() => setShowDireta(false)} className="text-gray-400 hover:text-gray-600"><LucideX className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={salvarEntradaDireta} className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-gray-600">Produto *</label>
-                <select
-                  required
-                  className="mt-1 w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300"
-                  value={formDireta.produtoId}
-                  onChange={e => setFormDireta(f => ({ ...f, produtoId: e.target.value }))}
-                >
-                  <option value="">Selecione o produto...</option>
-                  {produtos.filter(p => p.ativo).sort((a, b) => a.nome.localeCompare(b.nome)).map(p => (
-                    <option key={p.id} value={p.id}>{p.nome} — estoque: {p.estoqueAtual}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-600">Quantidade *</label>
-                <input required type="number" min="1"
-                  className="mt-1 w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300"
-                  value={formDireta.quantidade}
-                  onChange={e => setFormDireta(f => ({ ...f, quantidade: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-600">Cor (opcional)</label>
-                <input
-                  className="mt-1 w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300"
-                  placeholder="ex: Amarelo, Azul..."
-                  value={formDireta.cor}
-                  onChange={e => setFormDireta(f => ({ ...f, cor: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-gray-600">Observação (opcional)</label>
-                <textarea rows={2}
-                  className="mt-1 w-full border rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-300 resize-none"
-                  placeholder="NF, informações da chegada..."
-                  value={formDireta.observacao}
-                  onChange={e => setFormDireta(f => ({ ...f, observacao: e.target.value }))} />
-              </div>
-              <div className="flex gap-3 justify-end pt-1">
-                <button type="button" onClick={() => setShowDireta(false)}
-                  className="px-4 py-2 rounded-xl border text-sm text-gray-600 hover:bg-gray-50">Cancelar</button>
-                <button type="submit"
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow flex items-center gap-2">
-                  <LucideCheck className="w-4 h-4" /> Registrar Entrada
+              <div className="flex gap-3 pt-1">
+                <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                  <LucideCheck className="w-4 h-4" /> Confirmar
+                </button>
+                <button type="button" onClick={() => setModalConfirmar(null)} className="flex-1 border border-gray-200 text-gray-600 font-medium py-2.5 rounded-xl hover:bg-gray-50 transition">
+                  Cancelar
                 </button>
               </div>
             </form>

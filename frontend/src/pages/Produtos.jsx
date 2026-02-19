@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
 import { useAuth } from '../contexts/AuthContext';
 
-const VAZIO = { nome: '', codigo: '', categoria: '', modelo: '', tamanho: '', cor: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
+const VAZIO = { nome: '', codigo: '', categoria: '', modelo: '', tamanho: '', material: '', cor: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
 
 // Mapa de nomes de cores em português → hex
 const COR_MAP = {
@@ -195,6 +195,10 @@ export default function Produtos() {
                 <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="Ex: 30mm, 150mm, 30x40..." value={form.tamanho} onChange={e => setForm(f => ({ ...f, tamanho: e.target.value }))} />
               </div>
               <div className="col-span-2">
+                <label className="text-sm font-medium">Material</label>
+                <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="Ex: PP, Nylon, Latão, Aço..." value={form.material} onChange={e => setForm(f => ({ ...f, material: e.target.value }))} />
+              </div>
+              <div className="col-span-2">
                 <label className="text-sm font-medium">Cor</label>
                 <div className="flex items-center gap-2 mt-1">
                   <input
@@ -272,6 +276,7 @@ export default function Produtos() {
               <th className="p-3 text-left">Categoria</th>
               <th className="p-3 text-left">Modelo</th>
               <th className="p-3 text-left">Tamanho</th>
+              <th className="p-3 text-left">Material</th>
               <th className="p-3 text-center">Cor</th>
               <th className="p-3 text-center cursor-pointer hover:text-blue-600" onClick={() => setOrdemEstoque(o => o === 'asc' ? 'desc' : 'asc')}>
                 Estoque {ordemEstoque === 'asc' ? '↑' : ordemEstoque === 'desc' ? '↓' : '↕'}
@@ -307,6 +312,7 @@ export default function Produtos() {
                 <td className="p-3 text-gray-500">{p.categoria}</td>
                 <td className="p-3 text-gray-500 text-xs">{p.modelo || <span className="text-gray-300">—</span>}</td>
                 <td className="p-3 text-gray-500 text-xs whitespace-nowrap">{p.tamanho || <span className="text-gray-300">—</span>}</td>
+                <td className="p-3 text-gray-500 text-xs">{p.material || <span className="text-gray-300">—</span>}</td>
                 <td className="p-3">
                   <div className="flex items-center justify-center">
                     {(() => {

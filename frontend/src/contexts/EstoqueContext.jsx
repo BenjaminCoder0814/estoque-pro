@@ -6,12 +6,13 @@ const PRODUTOS_KEY = 'zkprodutos';
 const MOV_KEY = 'zkmovimentacoes';
 const AUDIT_KEY = 'zkauditoria';
 const SEED_VERSION_KEY = 'zkSeedVersion';
-const SEED_VERSION = 'v7'; // Incrementar aqui força reset do catálogo
+const SEED_VERSION = 'v8'; // Incrementar aqui força reset do catálogo
 
 const now = new Date().toISOString();
-const prod = (id, nome, codigo, categoria, estoqueAtual, estoqueMinimo, geraAlerta, imagem, modelo = '', tamanho = '') => ({
-  id, nome, codigo, categoria, estoqueAtual, estoqueMinimo, modelo, tamanho,
+const prod = (id, nome, codigo, categoria, estoqueAtual, estoqueMinimo, geraAlerta, imagem, modelo = '', tamanho = '', material = '', cor = '') => ({
+  id, nome, codigo, categoria, estoqueAtual, estoqueMinimo, modelo, tamanho, material, cor,
   controlaEstoque: true, geraAlerta, ativo: true, imagem, criadoEm: now,
+  ultimaAtualizacao: '', atualizadoPor: '',
 });
 
 const produtosIniciais = [
