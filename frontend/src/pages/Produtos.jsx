@@ -184,7 +184,7 @@ export default function Produtos() {
               <th className="p-3 text-center">Mínimo</th>
               <th className="p-3 text-center">Alerta</th>
               <th className="p-3 text-center">Status</th>
-              {can.editarProdutos && <th className="p-3 text-center">Ações</th>}
+              {(can.editarProdutos || can.excluirProdutos) && <th className="p-3 text-center">Ações</th>}
             </tr>
           </thead>
           <tbody>
@@ -233,10 +233,14 @@ export default function Produtos() {
                       </span>
                     )}
                 </td>
-                {can.editarProdutos && (
+                {(can.editarProdutos || can.excluirProdutos) && (
                   <td className="p-3 text-center whitespace-nowrap">
-                    <button onClick={() => abrirEdicao(p)} className="text-blue-600 hover:underline text-sm mr-3">Editar</button>
-                    <button onClick={() => remover(p.id)} className="text-red-500 hover:underline text-sm">Excluir</button>
+                    {can.editarProdutos && (
+                      <button onClick={() => abrirEdicao(p)} className="text-blue-600 hover:underline text-sm mr-3">Editar</button>
+                    )}
+                    {can.excluirProdutos && (
+                      <button onClick={() => remover(p.id)} className="text-red-500 hover:underline text-sm">Excluir</button>
+                    )}
                   </td>
                 )}
               </tr>

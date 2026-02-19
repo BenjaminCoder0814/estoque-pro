@@ -5,7 +5,7 @@ import { LucideLock, LucideUser, LucideEye, LucideEyeOff, LucideLoader } from 'l
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { login, error, user } = useAuth();
+  const { login, error, user, sessaoBloqueadaPor } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
@@ -117,8 +117,16 @@ export default function Login() {
         </div>
 
         {error && (
-          <div className="mb-4 px-4 py-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-sm text-center">
+          <div className={`mb-4 px-4 py-3 rounded-xl border text-sm text-center leading-snug
+            ${sessaoBloqueadaPor
+              ? 'bg-red-600/30 border-red-500/60 text-red-200'
+              : 'bg-red-500/20 border-red-500/30 text-red-300'}`}>
             {error}
+            {sessaoBloqueadaPor && (
+              <p className="mt-1 text-xs text-red-300 opacity-80">
+                Aguarde o logout de <strong>{sessaoBloqueadaPor}</strong> para acessar.
+              </p>
+            )}
           </div>
         )}
 

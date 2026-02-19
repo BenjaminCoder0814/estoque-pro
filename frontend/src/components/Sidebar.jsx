@@ -2,21 +2,24 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  LucideLayoutDashboard, LucideBox, LucideList, LucideFileText,
+  LucideLayoutDashboard, LucideBox, LucideList, LucideShoppingCart,
   LucideUsers, LucideChevronLeft, LucideChevronRight,
-  LucideAlertTriangle, LucideUserCog
+  LucideAlertTriangle, LucideUserCog, LucideClipboardList, LucideLightbulb
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEstoque } from '../contexts/EstoqueContext';
 
+// Cada item tem `allowed` listando os perfis que PODEM ver
+// Se `allowed` é undefined → todos os perfis logados veem
 const menu = [
-  { label: 'Dashboard',   icon: LucideLayoutDashboard, to: '/' },
-  { label: 'Produtos',    icon: LucideBox,              to: '/produtos' },
-  { label: 'Histórico',   icon: LucideList,             to: '/movimentacoes' },
-  { label: 'Alertas',     icon: LucideAlertTriangle,    to: '/alertas' },
-  { label: 'Auditoria',   icon: LucideUsers,            to: '/auditoria',  allowed: ['ADMIN', 'GERENCIA', 'SUPERVISAO'] },
-  { label: 'Relatórios',  icon: LucideFileText,         to: '/relatorios', allowed: ['ADMIN', 'GERENCIA', 'SUPERVISAO'] },
-  { label: 'Usuários',    icon: LucideUserCog,          to: '/usuarios',   allowed: ['ADMIN'] },
+  { label: 'Dashboard',   icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN', 'SUPERVISAO'] },
+  { label: 'Produtos',    icon: LucideBox,              to: '/produtos'      },
+  { label: 'Histórico',   icon: LucideList,             to: '/movimentacoes',allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO'] },
+  { label: 'Alertas',     icon: LucideAlertTriangle,    to: '/alertas',      allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
+  { label: 'Compras',     icon: LucideShoppingCart,     to: '/compras',      allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
+  { label: 'Auditoria',   icon: LucideClipboardList,    to: '/auditoria',    allowed: ['ADMIN'] },
+  { label: 'Sugestões',   icon: LucideLightbulb,        to: '/sugestoes'     },
+  { label: 'Usuários',    icon: LucideUserCog,          to: '/usuarios',     allowed: ['ADMIN'] },
 ];
 
 export default function Sidebar() {

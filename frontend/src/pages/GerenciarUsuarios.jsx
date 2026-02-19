@@ -5,10 +5,10 @@ import { LucideUserPlus, LucidePencil, LucideTrash2, LucideCheck, LucideX, Lucid
 
 const PERFIL_CORES = {
   ADMIN:      'bg-purple-100 text-purple-700 border-purple-200',
-  GERENCIA:   'bg-blue-100 text-blue-700 border-blue-200',
   EXPEDICAO:  'bg-emerald-100 text-emerald-700 border-emerald-200',
+  COMPRAS:    'bg-blue-100 text-blue-700 border-blue-200',
   SUPERVISAO: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200',
-  VENDEDORA:  'bg-pink-100 text-pink-700 border-pink-200',
+  COMERCIAL:  'bg-pink-100 text-pink-700 border-pink-200',
 };
 
 const FORM_VAZIO = { nome: '', email: '', senha: '', perfil: 'EXPEDICAO' };
@@ -50,10 +50,10 @@ export default function GerenciarUsuarios() {
     if (emailUsado) { flash('err', 'Este e-mail já está cadastrado.'); return; }
 
     if (editandoId) {
-      editarUsuario(editandoId, form);
+      editarUsuario(editandoId, { ...form, restricaoHorario: form.perfil !== 'ADMIN' });
       flash('ok', 'Usuário atualizado com sucesso!');
     } else {
-      criarUsuario(form);
+      criarUsuario({ ...form, restricaoHorario: form.perfil !== 'ADMIN' });
       flash('ok', 'Novo usuário criado com sucesso!');
     }
     cancelarEdicao();
@@ -180,6 +180,7 @@ export default function GerenciarUsuarios() {
               <th className="p-3 text-left">Nome</th>
               <th className="p-3 text-left">E-mail</th>
               <th className="p-3 text-center">Perfil</th>
+              <th className="p-3 text-center">Restrição Horário</th>
               <th className="p-3 text-center">Ações</th>
             </tr>
           </thead>
@@ -198,6 +199,12 @@ export default function GerenciarUsuarios() {
                   <span className={`text-[11px] font-bold px-2.5 py-1 rounded-xl border capitalize ${PERFIL_CORES[u.perfil] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                     {u.perfil}
                   </span>
+                </td>
+                <td className="p-3 text-center">
+                  {u.restricaoHorario
+                    ? <span className="text-xs bg-amber-100 text-amber-700 border border-amber-300 rounded-full px-2 py-0.5 font-semibold">Seg–Qui 07–18h / Sex 07–16h</span>
+                    : <span className="text-xs bg-green-100 text-green-700 border border-green-300 rounded-full px-2 py-0.5 font-semibold">Sem restrição</span>
+                  }
                 </td>
                 <td className="p-3 text-center">
                   <div className="flex items-center justify-center gap-2">
