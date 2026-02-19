@@ -11,10 +11,10 @@ const USUARIOS_PADRAO = [
   { id: 2, email: 'expedicao@zenith.com',   senha: 'exped2026', nome: 'Expedição',     perfil: 'EXPEDICAO',   restricaoHorario: true  },
   { id: 3, email: 'compras@zenith.com',     senha: 'lari2026',  nome: 'Compras',       perfil: 'COMPRAS',     restricaoHorario: true  },
   { id: 4, email: 'supervisao@zenith.com',  senha: 'super2026', nome: 'Supervisão',    perfil: 'SUPERVISAO',  restricaoHorario: true  },
-  { id: 5, email: 'vendedoras@zenith.com',  senha: 'vend2026',  nome: 'Vendedoras',    perfil: 'VENDEDORAS',  restricaoHorario: true  },
+  { id: 5, email: 'comercial@zenith.com',   senha: 'com2026',   nome: 'Comercial',     perfil: 'COMERCIAL',   restricaoHorario: true  },
 ];
 
-export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'VENDEDORAS'];
+export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL'];
 
 // ──────────────────────────────────────────────
 // SESSÃO ATIVA (controle de acesso único não-admin)
@@ -88,7 +88,7 @@ export function verificarHorarioComercial() {
 // ──────────────────────────────────────────────
 // HELPERS localStorage
 // ──────────────────────────────────────────────
-const USUARIOS_VERSION = 'v3'; // Incremente para forçar reset dos usuários padrão
+const USUARIOS_VERSION = 'v4'; // Incremente para forçar reset dos usuários padrão
 
 function loadUsuarios() {
   try {
@@ -128,6 +128,56 @@ export function AuthProvider({ children }) {
   const [usuarios, setUsuariosState]                = useState(loadUsuarios);
   const userRef = useRef(user);
   useEffect(() => { userRef.current = user; }, [user]);
+
+  // ── INATIVIDADE: LOGOUT AUTOMÁTICO APÓS 20 min ─────────────────
+  const INATIVIDADE_LIMIT = 20 * 60 * 1000; // 20 minutos
+  const ATIVIDADE_KEY = 'zkLastActivity';
+
+  function registrarAtividade() {
+    localStorage.setItem(ATIVIDADE_KEY, Date.now().toString());
+  }
+
+  // Ouve eventos de atividade do usuário
+  useEffect(() => {
+    const eventos = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    const handler = () => registrarAtividade();
+    eventos.forEach(e => window.addEventListener(e, handler, { passive: true }));
+    // Inicializa
+    registrarAtividade();
+    return () => eventos.forEach(e => window.removeEventListener(e, handler));
+  }, []);
+
+  // Verifica inatividade a cada 30s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentUser = userRef.current;
+      if (!currentUser) return;
+      const last = Number(localStorage.getItem(ATIVIDADE_KEY) || Date.now());
+      if (Date.now() - last > INATIVIDADE_LIMIT) {
+        // Limpa sessão por inatividade
+        if (currentUser.perfil !== 'ADMIN') {
+          const sessao = getSessaoAtiva();
+          if (sessao && sessao.id === currentUser.id) setSessaoAtiva(null);
+        }
+        setUser(null);
+        localStorage.removeItem('zkuser');
+        setKickedMessage('⏰ Você foi desconectado por inatividade (20 minutos sem atividade).');
+      }
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Limpa sessão ao fechar a aba (não-admin)
+  useEffect(() => {
+    const handle = () => {
+      const currentUser = userRef.current;
+      if (currentUser && currentUser.perfil !== 'ADMIN') {
+        setSessaoAtiva(null);
+      }
+    };
+    window.addEventListener('beforeunload', handle);
+    return () => window.removeEventListener('beforeunload', handle);
+  }, []);
 
   // ── POLLING: DETECTA SE ESTA SESSÃO FOI DERRUBADA ─────────────────────────
   useEffect(() => {
@@ -252,25 +302,25 @@ export function AuthProvider({ children }) {
   }
 
   // ── PERMISSÕES POR PERFIL ──────────────────
-  // ADMIN:      tudo, qualquer hora, sem restrição
-  // EXPEDICAO:  entrada, histórico, alertas, pendentes, editar produtos
-  // COMPRAS:    alertas + pendentes (criar) + produtos (visualização)
-  // SUPERVISAO: dashboard, produtos, histórico
-  // VENDEDORAS: somente produtos (visualização)
+  // ADMIN:      tudo, sem restrição
+  // EXPEDICAO:  Produtos, Histórico, Pendentes, Entrada (confirmar)
+  // COMPRAS:    Produtos (vis.), Alertas, Pendentes (criar pedido)
+  // SUPERVISAO: Produtos (vis.), Histórico
+  // COMERCIAL:  Somente Produtos (visualização)
   const can = {
-    verDashboard:         user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
+    verDashboard:         user && ['ADMIN'].includes(user.perfil),
     verProdutos:          !!user,
     editarProdutos:       user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     excluirProdutos:      user && ['ADMIN'].includes(user.perfil),
     fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'COMPRAS'].includes(user.perfil),
     verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
     verAuditoria:         user && ['ADMIN'].includes(user.perfil),
     verEntrada:           user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     confirmarEntrada:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     marcarPedido:         user && ['COMPRAS'].includes(user.perfil),
-    verSugestoes:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS'].includes(user.perfil),
+    verSugestoes:         user && ['ADMIN'].includes(user.perfil),
     gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
   };
 

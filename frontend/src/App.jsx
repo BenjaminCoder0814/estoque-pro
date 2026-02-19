@@ -28,9 +28,9 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        {/* Dashboard — ADMIN e SUPERVISAO */}
+        {/* Dashboard — ADMIN somente */}
         <Route path="/" element={
-          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO']}>
+          <PrivateRoute allowed={['ADMIN']}>
             <LayoutBase><Dashboard /></LayoutBase>
           </PrivateRoute>
         } />
@@ -49,9 +49,9 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Alertas — ADMIN, EXPEDICAO, COMPRAS */}
+        {/* Alertas — ADMIN, COMPRAS (EXPEDICAO e SUPERVISAO não vêem) */}
         <Route path="/alertas" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS']}>
+          <PrivateRoute allowed={['ADMIN', 'COMPRAS']}>
             <LayoutBase><Alertas /></LayoutBase>
           </PrivateRoute>
         } />
@@ -70,16 +70,16 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Entrada — ADMIN, EXPEDICAO (quem recebe fisicamente) */}
+        {/* Entrada — ADMIN + EXPEDICAO (acessível via link dos Pendentes) */}
         <Route path="/entrada" element={
           <PrivateRoute allowed={['ADMIN', 'EXPEDICAO']}>
             <LayoutBase><Entrada /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Sugestões — ADMIN, EXPEDICAO, SUPERVISAO, COMPRAS */}
+        {/* Sugestões — ADMIN apenas */}
         <Route path="/sugestoes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS']}>
+          <PrivateRoute allowed={['ADMIN']}>
             <LayoutBase><Sugestoes /></LayoutBase>
           </PrivateRoute>
         } />

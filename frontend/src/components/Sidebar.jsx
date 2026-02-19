@@ -13,15 +13,22 @@ import { useEstoque } from '../contexts/EstoqueContext';
 // Cada item tem `allowed` listando os perfis que PODEM ver
 // Se `allowed` é undefined → todos os perfis logados veem
 const menu = [
-  { label: 'Dashboard',   icon: LucideLayoutDashboard, to: '/',            allowed: ['ADMIN', 'SUPERVISAO'] },
-  { label: 'Produtos',    icon: LucideBox,              to: '/produtos'     },
-  { label: 'Histórico',   icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
-  { label: 'Alertas',     icon: LucideAlertTriangle,    to: '/alertas',      allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
-  { label: 'Pendentes',   icon: LucideClipboard,        to: '/pendentes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
-  { label: 'Entrada',     icon: LucidePackageCheck,     to: '/entrada',      allowed: ['ADMIN', 'EXPEDICAO'] },
-  { label: 'Auditoria',   icon: LucideClipboardList,    to: '/auditoria',    allowed: ['ADMIN'] },
-  { label: 'Sugestões',   icon: LucideLightbulb,        to: '/sugestoes',    allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS'] },
-  { label: 'Usuários',    icon: LucideUserCog,          to: '/usuarios',     allowed: ['ADMIN'] },
+  // ADMIN: tudo
+  { label: 'Dashboard',  icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN'] },
+  // Todos veem Produtos
+  { label: 'Produtos',   icon: LucideBox,              to: '/produtos'      },
+  // ADMIN + EXPEDICAO + SUPERVISAO
+  { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
+  // ADMIN + COMPRAS (não EXPEDICAO, não SUPERVISAO)
+  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS'] },
+  // ADMIN + EXPEDICAO + COMPRAS
+  { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
+  // ADMIN só (EXPEDICAO acessa via link de Pendentes)
+  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN'] },
+  // ADMIN só
+  { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN'] },
+  { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes',     allowed: ['ADMIN'] },
+  { label: 'Usuários',   icon: LucideUserCog,          to: '/usuarios',      allowed: ['ADMIN'] },
 ];
 
 export default function Sidebar() {
