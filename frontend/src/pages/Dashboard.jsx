@@ -1,13 +1,18 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement,
   Title, Tooltip, Legend, ArcElement, PointElement, LineElement,
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import { LucideBell, LucideX } from 'lucide-react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement);
+
+const COMPRAS_KEY    = 'zkCompras';
+const NOTIF_KEY      = 'zkNotificacoes';
 
 const CARD_STYLES = {
   blue:   'bg-blue-50   border-blue-200   text-blue-800',
@@ -15,6 +20,8 @@ const CARD_STYLES = {
   green:  'bg-green-50  border-green-200   text-green-800',
   yellow: 'bg-yellow-50 border-yellow-200  text-yellow-800',
   purple: 'bg-purple-50 border-purple-200  text-purple-800',
+  orange: 'bg-orange-50 border-orange-200  text-orange-800',
+  cyan:   'bg-cyan-50   border-cyan-200    text-cyan-800',
 };
 
 function Card({ title, value, sub, color = 'blue' }) {
@@ -35,14 +42,51 @@ function chartOpts(title) {
   };
 }
 
+function loadCompras() {
+  try { return JSON.parse(localStorage.getItem(COMPRAS_KEY) || '[]'); } catch { return []; }
+}
+function loadNotificacoes() {
+  try { return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]'); } catch { return []; }
+}
+function saveNotificacoes(lista) { localStorage.setItem(NOTIF_KEY, JSON.stringify(lista)); }
+
 export default function Dashboard() {
   const { produtos, movimentacoes, alertas } = useEstoque();
+  const { user } = useAuth();
+
+  const [notificacoes, setNotificacoes] = useState(loadNotificacoes);
+  const [mostrarNotif, setMostrarNotif] = useState(false);
+
+  // ── Compras / Divergências ──────────────────────────────────────────────
+  const compras = useMemo(loadCompras, []);
+  const comprasPendentes = useMemo(() => compras.filter(c => c.status === 'PENDENTE').length, [compras]);
+  const divergencias     = useMemo(() => compras.filter(c => c.status === 'DIVERGENCIA').length, [compras]);
+
+  // ── Notificações não lidas ─────────────────────────────────────────────
+  const naoLidas = useMemo(
+    () => notificacoes.filter(n => !n.lida),
+    [notificacoes]
+  );
+
+  function marcarLida(id) {
+    const nova = notificacoes.map(n => n.id === id ? { ...n, lida: true } : n);
+    setNotificacoes(nova);
+    saveNotificacoes(nova);
+  }
+
+  function marcarTodasLidas() {
+    const nova = notificacoes.map(n => ({ ...n, lida: true }));
+    setNotificacoes(nova);
+    saveNotificacoes(nova);
+  }
 
   const agora = new Date();
   const mesAtual = agora.getMonth();
   const anoAtual = agora.getFullYear();
 
   // ── Cards ──────────────────────────────────────────────────────────────
+  const totalProdutos = useMemo(() => produtos.filter(p => p.ativo).length, [produtos]);
+
   const estoqueTotal = useMemo(
     () => produtos.filter(p => p.controlaEstoque && p.ativo).reduce((s, p) => s + p.estoqueAtual, 0),
     [produtos]
@@ -125,19 +169,78 @@ export default function Dashboard() {
 
   // ── Últimas movimentações ──────────────────────────────────────────────
   const ultimas = useMemo(
-    () => [...movimentacoes].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)).slice(0, 8),
+    () => [...movimentacoes].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)).slice(0, 10),
     [movimentacoes]
   );
 
   return (
     <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+        <button
+          onClick={() => setMostrarNotif(v => !v)}
+          className="relative flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-medium text-gray-700 hover:shadow-md transition shadow-sm"
+        >
+          <LucideBell className="w-4 h-4" />
+          Notificações
+          {naoLidas.length > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+              {naoLidas.length > 9 ? '9+' : naoLidas.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Painel de Notificações */}
+      {mostrarNotif && (
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+              <LucideBell className="w-4 h-4 text-blue-500" />
+              Notificações {naoLidas.length > 0 && <span className="text-xs bg-red-100 text-red-600 rounded-full px-2 py-0.5 font-bold">{naoLidas.length} nova{naoLidas.length !== 1 ? 's' : ''}</span>}
+            </h2>
+            <div className="flex items-center gap-3">
+              {naoLidas.length > 0 && (
+                <button onClick={marcarTodasLidas} className="text-xs text-blue-600 hover:underline">
+                  Marcar todas como lidas
+                </button>
+              )}
+              <button onClick={() => setMostrarNotif(false)} className="text-gray-400 hover:text-gray-600">
+                <LucideX className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          {notificacoes.length === 0 ? (
+            <p className="text-center text-gray-400 text-sm py-6">Nenhuma notificação.</p>
+          ) : (
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {[...notificacoes].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)).map(n => (
+                <div key={n.id} className={`flex items-start gap-3 p-3 rounded-xl border transition ${n.lida ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-blue-50 border-blue-200'}`}>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-800">{n.mensagem}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{new Date(n.criadoEm).toLocaleString('pt-BR')}</p>
+                  </div>
+                  {!n.lida && (
+                    <button onClick={() => marcarLida(n.id)} className="text-xs text-blue-600 hover:underline flex-shrink-0 mt-0.5">
+                      Lida
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-5 gap-4">
-        <Card title="Estoque Total" value={estoqueTotal.toLocaleString()} sub="unidades (ativos)" color="blue" />
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+        <Card title="Total Produtos" value={totalProdutos.toLocaleString()} sub="produtos ativos" color="blue" />
+        <Card title="Estoque Total" value={estoqueTotal.toLocaleString()} sub="unidades (ativos)" color="cyan" />
         <Card title="Alertas Ativos" value={alertas.length} sub="estoque abaixo do mínimo" color={alertas.length > 0 ? 'red' : 'green'} />
         <Card title="Saídas do Mês" value={saidasMesTotal.toLocaleString()} sub="unidades expedidas" color="yellow" />
+        <Card title="Compras Pendentes" value={comprasPendentes.toLocaleString()} sub="pedidos aguardando" color={comprasPendentes > 0 ? 'orange' : 'green'} />
+        <Card title="Divergências" value={divergencias.toLocaleString()} sub="pedidos com divergência" color={divergencias > 0 ? 'red' : 'green'} />
         <Card title="Mais Saído" value={maisSaido} sub="produto com mais saídas" color="purple" />
         <Card title="Menos Saído" value={menosSaido} sub="produto com menos saídas" color="blue" />
       </div>
@@ -178,7 +281,7 @@ export default function Dashboard() {
 
       {/* Últimas movimentações */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <h2 className="text-sm font-semibold text-gray-600 mb-3">Últimas Movimentações</h2>
+        <h2 className="text-sm font-semibold text-gray-600 mb-3">Últimas 10 Movimentações</h2>
         {ultimas.length === 0
           ? <p className="text-gray-400 text-sm text-center py-6">Nenhuma movimentação registrada.</p>
           : (

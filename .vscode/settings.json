@@ -1,4 +1,7 @@
 {
     "prisma.pinToPrisma6": true,
-    "liveServer.settings.port": 5501
+    "liveServer.settings.port": 5501,
+    "css.validate": false,
+    "scss.validate": false,
+    "css.lint.unknownAtRules": "ignore"
 }

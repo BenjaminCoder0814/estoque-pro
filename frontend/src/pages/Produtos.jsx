@@ -2,7 +2,35 @@ import React, { useState, useRef } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
 import { useAuth } from '../contexts/AuthContext';
 
-const VAZIO = { nome: '', codigo: '', categoria: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
+const VAZIO = { nome: '', codigo: '', categoria: '', cor: '', modelo: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
+
+// Mapeamento automático de imagens por palavras-chave no nome do produto
+const IMAGENS_PADRAO = {
+  'cadeado': 'https://cdn-icons-png.flaticon.com/512/1067/1067357.png',
+  'fita':    'https://cdn-icons-png.flaticon.com/512/1041/1041889.png',
+  'abraçadeira': 'https://cdn-icons-png.flaticon.com/512/2665/2665038.png',
+  'parafuso': 'https://cdn-icons-png.flaticon.com/512/2829/2829963.png',
+  'porca':    'https://cdn-icons-png.flaticon.com/512/2829/2829963.png',
+  'cabo':     'https://cdn-icons-png.flaticon.com/512/4213/4213958.png',
+  'luva':     'https://cdn-icons-png.flaticon.com/512/2972/2972494.png',
+  'capacete': 'https://cdn-icons-png.flaticon.com/512/1553/1553752.png',
+  'óculos':   'https://cdn-icons-png.flaticon.com/512/807/807296.png',
+  'bota':     'https://cdn-icons-png.flaticon.com/512/3281/3281283.png',
+  'colete':   'https://cdn-icons-png.flaticon.com/512/2917/2917996.png',
+  'mangueira':'https://cdn-icons-png.flaticon.com/512/2666/2666435.png',
+  'válvula':  'https://cdn-icons-png.flaticon.com/512/2965/2965567.png',
+  'sensor':   'https://cdn-icons-png.flaticon.com/512/2989/2989988.png',
+  'motor':    'https://cdn-icons-png.flaticon.com/512/3144/3144456.png',
+  'bomba':    'https://cdn-icons-png.flaticon.com/512/3144/3144456.png',
+};
+
+function autoImagem(nome) {
+  const lower = nome.toLowerCase();
+  for (const [chave, url] of Object.entries(IMAGENS_PADRAO)) {
+    if (lower.includes(chave)) return url;
+  }
+  return '';
+}
 
 export default function Produtos() {
   const { produtos, alertas, criarProduto, editarProduto, excluirProduto } = useEstoque();
@@ -32,6 +60,14 @@ export default function Produtos() {
 
   function abrirNovo() { setForm(VAZIO); setEditandoId(null); setShowForm(true); }
   function abrirEdicao(p) { setForm({ ...p }); setEditandoId(p.id); setShowForm(true); }
+
+  function handleNome(e) {
+    const nome = e.target.value;
+    setForm(f => {
+      const imagem = f.imagem || autoImagem(nome);
+      return { ...f, nome, imagem };
+    });
+  }
 
   function handleImagem(e) {
     const file = e.target.files[0];
@@ -109,7 +145,7 @@ export default function Produtos() {
             <form onSubmit={salvar} className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="text-sm font-medium">Nome *</label>
-                <input required className="border rounded-lg px-3 py-2 w-full mt-1" value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} />
+                <input required className="border rounded-lg px-3 py-2 w-full mt-1" value={form.nome} onChange={handleNome} />
               </div>
               <div>
                 <label className="text-sm font-medium">Código (SKU) *</label>
@@ -119,6 +155,14 @@ export default function Produtos() {
                 <label className="text-sm font-medium">Categoria</label>
                 <input className="border rounded-lg px-3 py-2 w-full mt-1" value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} list="cats-list" />
                 <datalist id="cats-list">{categorias.map(c => <option key={c} value={c} />)}</datalist>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Cor</label>
+                <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="ex: Preto, Vermelho..." value={form.cor} onChange={e => setForm(f => ({ ...f, cor: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Modelo</label>
+                <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="ex: 50mm, Pro, Slim..." value={form.modelo} onChange={e => setForm(f => ({ ...f, modelo: e.target.value }))} />
               </div>
               <div>
                 <label className="text-sm font-medium">Estoque Atual</label>
@@ -178,6 +222,8 @@ export default function Produtos() {
               <th className="p-3 text-left">Nome</th>
               <th className="p-3 text-left">Código</th>
               <th className="p-3 text-left">Categoria</th>
+              <th className="p-3 text-left">Cor</th>
+              <th className="p-3 text-left">Modelo</th>
               <th className="p-3 text-center cursor-pointer hover:text-blue-600" onClick={() => setOrdemEstoque(o => o === 'asc' ? 'desc' : 'asc')}>
                 Estoque {ordemEstoque === 'asc' ? '↑' : ordemEstoque === 'desc' ? '↓' : '↕'}
               </th>
@@ -190,7 +236,7 @@ export default function Produtos() {
           <tbody>
             {lista.length === 0 && (
               <tr>
-                <td colSpan={9} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
+                <td colSpan={11} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
               </tr>
             )}
             {lista.map(p => (
@@ -208,6 +254,8 @@ export default function Produtos() {
                 </td>
                 <td className="p-3 text-gray-500">{p.codigo}</td>
                 <td className="p-3 text-gray-500">{p.categoria}</td>
+                <td className="p-3 text-gray-500">{p.cor || <span className="text-gray-300">—</span>}</td>
+                <td className="p-3 text-gray-500">{p.modelo || <span className="text-gray-300">—</span>}</td>
                 <td className={`p-3 text-center font-bold text-lg ${alertaIds.has(p.id) ? 'text-red-600' : 'text-gray-800'}`}>
                   {p.estoqueAtual}
                 </td>
