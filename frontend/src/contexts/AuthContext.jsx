@@ -1,5 +1,5 @@
 // Contexto de autenticação com controle de horário comercial e sessão única
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const AuthContext = createContext();
 
@@ -19,7 +19,12 @@ export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL
 // ──────────────────────────────────────────────
 // SESSÃO ATIVA (controle de acesso único não-admin)
 // ──────────────────────────────────────────────
-const SESSAO_KEY = 'zkSessaoAtiva';
+const SESSAO_KEY   = 'zkSessaoAtiva';
+const KICK_KEY     = 'zkSessaoKick';
+
+function genSessionId() {
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
 
 function getSessaoAtiva() {
   try {
@@ -33,11 +38,27 @@ function setSessaoAtiva(userData) {
     localStorage.setItem(SESSAO_KEY, JSON.stringify({
       id: userData.id, nome: userData.nome, email: userData.email,
       perfil: userData.perfil, inicio: new Date().toISOString(),
+      sessionId: userData.sessionId,
     }));
   } else {
     localStorage.removeItem(SESSAO_KEY);
   }
 }
+
+// Sinaliza que uma sessão específica deve ser derrubada
+function enviarSinalKick(targetSessionId, byNome) {
+  localStorage.setItem(KICK_KEY, JSON.stringify({
+    targetSessionId,
+    by: byNome,
+    ts: Date.now(),
+  }));
+}
+
+function getKickSignal() {
+  try { return JSON.parse(localStorage.getItem(KICK_KEY) || 'null'); } catch { return null; }
+}
+
+function clearKickSignal() { localStorage.removeItem(KICK_KEY); }
 
 // ──────────────────────────────────────────────
 // VERIFICAÇÃO DE HORÁRIO COMERCIAL
@@ -101,14 +122,38 @@ export function AuthProvider({ children }) {
     } catch { return null; }
   });
 
-  const [error, setError]                       = useState(null);
+  const [error, setError]                           = useState(null);
   const [sessaoBloqueadaPor, setSessaoBloqueadaPor] = useState(null);
-  const [usuarios, setUsuariosState]            = useState(loadUsuarios);
+  const [kickedMessage, setKickedMessage]           = useState(null);
+  const [usuarios, setUsuariosState]                = useState(loadUsuarios);
+  const userRef = useRef(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
+  // ── POLLING: DETECTA SE ESTA SESSÃO FOI DERRUBADA ─────────────────────────
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentUser = userRef.current;
+      if (!currentUser || currentUser.perfil === 'ADMIN') return;
+      const kick = getKickSignal();
+      if (kick && kick.targetSessionId && kick.targetSessionId === currentUser.sessionId) {
+        clearKickSignal();
+        // Limpa sessão local
+        setSessaoAtiva(null);
+        setUser(null);
+        localStorage.removeItem('zkuser');
+        setKickedMessage(
+          `⚠️ Sua sessão foi encerrada pelo Administrador (${kick.by}). Você foi desconectado.`
+        );
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   // ── LOGIN ──────────────────────────────────
   function login(email, senha) {
     setError(null);
     setSessaoBloqueadaPor(null);
+    setKickedMessage(null);
     const lista = loadUsuarios();
     const found = lista.find(u => u.email === email && u.senha === senha);
 
@@ -126,22 +171,31 @@ export function AuthProvider({ children }) {
       }
     }
 
-    // Controle de sessão única: só 1 não-admin por vez (admin pode sempre)
-    if (found.perfil !== 'ADMIN') {
-      const sessao = getSessaoAtiva();
+    const sessao = getSessaoAtiva();
+
+    if (found.perfil === 'ADMIN') {
+      // ADMIN: derruba qualquer sessão ativa existente
+      if (sessao) {
+        enviarSinalKick(sessao.sessionId, found.nome);
+        setSessaoAtiva(null);
+      }
+    } else {
+      // Não-admin: bloqueia se outro usuário diferente já está ativo
       if (sessao && sessao.id !== found.id) {
         setSessaoBloqueadaPor(sessao.nome);
         setError(
-          `⛔ Acesso bloqueado! O usuário "${sessao.nome}" está utilizando o sistema no momento. ` +
-          `Apenas um acesso é permitido por vez.`
+          `⛔ Acesso bloqueado! "${sessao.nome}" está utilizando o sistema no momento. ` +
+          `Apenas um acesso simultâneo é permitido. Aguarde o logout ou solicite ao Administrador.`
         );
         return false;
       }
     }
 
+    const sessionId = genSessionId();
     const userData = {
       id: found.id, email: found.email, nome: found.nome,
       perfil: found.perfil, restricaoHorario: found.restricaoHorario ?? false,
+      sessionId,
     };
 
     setUser(userData);
@@ -155,9 +209,10 @@ export function AuthProvider({ children }) {
 
   // ── LOGOUT ─────────────────────────────────
   function logout() {
-    if (user && user.perfil !== 'ADMIN') {
+    const currentUser = userRef.current;
+    if (currentUser && currentUser.perfil !== 'ADMIN') {
       const sessao = getSessaoAtiva();
-      if (sessao && sessao.id === user.id) setSessaoAtiva(null);
+      if (sessao && sessao.id === currentUser.id) setSessaoAtiva(null);
     }
     setUser(null);
     localStorage.removeItem('zkuser');
@@ -209,7 +264,7 @@ export function AuthProvider({ children }) {
     excluirProdutos:      user && ['ADMIN'].includes(user.perfil),
     fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
     verAuditoria:         user && ['ADMIN'].includes(user.perfil),
     verEntrada:           user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     confirmarEntrada:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
@@ -221,7 +276,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, login, logout, error, can,
-      sessaoBloqueadaPor,
+      sessaoBloqueadaPor, kickedMessage, setKickedMessage,
       usuarios, PERFIS,
       criarUsuario, editarUsuario, excluirUsuario,
     }}>

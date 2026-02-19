@@ -15,7 +15,7 @@ const menu = [
   { label: 'Dashboard',   icon: LucideLayoutDashboard, to: '/',            allowed: ['ADMIN', 'SUPERVISAO'] },
   { label: 'Produtos',    icon: LucideBox,              to: '/produtos'     },
   { label: 'Histórico',   icon: LucideList,             to: '/movimentacoes',allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
-  { label: 'Alertas',     icon: LucideAlertTriangle,    to: '/alertas',      allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS'] },
+  { label: 'Alertas',     icon: LucideAlertTriangle,    to: '/alertas',      allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
   { label: 'Entrada',     icon: LucidePackageCheck,     to: '/entrada',      allowed: ['ADMIN', 'EXPEDICAO'] },
   { label: 'Auditoria',   icon: LucideClipboardList,    to: '/auditoria',    allowed: ['ADMIN'] },
   { label: 'Sugestões',   icon: LucideLightbulb,        to: '/sugestoes'     },

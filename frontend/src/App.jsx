@@ -48,9 +48,9 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Alertas — ADMIN, EXPEDICAO, SUPERVISAO, COMPRAS */}
+        {/* Alertas — ADMIN, EXPEDICAO, COMPRAS */}
         <Route path="/alertas" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS']}>
             <LayoutBase><Alertas /></LayoutBase>
           </PrivateRoute>
         } />

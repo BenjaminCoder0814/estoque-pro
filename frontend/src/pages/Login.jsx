@@ -1,11 +1,11 @@
 // Tela de login — glassmorphism profissional sobre fundo animado
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LucideLock, LucideUser, LucideEye, LucideEyeOff, LucideLoader } from 'lucide-react';
+import { LucideLock, LucideUser, LucideEye, LucideEyeOff, LucideLoader, LucideAlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
-  const { login, error, user, sessaoBloqueadaPor } = useAuth();
+  const { login, error, user, sessaoBloqueadaPor, kickedMessage, setKickedMessage } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,6 +20,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setKickedMessage(null);
     setLoading(true);
     await login(email, senha);
     setLoading(false);
@@ -116,6 +117,17 @@ export default function Login() {
           </div>
         </div>
 
+        {kickedMessage && (
+          <div className="mb-4 px-4 py-3 rounded-xl border text-sm text-center leading-snug animate-slideup"
+            style={{ background: 'rgba(234,179,8,0.15)', border: '1px solid rgba(234,179,8,0.5)', color: '#fde68a' }}>
+            <div className="flex items-center justify-center gap-2 font-semibold mb-1">
+              <LucideAlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+              Sessão encerrada
+            </div>
+            <p className="text-xs opacity-90">{kickedMessage}</p>
+          </div>
+        )}
+
         {error && (
           <div className={`mb-4 px-4 py-3 rounded-xl border text-sm text-center leading-snug
             ${sessaoBloqueadaPor
@@ -124,7 +136,7 @@ export default function Login() {
             {error}
             {sessaoBloqueadaPor && (
               <p className="mt-1 text-xs text-red-300 opacity-80">
-                Aguarde o logout de <strong>{sessaoBloqueadaPor}</strong> para acessar.
+                Aguarde o logout de <strong>{sessaoBloqueadaPor}</strong> ou contate o Administrador.
               </p>
             )}
           </div>
