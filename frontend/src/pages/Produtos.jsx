@@ -22,6 +22,18 @@ function resolverCor(cor) {
   return COR_MAP[lower] || cor;
 }
 
+// Detecta cor pelo nome do produto (ex: "Lacre Metálico Amarelo" → #eab308)
+function corPeloNome(nome) {
+  if (!nome) return null;
+  const lower = nome.toLowerCase();
+  // testa as chaves do mapa do maior para o menor (evita 'azul' sobrescrever 'azul claro')
+  const chaves = Object.keys(COR_MAP).sort((a, b) => b.length - a.length);
+  for (const chave of chaves) {
+    if (lower.includes(chave)) return COR_MAP[chave];
+  }
+  return null;
+}
+
 // Mapeamento automático de imagens por palavras-chave no nome do produto
 const IMAGENS_PADRAO = {
   'cadeado': 'https://cdn-icons-png.flaticon.com/512/1067/1067357.png',
@@ -273,23 +285,29 @@ export default function Produtos() {
                     ? <img src={p.imagem} alt={p.nome} className="w-12 h-12 object-contain rounded" />
                     : <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">—</div>}
                 </td>
-                <td className="p-3 font-medium">
-                  {p.nome}
-                  {alertaIds.has(p.id) && (
-                    <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs">⚠ ALERTA</span>
-                  )}
+                <td className="p-3 font-medium max-w-[220px]">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="leading-snug">{p.nome}</span>
+                    {alertaIds.has(p.id) && (
+                      <span className="inline-flex items-center gap-1 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap flex-shrink-0">⚠ ALERTA</span>
+                    )}
+                  </div>
                 </td>
                 <td className="p-3 text-gray-500">{p.codigo}</td>
                 <td className="p-3 text-gray-500">{p.categoria}</td>
                 <td className="p-3">
                   <div className="flex items-center justify-center">
-                    {p.cor
-                      ? <span
-                          className="w-5 h-5 rounded-full border border-gray-300 shadow-sm inline-block"
-                          style={{ background: resolverCor(p.cor) }}
-                          title={p.cor}
-                        />
-                      : <span className="text-gray-300">—</span>}
+                    {(() => {
+                      const hex = resolverCor(p.cor) || corPeloNome(p.nome);
+                      const label = p.cor || '';
+                      return hex
+                        ? <span
+                            className="w-5 h-5 rounded-full border border-gray-300 shadow-sm inline-block flex-shrink-0"
+                            style={{ background: hex }}
+                            title={label || 'cor detectada pelo nome'}
+                          />
+                        : <span className="text-gray-300">—</span>;
+                    })()}
                   </div>
                 </td>
                 <td className={`p-3 text-center font-bold text-lg ${alertaIds.has(p.id) ? 'text-red-600' : 'text-gray-800'}`}>
