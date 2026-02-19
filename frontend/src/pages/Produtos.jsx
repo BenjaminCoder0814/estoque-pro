@@ -2,7 +2,25 @@ import React, { useState, useRef } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
 import { useAuth } from '../contexts/AuthContext';
 
-const VAZIO = { nome: '', codigo: '', categoria: '', cor: '', modelo: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
+const VAZIO = { nome: '', codigo: '', categoria: '', cor: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
+
+// Mapa de nomes de cores em português → hex
+const COR_MAP = {
+  'preto': '#1a1a1a', 'branco': '#f5f5f5', 'vermelho': '#ef4444',
+  'azul': '#3b82f6', 'verde': '#22c55e', 'amarelo': '#eab308',
+  'laranja': '#f97316', 'roxo': '#a855f7', 'rosa': '#ec4899',
+  'cinza': '#9ca3af', 'marrom': '#92400e', 'dourado': '#ca8a04',
+  'prata': '#cbd5e1', 'bege': '#d4b896', 'ciano': '#06b6d4',
+  'azul claro': '#60a5fa', 'azul escuro': '#1e40af',
+  'verde claro': '#86efac', 'verde escuro': '#15803d',
+  'transparente': 'rgba(0,0,0,0.08)',
+};
+
+function resolverCor(cor) {
+  if (!cor) return null;
+  const lower = cor.toLowerCase().trim();
+  return COR_MAP[lower] || cor;
+}
 
 // Mapeamento automático de imagens por palavras-chave no nome do produto
 const IMAGENS_PADRAO = {
@@ -156,13 +174,23 @@ export default function Produtos() {
                 <input className="border rounded-lg px-3 py-2 w-full mt-1" value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} list="cats-list" />
                 <datalist id="cats-list">{categorias.map(c => <option key={c} value={c} />)}</datalist>
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="text-sm font-medium">Cor</label>
-                <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="ex: Preto, Vermelho..." value={form.cor} onChange={e => setForm(f => ({ ...f, cor: e.target.value }))} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Modelo</label>
-                <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="ex: 50mm, Pro, Slim..." value={form.modelo} onChange={e => setForm(f => ({ ...f, modelo: e.target.value }))} />
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="color"
+                    className="h-9 w-12 cursor-pointer rounded border p-0.5"
+                    value={resolverCor(form.cor) && resolverCor(form.cor).startsWith('#') ? resolverCor(form.cor) : '#6b7280'}
+                    onChange={e => setForm(f => ({ ...f, cor: e.target.value }))}
+                  />
+                  <input
+                    className="border rounded-lg px-3 py-2 flex-1"
+                    placeholder="ex: Preto, Vermelho, #3b82f6..."
+                    value={form.cor}
+                    onChange={e => setForm(f => ({ ...f, cor: e.target.value }))}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Use o seletor ou digite o nome (Preto, Azul...) ou um código hex</p>
               </div>
               <div>
                 <label className="text-sm font-medium">Estoque Atual</label>
@@ -222,8 +250,7 @@ export default function Produtos() {
               <th className="p-3 text-left">Nome</th>
               <th className="p-3 text-left">Código</th>
               <th className="p-3 text-left">Categoria</th>
-              <th className="p-3 text-left">Cor</th>
-              <th className="p-3 text-left">Modelo</th>
+              <th className="p-3 text-center">Cor</th>
               <th className="p-3 text-center cursor-pointer hover:text-blue-600" onClick={() => setOrdemEstoque(o => o === 'asc' ? 'desc' : 'asc')}>
                 Estoque {ordemEstoque === 'asc' ? '↑' : ordemEstoque === 'desc' ? '↓' : '↕'}
               </th>
@@ -236,7 +263,7 @@ export default function Produtos() {
           <tbody>
             {lista.length === 0 && (
               <tr>
-                <td colSpan={11} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
+                <td colSpan={10} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
               </tr>
             )}
             {lista.map(p => (
@@ -254,8 +281,17 @@ export default function Produtos() {
                 </td>
                 <td className="p-3 text-gray-500">{p.codigo}</td>
                 <td className="p-3 text-gray-500">{p.categoria}</td>
-                <td className="p-3 text-gray-500">{p.cor || <span className="text-gray-300">—</span>}</td>
-                <td className="p-3 text-gray-500">{p.modelo || <span className="text-gray-300">—</span>}</td>
+                <td className="p-3">
+                  <div className="flex items-center justify-center">
+                    {p.cor
+                      ? <span
+                          className="w-5 h-5 rounded-full border border-gray-300 shadow-sm inline-block"
+                          style={{ background: resolverCor(p.cor) }}
+                          title={p.cor}
+                        />
+                      : <span className="text-gray-300">—</span>}
+                  </div>
+                </td>
                 <td className={`p-3 text-center font-bold text-lg ${alertaIds.has(p.id) ? 'text-red-600' : 'text-gray-800'}`}>
                   {p.estoqueAtual}
                 </td>
