@@ -11,7 +11,7 @@ import Movimentacoes from './pages/Movimentacoes';
 import Auditoria from './pages/Auditoria';
 import Alertas from './pages/Alertas';
 import GerenciarUsuarios from './pages/GerenciarUsuarios';
-import Compras from './pages/Compras';
+import Entrada from './pages/Entrada';
 import Sugestoes from './pages/Sugestoes';
 
 function PrivateRoute({ children, allowed }) {
@@ -41,16 +41,16 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Histórico — ADMIN, EXPEDICAO, COMPRAS, SUPERVISAO */}
+        {/* Histórico — ADMIN, EXPEDICAO, SUPERVISAO apenas */}
         <Route path="/movimentacoes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO']}>
             <LayoutBase><Movimentacoes /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Alertas — ADMIN, EXPEDICAO, SUPERVISAO */}
+        {/* Alertas — ADMIN, EXPEDICAO, SUPERVISAO, COMPRAS */}
         <Route path="/alertas" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS']}>
             <LayoutBase><Alertas /></LayoutBase>
           </PrivateRoute>
         } />
@@ -62,10 +62,10 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Compras — ADMIN, EXPEDICAO, COMPRAS */}
-        <Route path="/compras" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS']}>
-            <LayoutBase><Compras /></LayoutBase>
+        {/* Entrada — ADMIN, EXPEDICAO (quem recebe fisicamente) */}
+        <Route path="/entrada" element={
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO']}>
+            <LayoutBase><Entrada /></LayoutBase>
           </PrivateRoute>
         } />
 

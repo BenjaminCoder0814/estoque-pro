@@ -198,22 +198,22 @@ export function AuthProvider({ children }) {
 
   // ── PERMISSÕES POR PERFIL ──────────────────
   // ADMIN:      tudo, qualquer hora
-  // EXPEDICAO:  adicionar/editar produtos, ver histórico, ver alertas, ver compras (confirmar recebimento)
-  // COMPRAS:    ver/editar produtos, criar pedidos de compra, ver histórico
-  // SUPERVISAO: ver produtos, ver histórico, ver alertas
+  // EXPEDICAO:  editar produtos, ver histórico, ver alertas, confirmar entradas
+  // COMPRAS:    somente ver alertas + marcar pedidos + ver produtos
+  // SUPERVISAO: ver produtos, histórico, alertas, dashboard
   // COMERCIAL:  somente visualização de produtos
   const can = {
     verDashboard:         user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
     verProdutos:          !!user,
-    editarProdutos:       user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
+    editarProdutos:       user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     excluirProdutos:      user && ['ADMIN'].includes(user.perfil),
     fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
-    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'].includes(user.perfil),
+    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS'].includes(user.perfil),
     verAuditoria:         user && ['ADMIN'].includes(user.perfil),
-    verCompras:           user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
-    gerenciarCompras:     user && ['ADMIN', 'COMPRAS'].includes(user.perfil),
-    confirmarRecebimento: user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
+    verEntrada:           user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
+    confirmarEntrada:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
+    marcarPedido:         user && ['COMPRAS'].includes(user.perfil),
     verSugestoes:         !!user,
     gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
   };
