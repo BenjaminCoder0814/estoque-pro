@@ -7,14 +7,14 @@ const AuthContext = createContext();
 // USUÁRIOS DO SISTEMA
 // ──────────────────────────────────────────────
 const USUARIOS_PADRAO = [
-  { id: 1, email: 'admin@zenith.com',      senha: '123456',    nome: 'Administrador', perfil: 'ADMIN',      restricaoHorario: false },
-  { id: 2, email: 'expedicao@zenith.com',  senha: 'exped2026', nome: 'Expedição',     perfil: 'EXPEDICAO',  restricaoHorario: true  },
-  { id: 3, email: 'compras@zenith.com',    senha: 'lari2026',  nome: 'Compras',       perfil: 'COMPRAS',    restricaoHorario: true  },
-  { id: 4, email: 'supervisao@zenith.com', senha: 'super2026', nome: 'Supervisão',    perfil: 'SUPERVISAO', restricaoHorario: true  },
-  { id: 5, email: 'comercial@zenith.com',  senha: 'com2026',   nome: 'Comercial',     perfil: 'COMERCIAL',  restricaoHorario: true  },
+  { id: 1, email: 'admin@zenith.com',       senha: '123456',    nome: 'Administrador', perfil: 'ADMIN',       restricaoHorario: false },
+  { id: 2, email: 'expedicao@zenith.com',   senha: 'exped2026', nome: 'Expedição',     perfil: 'EXPEDICAO',   restricaoHorario: true  },
+  { id: 3, email: 'compras@zenith.com',     senha: 'lari2026',  nome: 'Compras',       perfil: 'COMPRAS',     restricaoHorario: true  },
+  { id: 4, email: 'supervisao@zenith.com',  senha: 'super2026', nome: 'Supervisão',    perfil: 'SUPERVISAO',  restricaoHorario: true  },
+  { id: 5, email: 'vendedoras@zenith.com',  senha: 'vend2026',  nome: 'Vendedoras',    perfil: 'VENDEDORAS',  restricaoHorario: true  },
 ];
 
-export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL'];
+export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'VENDEDORAS'];
 
 // ──────────────────────────────────────────────
 // SESSÃO ATIVA (controle de acesso único não-admin)
@@ -88,7 +88,7 @@ export function verificarHorarioComercial() {
 // ──────────────────────────────────────────────
 // HELPERS localStorage
 // ──────────────────────────────────────────────
-const USUARIOS_VERSION = 'v2'; // Incremente para forçar reset dos usuários padrão
+const USUARIOS_VERSION = 'v3'; // Incremente para forçar reset dos usuários padrão
 
 function loadUsuarios() {
   try {
@@ -252,11 +252,11 @@ export function AuthProvider({ children }) {
   }
 
   // ── PERMISSÕES POR PERFIL ──────────────────
-  // ADMIN:      tudo, qualquer hora
-  // EXPEDICAO:  editar produtos, ver histórico, ver alertas, confirmar entradas
-  // COMPRAS:    somente ver alertas + marcar pedidos + ver produtos
-  // SUPERVISAO: ver produtos, histórico, alertas, dashboard
-  // COMERCIAL:  somente visualização de produtos
+  // ADMIN:      tudo, qualquer hora, sem restrição
+  // EXPEDICAO:  entrada, histórico, alertas, pendentes, editar produtos
+  // COMPRAS:    alertas + pendentes (criar) + produtos (visualização)
+  // SUPERVISAO: dashboard, produtos, histórico
+  // VENDEDORAS: somente produtos (visualização)
   const can = {
     verDashboard:         user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
     verProdutos:          !!user,
@@ -265,11 +265,12 @@ export function AuthProvider({ children }) {
     fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'].includes(user.perfil),
     verAlertas:           user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
+    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
     verAuditoria:         user && ['ADMIN'].includes(user.perfil),
     verEntrada:           user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     confirmarEntrada:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     marcarPedido:         user && ['COMPRAS'].includes(user.perfil),
-    verSugestoes:         !!user,
+    verSugestoes:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS'].includes(user.perfil),
     gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
   };
 

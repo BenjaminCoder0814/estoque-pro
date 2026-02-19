@@ -1,10 +1,11 @@
 // Alertas de estoque
 // COMPRAS: vê alertas e pode marcar como "Pedido" (cria registro em zkPendentes)
-// ADMIN/EXPEDICAO/SUPERVISAO: veem os alertas normalmente
+// ADMIN/EXPEDICAO: veem os alertas normalmente
 import React, { useState, useMemo } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
 import { useAuth } from '../contexts/AuthContext';
-import { LucideX, LucideShoppingBag, LucideCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LucideX, LucideShoppingBag, LucideCheck, LucideClipboard } from 'lucide-react';
 
 const PENDENTES_KEY = 'zkPendentes';
 function loadPendentes() {
@@ -15,6 +16,7 @@ function savePendentes(lista) { localStorage.setItem(PENDENTES_KEY, JSON.stringi
 export default function Alertas() {
   const { alertas, editarProduto } = useEstoque();
   const { user, can } = useAuth();
+  const navigate = useNavigate();
 
   const [pendentes, setPendentes] = useState(loadPendentes);
   const [modalPedido, setModalPedido] = useState(null);
@@ -53,8 +55,8 @@ export default function Alertas() {
     const nova = [novo, ...pendentes];
     setPendentes(nova);
     savePendentes(nova);
-    setSucesso(`Pedido de "${modalPedido.nome}" registrado!`);
-    setTimeout(() => setSucesso(''), 3500);
+    setSucesso(`Pedido de "${modalPedido.nome}" registrado! Veja em Pendentes.`);
+    setTimeout(() => setSucesso(''), 4000);
     setModalPedido(null);
   }
 
@@ -82,9 +84,18 @@ export default function Alertas() {
       </div>
 
       {isCompras && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm text-blue-700 flex items-start gap-2">
-          <LucideShoppingBag className="w-4 h-4 mt-0.5 flex-shrink-0" />
-          <span>Clique em <strong>Marcar como Pedido</strong> para avisar a Expedição que o material já foi providenciado e está a caminho.</span>
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 text-sm text-blue-700 flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2">
+            <LucideShoppingBag className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <span>Clique em <strong>Marcar como Pedido</strong> para registrar a necessidade. A Expedição receberá o pedido e confirmará a chegada do material.</span>
+          </div>
+          <button
+            onClick={() => navigate('/pendentes')}
+            className="flex items-center gap-1.5 text-xs font-semibold bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg whitespace-nowrap transition flex-shrink-0"
+          >
+            <LucideClipboard className="w-3.5 h-3.5" />
+            Ver Pendentes
+          </button>
         </div>
       )}
 
@@ -145,9 +156,17 @@ export default function Alertas() {
                 {isCompras && (
                   <div className="mt-3">
                     {jaPedido ? (
-                      <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                        <LucideCheck className="w-3 h-3" /> Pedido registrado — aguardando Expedição
-                      </p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                          <LucideCheck className="w-3 h-3" /> Pedido registrado — aguardando Expedição
+                        </p>
+                        <button
+                          onClick={() => navigate('/pendentes')}
+                          className="text-xs text-indigo-600 hover:text-indigo-800 underline font-medium flex items-center gap-1"
+                        >
+                          <LucideClipboard className="w-3 h-3" /> Ver status
+                        </button>
+                      </div>
                     ) : (
                       <button
                         onClick={() => abrirModalPedido(p)}

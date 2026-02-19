@@ -4,7 +4,8 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LucideLayoutDashboard, LucideBox, LucideList, LucidePackageCheck,
   LucideUsers, LucideChevronLeft, LucideChevronRight,
-  LucideAlertTriangle, LucideUserCog, LucideClipboardList, LucideLightbulb
+  LucideAlertTriangle, LucideUserCog, LucideClipboardList, LucideLightbulb,
+  LucideClipboard
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEstoque } from '../contexts/EstoqueContext';
@@ -14,11 +15,12 @@ import { useEstoque } from '../contexts/EstoqueContext';
 const menu = [
   { label: 'Dashboard',   icon: LucideLayoutDashboard, to: '/',            allowed: ['ADMIN', 'SUPERVISAO'] },
   { label: 'Produtos',    icon: LucideBox,              to: '/produtos'     },
-  { label: 'Histórico',   icon: LucideList,             to: '/movimentacoes',allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
+  { label: 'Histórico',   icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
   { label: 'Alertas',     icon: LucideAlertTriangle,    to: '/alertas',      allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
+  { label: 'Pendentes',   icon: LucideClipboard,        to: '/pendentes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
   { label: 'Entrada',     icon: LucidePackageCheck,     to: '/entrada',      allowed: ['ADMIN', 'EXPEDICAO'] },
   { label: 'Auditoria',   icon: LucideClipboardList,    to: '/auditoria',    allowed: ['ADMIN'] },
-  { label: 'Sugestões',   icon: LucideLightbulb,        to: '/sugestoes'     },
+  { label: 'Sugestões',   icon: LucideLightbulb,        to: '/sugestoes',    allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS'] },
   { label: 'Usuários',    icon: LucideUserCog,          to: '/usuarios',     allowed: ['ADMIN'] },
 ];
 

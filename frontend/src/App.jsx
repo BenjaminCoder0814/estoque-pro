@@ -12,6 +12,7 @@ import Auditoria from './pages/Auditoria';
 import Alertas from './pages/Alertas';
 import GerenciarUsuarios from './pages/GerenciarUsuarios';
 import Entrada from './pages/Entrada';
+import Pendentes from './pages/Pendentes';
 import Sugestoes from './pages/Sugestoes';
 
 function PrivateRoute({ children, allowed }) {
@@ -55,6 +56,13 @@ export default function App() {
           </PrivateRoute>
         } />
 
+        {/* Pendentes — ADMIN, EXPEDICAO, COMPRAS */}
+        <Route path="/pendentes" element={
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS']}>
+            <LayoutBase><Pendentes /></LayoutBase>
+          </PrivateRoute>
+        } />
+
         {/* Auditoria — ADMIN apenas */}
         <Route path="/auditoria" element={
           <PrivateRoute allowed={['ADMIN']}>
@@ -69,9 +77,9 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Sugestões — todos os perfis */}
+        {/* Sugestões — ADMIN, EXPEDICAO, SUPERVISAO, COMPRAS */}
         <Route path="/sugestoes" element={
-          <PrivateRoute>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMPRAS']}>
             <LayoutBase><Sugestoes /></LayoutBase>
           </PrivateRoute>
         } />
