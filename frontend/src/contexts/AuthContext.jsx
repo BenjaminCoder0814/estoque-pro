@@ -322,6 +322,8 @@ export function AuthProvider({ children }) {
     marcarPedido:         user && ['COMPRAS'].includes(user.perfil),
     verSugestoes:         user && ['ADMIN'].includes(user.perfil),
     gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
+    verPrecos:            !!user,
+    verMidia:             !!user,
   };
 
   return (

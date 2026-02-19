@@ -14,6 +14,8 @@ import GerenciarUsuarios from './pages/GerenciarUsuarios';
 import Entrada from './pages/Entrada';
 import Pendentes from './pages/Pendentes';
 import Sugestoes from './pages/Sugestoes';
+import Precos from './pages/Precos';
+import Midia from './pages/Midia';
 
 function PrivateRoute({ children, allowed }) {
   const { user } = useAuth();
@@ -88,6 +90,20 @@ export default function App() {
         <Route path="/usuarios" element={
           <PrivateRoute allowed={['ADMIN']}>
             <LayoutBase><GerenciarUsuarios /></LayoutBase>
+          </PrivateRoute>
+        } />
+
+        {/* Preços — todos os perfis */}
+        <Route path="/precos" element={
+          <PrivateRoute>
+            <LayoutBase><Precos /></LayoutBase>
+          </PrivateRoute>
+        } />
+
+        {/* Mídia — todos os perfis */}
+        <Route path="/midia" element={
+          <PrivateRoute>
+            <LayoutBase><Midia /></LayoutBase>
           </PrivateRoute>
         } />
 
