@@ -1,0 +1,60 @@
+nome,categoria,medida,cor,quantidade,unidade,controla_estoque,gera_alerta,estoque_minimo
+Cadeado Tradicional,Cadeados,25mm,,3,UN,true,true,5
+Cadeado Tradicional,Cadeados,30mm,,7,UN,true,true,5
+Cadeado Tradicional,Cadeados,40mm,,2,UN,true,true,5
+Cadeado Tradicional,Cadeados,50mm,,1,UN,true,true,3
+Cadeado Tradicional,Cadeados,60mm,,2,UN,true,true,3
+Cadeado Tradicional,Cadeados,70mm,,70,UN,true,true,10
+Cadeado Tradicional,Cadeados,100mm,,100,UN,true,true,20
+Cadeado Segredo Numérico,Cadeados,25mm,,4,UN,true,true,5
+Cadeado Tetra,Cadeados,30mm,,13,UN,true,true,5
+Cadeado Haste Longa,Cadeados,35mm,,14,UN,true,true,5
+Lacre Tag Pino,Lacres,,,10,CX,true,true,5
+Lacre Pino Anel,Lacres,125mm,,17,CX,true,true,5
+Lacre RATH,Lacres,25mm,,1,UN,true,true,5
+Fita Isolante,Fitas,5m,,850,UN,true,true,100
+Fita Isolante,Fitas,10m,,350,UN,true,true,50
+Fita Crepe,Fitas,6m Fina,,19,UN,true,true,10
+Fita Crepe,Fitas,6m Grossa,,2,UN,true,true,5
+Fita Crepe,Fitas,12m Média,,6,UN,true,true,5
+Fita Crepe,Fitas,15m Fina,,7,UN,true,true,5
+Fita Lacradora,Fitas,25un,Azul,33,UN,true,true,5
+Fita Lacradora,Fitas,,Vermelha,1,UN,true,true,5
+Fita Adesiva,Fitas,45x100,,100,UN,true,true,20
+Fita 19x19,Fitas,,Branca,100,UN,true,true,20
+Fita Transparente,Fitas,,,10,PCT,true,true,5
+Fita Marrom,Fitas,,,20,PCT,true,true,5
+Máquina Lacradora Quadrada,Máquinas,,Azul,72,UN,true,false,5
+Máquina Lacradora Quadrada,Máquinas,,,9,UN,true,false,3
+Máquina Lacradora Redonda,Máquinas,,Vermelha,16,UN,true,false,3
+Refil Selagem,Máquinas,,,12,UN,true,true,5
+Malote Correios,Malotes,30x25x10,Marrom,1,UN,true,true,3
+Malote Lona,Malotes,52x34x17,Laranja,4,UN,true,true,3
+Malote Correios,Malotes,56x36x10,Azul,5,UN,true,true,3
+Pasta Emborrachada,Pastas,30x40,Azul,18,UN,true,true,5
+Pasta Lona,Pastas,30x40,Azul,10,UN,true,true,5
+Pasta Lona,Pastas,30x40,Amarela,1,UN,true,true,3
+Pasta Lona,Pastas,30x40,Verde,3,UN,true,true,3
+Pasta Nylon,Pastas,40x35x8,Preto,3,UN,true,true,3
+Pasta Nylon,Pastas,40x35x8,Bege,3,UN,true,true,3
+Pasta Nylon,Pastas,46x41x8,Vermelho,4,UN,true,true,3
+Pasta Lona,Pastas,40x35,Verde,13,UN,true,true,5
+Pasta Lona,Pastas,34x27,Verde,15,UN,true,true,5
+Pasta Lona,Pastas,21x36,Preto,49,UN,true,true,10
+Saquinho,Saquinhos,25x35x6,,8,UN,true,true,5
+Saquinho,Saquinhos,45x20x6,,8,UN,true,true,5
+Saquinho,Saquinhos,30x60x6,,15,UN,true,true,5
+Saquinho,Saquinhos,20x35x6,,1,UN,true,true,3
+Saquinho,Saquinhos,20x25x6,,2,UN,true,true,3
+Saquinho,Saquinhos,30x70x6,,19,UN,true,true,5
+Saquinho,Saquinhos,30x35x6,,8,UN,true,true,5
+Saquinho,Saquinhos,35x45x6,,6,UN,true,true,5
+Saquinho,Saquinhos,12x17,,3,UN,true,true,3
+Estilete,Diversos,,,,10,UN,false,false,0
+Lâmpada,Diversos,,,,2,UN,false,false,0
+Luvas,Diversos,,2 CX,2,CX,false,false,0
+Tek Bond Spray,Diversos,,,,3,UN,false,false,0
+Café,Diversos,,,,1,UN,false,false,0
+Bolacha,Diversos,,,,4,UN,false,false,0
+Sardinha,Diversos,,,,2,UN,false,false,0
+Massa de Bolo,Diversos,,,,2,UN,false,false,0

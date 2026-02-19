@@ -1,0 +1,251 @@
+import React, { useState, useRef } from 'react';
+import { useEstoque } from '../contexts/EstoqueContext';
+import { useAuth } from '../contexts/AuthContext';
+
+const VAZIO = { nome: '', codigo: '', categoria: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
+
+export default function Produtos() {
+  const { produtos, alertas, criarProduto, editarProduto, excluirProduto } = useEstoque();
+  const { user, can } = useAuth();
+  const fileRef = useRef();
+
+  const [busca, setBusca] = useState('');
+  const [filtroCategoria, setFiltroCategoria] = useState('');
+  const [filtroAlerta, setFiltroAlerta] = useState('');
+  const [filtroStatus, setFiltroStatus] = useState('');
+  const [ordemEstoque, setOrdemEstoque] = useState('');
+  const [form, setForm] = useState(VAZIO);
+  const [editandoId, setEditandoId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const alertaIds = new Set(alertas.map(p => p.id));
+  const categorias = [...new Set(produtos.map(p => p.categoria).filter(Boolean))];
+
+  let lista = produtos.filter(p =>
+    (!busca || p.nome.toLowerCase().includes(busca.toLowerCase()) || p.codigo.toLowerCase().includes(busca.toLowerCase())) &&
+    (!filtroCategoria || p.categoria === filtroCategoria) &&
+    (!filtroAlerta || (filtroAlerta === 'sim' ? alertaIds.has(p.id) : !alertaIds.has(p.id))) &&
+    (!filtroStatus || (filtroStatus === 'ativo' ? p.ativo : !p.ativo))
+  );
+  if (ordemEstoque === 'asc') lista = [...lista].sort((a, b) => a.estoqueAtual - b.estoqueAtual);
+  if (ordemEstoque === 'desc') lista = [...lista].sort((a, b) => b.estoqueAtual - a.estoqueAtual);
+
+  function abrirNovo() { setForm(VAZIO); setEditandoId(null); setShowForm(true); }
+  function abrirEdicao(p) { setForm({ ...p }); setEditandoId(p.id); setShowForm(true); }
+
+  function handleImagem(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => setForm(f => ({ ...f, imagem: ev.target.result }));
+    reader.readAsDataURL(file);
+  }
+
+  function salvar(e) {
+    e.preventDefault();
+    const dados = { ...form, estoqueAtual: Number(form.estoqueAtual), estoqueMinimo: Number(form.estoqueMinimo) };
+    if (editandoId) editarProduto(editandoId, dados, user);
+    else criarProduto(dados, user);
+    setShowForm(false);
+    setForm(VAZIO);
+    setEditandoId(null);
+  }
+
+  function toggleAtivo(p) {
+    editarProduto(p.id, { ...p, ativo: !p.ativo }, user);
+  }
+
+  function remover(id) {
+    if (window.confirm('Confirma exclusão do produto?')) excluirProduto(id, user);
+  }
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Produtos <span className="text-base font-normal text-gray-400">({lista.length})</span>
+        </h1>
+        {can.editarProdutos && (
+          <button onClick={abrirNovo} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition">
+            + Novo Produto
+          </button>
+        )}
+      </div>
+
+      {/* Filtros */}
+      <div className="flex gap-3 mb-5 flex-wrap bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+        <input
+          className="border rounded-lg px-3 py-2 text-sm w-52"
+          placeholder="Buscar nome ou código..."
+          value={busca}
+          onChange={e => setBusca(e.target.value)}
+        />
+        <select className="border rounded-lg px-3 py-2 text-sm" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}>
+          <option value="">Todas categorias</option>
+          {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select className="border rounded-lg px-3 py-2 text-sm" value={filtroAlerta} onChange={e => setFiltroAlerta(e.target.value)}>
+          <option value="">Todos (alerta)</option>
+          <option value="sim">Com alerta</option>
+          <option value="nao">Sem alerta</option>
+        </select>
+        <select className="border rounded-lg px-3 py-2 text-sm" value={filtroStatus} onChange={e => setFiltroStatus(e.target.value)}>
+          <option value="">Todos (status)</option>
+          <option value="ativo">Ativos</option>
+          <option value="inativo">Inativos</option>
+        </select>
+        <select className="border rounded-lg px-3 py-2 text-sm" value={ordemEstoque} onChange={e => setOrdemEstoque(e.target.value)}>
+          <option value="">Ordenação padrão</option>
+          <option value="asc">Estoque ↑ menor</option>
+          <option value="desc">Estoque ↓ maior</option>
+        </select>
+      </div>
+
+      {/* Modal */}
+      {showForm && can.editarProdutos && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-5">{editandoId ? 'Editar Produto' : 'Novo Produto'}</h2>
+            <form onSubmit={salvar} className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="text-sm font-medium">Nome *</label>
+                <input required className="border rounded-lg px-3 py-2 w-full mt-1" value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Código (SKU) *</label>
+                <input required className="border rounded-lg px-3 py-2 w-full mt-1" value={form.codigo} onChange={e => setForm(f => ({ ...f, codigo: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Categoria</label>
+                <input className="border rounded-lg px-3 py-2 w-full mt-1" value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} list="cats-list" />
+                <datalist id="cats-list">{categorias.map(c => <option key={c} value={c} />)}</datalist>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Estoque Atual</label>
+                <input type="number" min="0" className="border rounded-lg px-3 py-2 w-full mt-1" value={form.estoqueAtual} onChange={e => setForm(f => ({ ...f, estoqueAtual: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Estoque Mínimo</label>
+                <input type="number" min="0" className="border rounded-lg px-3 py-2 w-full mt-1" value={form.estoqueMinimo} onChange={e => setForm(f => ({ ...f, estoqueMinimo: e.target.value }))} />
+              </div>
+              <div className="col-span-2">
+                <label className="text-sm font-medium">Imagem</label>
+                <div className="flex gap-3 items-center mt-1">
+                  {form.imagem
+                    ? <img src={form.imagem} alt="preview" className="w-16 h-16 object-contain rounded border" />
+                    : <div className="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center text-gray-400 text-xs">Sem img</div>}
+                  <div className="flex flex-col gap-1">
+                    <button type="button" onClick={() => fileRef.current.click()} className="text-sm text-blue-600 hover:underline">Upload de imagem</button>
+                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImagem} />
+                    <input
+                      className="border rounded px-2 py-1 text-xs w-52"
+                      placeholder="ou cole URL..."
+                      value={form.imagem && form.imagem.startsWith('data:') ? '' : form.imagem}
+                      onChange={e => setForm(f => ({ ...f, imagem: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={form.controlaEstoque} onChange={e => setForm(f => ({ ...f, controlaEstoque: e.target.checked }))} />
+                  Controla Estoque
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={form.geraAlerta} onChange={e => setForm(f => ({ ...f, geraAlerta: e.target.checked }))} />
+                  Gera Alerta
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={form.ativo} onChange={e => setForm(f => ({ ...f, ativo: e.target.checked }))} />
+                  Ativo
+                </label>
+              </div>
+              <div className="col-span-2 flex gap-3 justify-end mt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50">Cancelar</button>
+                <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Tabela */}
+      <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50 text-gray-600 text-sm select-none">
+              <th className="p-3 text-left">Imagem</th>
+              <th className="p-3 text-left">Nome</th>
+              <th className="p-3 text-left">Código</th>
+              <th className="p-3 text-left">Categoria</th>
+              <th className="p-3 text-center cursor-pointer hover:text-blue-600" onClick={() => setOrdemEstoque(o => o === 'asc' ? 'desc' : 'asc')}>
+                Estoque {ordemEstoque === 'asc' ? '↑' : ordemEstoque === 'desc' ? '↓' : '↕'}
+              </th>
+              <th className="p-3 text-center">Mínimo</th>
+              <th className="p-3 text-center">Alerta</th>
+              <th className="p-3 text-center">Status</th>
+              {can.editarProdutos && <th className="p-3 text-center">Ações</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {lista.length === 0 && (
+              <tr>
+                <td colSpan={9} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
+              </tr>
+            )}
+            {lista.map(p => (
+              <tr key={p.id} className={`border-t text-sm hover:bg-gray-50 transition ${alertaIds.has(p.id) ? 'bg-red-50' : ''} ${!p.ativo ? 'opacity-50' : ''}`}>
+                <td className="p-3">
+                  {p.imagem
+                    ? <img src={p.imagem} alt={p.nome} className="w-12 h-12 object-contain rounded" />
+                    : <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">—</div>}
+                </td>
+                <td className="p-3 font-medium">
+                  {p.nome}
+                  {alertaIds.has(p.id) && (
+                    <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs">⚠ ALERTA</span>
+                  )}
+                </td>
+                <td className="p-3 text-gray-500">{p.codigo}</td>
+                <td className="p-3 text-gray-500">{p.categoria}</td>
+                <td className={`p-3 text-center font-bold text-lg ${alertaIds.has(p.id) ? 'text-red-600' : 'text-gray-800'}`}>
+                  {p.estoqueAtual}
+                </td>
+                <td className="p-3 text-center text-gray-500">{p.estoqueMinimo}</td>
+                <td className="p-3 text-center">
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.geraAlerta ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-400'}`}>
+                    {p.geraAlerta ? 'Sim' : 'Não'}
+                  </span>
+                </td>
+                <td className="p-3 text-center">
+                  {can.editarProdutos
+                    ? (
+                      <button
+                        onClick={() => toggleAtivo(p)}
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium transition ${p.ativo ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                      >
+                        {p.ativo ? 'Ativo' : 'Inativo'}
+                      </button>
+                    )
+                    : (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.ativo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                        {p.ativo ? 'Ativo' : 'Inativo'}
+                      </span>
+                    )}
+                </td>
+                {can.editarProdutos && (
+                  <td className="p-3 text-center whitespace-nowrap">
+                    <button onClick={() => abrirEdicao(p)} className="text-blue-600 hover:underline text-sm mr-3">Editar</button>
+                    <button onClick={() => remover(p.id)} className="text-red-500 hover:underline text-sm">Excluir</button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+

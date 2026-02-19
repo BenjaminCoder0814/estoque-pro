@@ -1,0 +1,5 @@
+- [ ] Estrutura de pastas completa para frontend e backend
+- [ ] Código funcional pronto para rodar no VS Code
+- [ ] Comentários explicando a função de cada arquivo
+- [ ] Exemplo de tela de login já estilizada com a paleta definida
+- [ ] Orientações de como rodar o projeto localmente

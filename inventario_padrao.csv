@@ -1,0 +1,76 @@
+Nome,Categoria,Medida,Cor,Quantidade,ControlaEstoque,GeraAlerta,EstoqueMinimo,Imagem
+Cadeado Tradicional,Cadeados,25mm,,3,SIM,SIM,5,uploads/cadeados/Cadeado Tradicional (latão).png
+Cadeado Tradicional,Cadeados,30mm,,7,SIM,SIM,5,uploads/cadeados/Cadeado Tradicional (latão).png
+Cadeado Tradicional,Cadeados,40mm,,2,SIM,SIM,5,uploads/cadeados/Cadeado Tradicional (latão).png
+Cadeado Tradicional,Cadeados,50mm,,1,SIM,SIM,5,uploads/cadeados/Cadeado Tradicional (latão).png
+Cadeado Tradicional,Cadeados,60mm,,2,SIM,SIM,5,uploads/cadeados/Cadeado Tradicional (latão).png
+Cadeado Tradicional,Cadeados,70mm,,70,SIM,SIM,5,uploads/cadeados/Cadeado Tradicional (latão).png
+Cadeado Tradicional,Cadeados,100mm,,100,SIM,SIM,5,uploads/cadeados/Cadeado Tradicional (latão).png
+Cadeado Segredo Numérico,Cadeados,25mm,,4,SIM,SIM,5,uploads/cadeados/Cadeado Segredo Numérico.png
+Cadeado Tetra,Cadeados,30mm,,13,SIM,SIM,5,uploads/cadeados/Cadeado Tetra.png
+Cadeado Haste Longa,Cadeados,35mm,,14,SIM,SIM,5,uploads/cadeados/Cadeado Haste Longa.png
+Lacre Tag Pino,Lacres,,,10,SIM,NÃO,0,
+Lacre Pino Anel,Lacres,125mm,,17,SIM,NÃO,0,
+Lacre RATH,Lacres,25mm,,1,SIM,NÃO,0,
+Fita Isolante,Fitas,5m,,850,SIM,SIM,50,uploads/fitas/Fita isolante.png
+Fita Isolante,Fitas,10m,,350,SIM,SIM,50,uploads/fitas/Fita isolante.png
+Fita Crepe,Fitas,6m fina,,19,SIM,SIM,10,uploads/fitas/Fita crepe.png
+Fita Crepe,Fitas,6m grossa,,2,SIM,SIM,10,uploads/fitas/Fita crepe.png
+Fita Crepe,Fitas,12m média,,6,SIM,SIM,10,uploads/fitas/Fita crepe.png
+Fita Crepe,Fitas,15m fina,,7,SIM,SIM,10,uploads/fitas/Fita crepe.png
+Fita Crepe,Fitas,soltas,,14,SIM,SIM,10,uploads/fitas/Fita crepe.png
+Fita Lacradora,Fitas,Azul 25un pct,,33,SIM,NÃO,0,uploads/fitas/Fita para máquina lacradora.png
+Fita Lacradora,Fitas,Azul aberto,,2,SIM,NÃO,0,uploads/fitas/Fita para máquina lacradora.png
+Fita Lacradora,Fitas,Vermelha,,1,SIM,NÃO,0,uploads/fitas/Fita para máquina lacradora.png
+Fita 45x100,Fitas,100 rolos,,100,SIM,NÃO,0,uploads/fitas/Fita adesiva.png
+Fita 19x19 branca,Fitas,100,,100,SIM,NÃO,0,uploads/fitas/Fita dupla face.png
+Fita Transparente,Fitas,10 pct,,10,SIM,NÃO,0,uploads/fitas/Fita isolante antichama.png
+Fita Marrom,Fitas,20 pct,,20,SIM,NÃO,0,uploads/fitas/Fita isolante.png
+Fita Branca 29cm,Fitas,3 pct,,3,SIM,NÃO,0,uploads/fitas/Fita isolante.png
+Fitas Zebrada,Fitas,,,5,SIM,NÃO,0,uploads/fitas/Fita zebrada.png
+Fita Personalizada,Fitas,,,2,SIM,NÃO,0,uploads/fitas/Fita isolante.png
+Fita Demarcação,Fitas,,,1,SIM,NÃO,0,uploads/fitas/Fita isolante.png
+Máquina Lacradora Quadrada,Máquinas,,,9,SIM,NÃO,2,uploads/malotes/Malote Correio.png
+Máquina Lacradora Quadrada,Máquinas,Azul,72,SIM,NÃO,2,uploads/malotes/Malote Correio.png
+Máquina Lacradora Redonda,Máquinas,Vermelha,16,SIM,NÃO,2,uploads/malotes/Malote Correio.png
+Refil Selagem,Máquinas,,,12,SIM,NÃO,2,
+Malote Correios,Malotes e Pastas,30x25x10,Marrom,1,SIM,NÃO,0,uploads/malotes/Malote Correio.png
+Malote Lona,Malotes e Pastas,52x34x17,Laranja,4,SIM,NÃO,0,uploads/malotes/Malote Correio.png
+Malote Correios,Malotes e Pastas,56x36x10,Azul,5,SIM,NÃO,0,uploads/malotes/Malote Correio.png
+Pasta Emborrachada,Malotes e Pastas,30x40,Azul,18,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Lona,Malotes e Pastas,30x40,Azul,10,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Lona,Malotes e Pastas,30x40,Amarela,1,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Lona,Malotes e Pastas,30x40,Verde,3,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Nylon,Malotes e Pastas,40x35x8,Preto,3,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Nylon,Malotes e Pastas,40x35x8,Bege,3,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Nylon,Malotes e Pastas,46x41x8,Vermelho,4,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Lona,Malotes e Pastas,40x35,Verde,13,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Lona,Malotes e Pastas,34x27,Verde,15,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Lona,Malotes e Pastas,21x36,Preto,49,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Nylon,Malotes e Pastas,29x39,Cinza,1,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Nylon,Malotes e Pastas,28x40,Verde,1,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta Nylon,Malotes e Pastas,35x30,Azul,10,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta,Malotes e Pastas,51x41x8,Verde,4,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta,Malotes e Pastas,45x40x6,Verde,2,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta,Malotes e Pastas,46x41,Verde,1,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta,Malotes e Pastas,17x26,Preto,5,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta,Malotes e Pastas,40x26,Preto,4,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Pasta,Malotes e Pastas,30x40,2 nylon / 2 emborrachada,4,SIM,NÃO,0,uploads/malotes/Pasta para Documentos.png
+Saquinho,Saquinhos,25x35x6,,8,SIM,NÃO,0,
+Saquinho,Saquinhos,45x20x6,,8,SIM,NÃO,0,
+Saquinho,Saquinhos,30x60x6,,15,SIM,NÃO,0,
+Saquinho,Saquinhos,20x35x6,,1,SIM,NÃO,0,
+Saquinho,Saquinhos,20x25x6,,2,SIM,NÃO,0,
+Saquinho,Saquinhos,30x70x6,,19,SIM,NÃO,0,
+Saquinho,Saquinhos,30x35x6,,8,SIM,NÃO,0,
+Saquinho,Saquinhos,35x45x6,,6,SIM,NÃO,0,
+Saquinho,Saquinhos,12x17,,3,SIM,NÃO,0,
+Estilete,Diversos,,,,10,NÃO,NÃO,0,
+Lâmpada,Diversos,,,,2,NÃO,NÃO,0,
+Luva,Diversos,,,,2 cx,NÃO,NÃO,0,
+Arame,Diversos,,,,6,NÃO,NÃO,0,
+Tek Bond Spray,Diversos,,,,3,NÃO,NÃO,0,
+Café,Diversos,,,,1,NÃO,NÃO,0,
+Bolacha,Diversos,,,,4,NÃO,NÃO,0,
+Sardinha,Diversos,,,,2,NÃO,NÃO,0,
+Massa de bolo,Diversos,,,,2,NÃO,NÃO,0,

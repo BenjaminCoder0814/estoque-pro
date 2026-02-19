@@ -1,0 +1,72 @@
+sku,nome,categoria,medida,modelo,cor,quantidade,unidade,controla_estoque,gera_alerta,estoque_minimo
+CAT-25MM-TRAD,Cadeado Tradicional,Cadeados,25mm,Tradicional,,73,UN,true,true,5
+CAT-30MM-TRAD,Cadeado Tradicional,Cadeados,30mm,Tradicional,,107,UN,true,true,5
+CAT-40MM-TRAD,Cadeado Tradicional,Cadeados,40mm,Tradicional,,2,UN,true,true,5
+CAT-50MM-TRAD,Cadeado Tradicional,Cadeados,50mm,Tradicional,,1,UN,true,true,3
+CAT-60MM-TRAD,Cadeado Tradicional,Cadeados,60mm,Tradicional,,2,UN,true,true,3
+CAT-70MM-TRAD,Cadeado Tradicional,Cadeados,70mm,Tradicional,,70,UN,true,true,10
+CAT-100MM-TRAD,Cadeado Tradicional,Cadeados,100mm,Tradicional,,100,UN,true,true,20
+CAT-25MM-SEGNUM,Cadeado Segredo Numérico,Cadeados,25mm,Segredo Numérico,,4,UN,true,true,5
+CAT-30MM-TETRA,Cadeado Tetra,Cadeados,30mm,Tetra,,13,UN,true,true,5
+CAT-35MM-RAH,Cadeado RAH,Cadeados,35mm,RAH,,14,UN,true,true,5
+FITA-ISOL-5M,Fita Isolante,Fitas,5m,Isolante,,850,UN,true,true,100
+FITA-ISOL-10M,Fita Isolante,Fitas,10m,Isolante,,350,UN,true,true,50
+FITA-FIXA-19X19,Fita Fixa,Fitas,19x19,Fixa,Branca,100,UN,true,true,20
+FITA-ADES-45X100,Fita Adesiva,Fitas,45x100,Adesiva,,100,UN,true,true,20
+FITA-LACR-25UN,Fita Lacradora,Fitas,25un,Lacradora,Azul,33,UN,true,true,5
+FITA-LACR-UN,Fita Lacradora,Fitas,,Lacradora,Vermelha,1,UN,true,true,5
+FITA-CREPE-6M-FINA,Fita Crepe,Fitas,6m,Crepe,Fina,19,UN,true,true,10
+FITA-CREPE-6M-GROSSA,Fita Crepe,Fitas,6m,Crepe,Grossa,2,UN,true,true,5
+FITA-CREPE-12M-MEDIA,Fita Crepe,Fitas,12m,Crepe,Média,6,UN,true,true,5
+FITA-CREPE-15M-FINA,Fita Crepe,Fitas,15m,Crepe,Fina,7,UN,true,true,5
+LACRE-TAGPINO,Lacre Tag Pino,Lacres,,,Tag Pino,,10,CX,true,true,5
+LACRE-PINOANEL-125MM,Lacre Pino Anel,Lacres,125mm,Pino Anel,,17,CX,true,true,5
+LACRE-RAH-25MM,Lacre RAH,Lacres,25mm,RAH,,1,UN,true,true,5
+MAQ-LACR-QUAD,Máquina Lacradora Quadrada,Máquinas,,Quadrada,,81,UN,true,false,5
+MAQ-LACR-RED,Máquina Lacradora Redonda,Máquinas,,Redonda,Vermelha,16,UN,true,false,3
+REFIL-SELAGEM,Refil Selagem,Máquinas,,,Selagem,,12,UN,true,true,5
+MALOTE-CORREIOS-30X25X10,Malote Correios,Malotes,30x25x10,Correios,Marrom,1,UN,true,true,3
+MALOTE-LONA-52X34X17,Malote Lona,Malotes,52x34x17,Lona,Laranja,4,UN,true,true,3
+MALOTE-CORREIOS-56X36X10,Malote Correios,Malotes,56x36x10,Correios,Azul,5,UN,true,true,3
+PASTA-EMB-30X40-AZUL,Pasta Emborrachada,Pastas,30x40,Emborrachada,Azul,18,UN,true,true,5
+PASTA-LONA-30X40,Pasta Lona,Pastas,30x40,Lona,,14,UN,true,true,5
+PASTA-LONA-40X35,Pasta Lona,Pastas,40x35,Lona,Verde,13,UN,true,true,5
+PASTA-LONA-34X27,Pasta Lona,Pastas,34x27,Lona,Verde,15,UN,true,true,5
+PASTA-LONA-21X36,Pasta Lona,Pastas,21x36,Lona,Preto,49,UN,true,true,10
+PASTA-NYLON-30X40,Pasta Nylon,Pastas,30x40,Nylon,,6,UN,true,true,3
+PASTA-NYLON-29X39,Pasta Nylon,Pastas,29x39,Nylon,Cinza,1,UN,true,true,3
+PASTA-NYLON-28X40,Pasta Nylon,Pastas,28x40,Nylon,Verde,1,UN,true,true,3
+PASTA-NYLON-35X30,Pasta Nylon,Pastas,35x30,Nylon,Azul,10,UN,true,true,3
+PASTA-51X41X8,Pasta,Pastas,51x41x8,,Verde,4,UN,true,true,3
+PASTA-45X40X6,Pasta,Pastas,45x40x6,,Verde,2,UN,true,true,3
+PASTA-46X41,Pasta,Pastas,46x41,,Verde,1,UN,true,true,3
+PASTA-17X26,Pasta,Pastas,17x26,,Preto,5,UN,true,true,3
+PASTA-40X26,Pasta,Pastas,40x26,,Preto,4,UN,true,true,3
+PASTA-30X40,Pasta,Pastas,30x40,,Nylon/Emborrachada,4,UN,true,true,3
+SAQ-25X35X6,Saquinho,Saquinhos,25x35x6,,,8,UN,true,true,5
+SAQ-45X20X6,Saquinho,Saquinhos,45x20x6,,,8,UN,true,true,5
+SAQ-30X60X6,Saquinho,Saquinhos,30x60x6,,,15,UN,true,true,5
+SAQ-20X35X6,Saquinho,Saquinhos,20x35x6,,,1,UN,true,true,3
+SAQ-20X25X6,Saquinho,Saquinhos,20x25x6,,,2,UN,true,true,3
+SAQ-30X70X6,Saquinho,Saquinhos,30x70x6,,,19,UN,true,true,5
+SAQ-30X35X6,Saquinho,Saquinhos,30x35x6,,,8,UN,true,true,5
+SAQ-35X45X6,Saquinho,Saquinhos,35x45x6,,,6,UN,true,true,5
+SAQ-12X17,Saquinho,Saquinhos,12x17,,,3,UN,true,true,3
+CX-JNG,Caixa JNG,Diversos,,,,16,UN,false,false,0
+SOL-LIMP-MAQ,Solução Limpeza Máquina,Diversos,,,,2,UN,false,false,0
+ROSQUINHA,Diversos,Diversos,,,,4,UN,false,false,0
+ROSQUINHA-LEITE,Diversos,Diversos,,,,1,UN,false,false,0
+BISCOITO-CACAU,Diversos,Diversos,,,,2,UN,false,false,0
+BISCOITO-LEITE,Diversos,Diversos,,,,1,UN,false,false,0
+BISCOITO-MARIA,Diversos,Diversos,,,,2,UN,false,false,0
+CREME-CRACK,Diversos,Diversos,,,,17,UN,false,false,0
+MASSA-BOLO,Diversos,Diversos,,,,2,UN,false,false,0
+SARDINHA,Diversos,Diversos,,,,2,UN,false,false,0
+SACOLA-FIOS,Sacola de Fios,Diversos,,,,1,UN,false,false,0
+TEK-BOND-SPRAY,Tek Bond Spray,Diversos,,,,3,UN,false,false,0
+ESTILETE,Estilete,Diversos,,,,10,UN,false,false,0
+LAMPADA,Lâmpada,Diversos,,,,2,UN,false,false,0
+LUVA,Luvas,Diversos,,,,2,CX,false,false,0
+ARAME,Arame,Diversos,,,,6,UN,false,false,0
+FITA-BRANCA-29CM,Fita Branca,Diversos,29cm,,,3,UN,false,false,0
+STECK-25A,Steck 25A,Diversos,25A,,,5,CX,false,false,0
