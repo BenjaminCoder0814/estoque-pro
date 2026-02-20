@@ -314,7 +314,7 @@ export function AuthProvider({ children }) {
     excluirProdutos:      user && ['ADMIN'].includes(user.perfil),
     fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'COMPRAS'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO'].includes(user.perfil),
     verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
     verAuditoria:         user && ['ADMIN'].includes(user.perfil),
     verEntrada:           user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
@@ -324,7 +324,7 @@ export function AuthProvider({ children }) {
     gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
     verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
     editarPrecos:         user && ['ADMIN'].includes(user.perfil),
-    verMidia:             !!user,
+    verMidia:             user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
   };
 
   return (

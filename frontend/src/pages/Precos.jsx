@@ -652,11 +652,10 @@ function saveCatalogo(data) { localStorage.setItem(CAT_KEY, JSON.stringify(data)
 
 const VAZIO_CAT  = { categoria: '' };
 const VAZIO_PROD = { nome: '' };
-const VAZIO_VAR  = { tamanho:'', material:'', cor:'', precoAtacado:'', precoVarejo:'', precoMilheiro:'', precoUnidade:'', prazo:'', obs:'' };
+const VAZIO_VAR  = { tamanho:'', material:'', precoAtacado:'', precoMilheiro:'', precoUnidade:'', prazo:'', obs:'' };
 
 const CAMPOS_PRECO = [
   { key:'precoAtacado',  label:'Atacado',   cls:'text-emerald-700 font-bold' },
-  { key:'precoVarejo',   label:'Varejo',    cls:'text-blue-700 font-bold'    },
   { key:'precoMilheiro', label:'/Milheiro', cls:'text-purple-700 font-bold'  },
   { key:'precoUnidade',  label:'/Unidade',  cls:'text-orange-700 font-bold'  },
 ];
@@ -691,7 +690,7 @@ export default function Precos() {
     let tv = 0, cp = 0;
     catalogo.forEach(c => c.produtos.forEach(p => p.variacoes.forEach(vv => {
       tv++;
-      if ([vv.precoAtacado, vv.precoVarejo, vv.precoMilheiro, vv.precoUnidade].some(x => x != null && x !== '')) cp++;
+      if ([vv.precoAtacado, vv.precoMilheiro, vv.precoUnidade].some(x => x != null && x !== '')) cp++;
     })));
     return { totalCats: catalogo.length, totalVars: tv, comPreco: cp };
   }, [catalogo]);
@@ -706,7 +705,7 @@ export default function Precos() {
         produtos: c.produtos.map(p => ({
           ...p,
           variacoes: q
-            ? p.variacoes.filter(vv => (p.nome + vv.tamanho + vv.material + vv.cor + vv.obs).toLowerCase().includes(q))
+            ? p.variacoes.filter(vv => (p.nome + vv.tamanho + vv.material + vv.obs).toLowerCase().includes(q))
             : p.variacoes,
         })).filter(p => {
           if (!q) return true;
@@ -743,7 +742,7 @@ export default function Precos() {
   const salvarVar = (e) => {
     e.preventDefault();
     const parseN = x => (x === '' || x == null) ? null : Number(x);
-    const dv = { ...formVar, precoAtacado: parseN(formVar.precoAtacado), precoVarejo: parseN(formVar.precoVarejo), precoMilheiro: parseN(formVar.precoMilheiro), precoUnidade: parseN(formVar.precoUnidade) };
+    const dv = { ...formVar, precoAtacado: parseN(formVar.precoAtacado), precoMilheiro: parseN(formVar.precoMilheiro), precoUnidade: parseN(formVar.precoUnidade) };
     persist(catalogo.map(c => {
       if (c.id !== modalVar.catId) return c;
       return { ...c, produtos: c.produtos.map(p => {
@@ -768,7 +767,7 @@ export default function Precos() {
   };
 
   const abrirNovaVar   = (cId,pId)    => { setFormVar(VAZIO_VAR);    setModalVar({ modo:'novo',    catId:cId, prodId:pId }); };
-  const abrirEditarVar = (cId,pId,vD) => { setFormVar({ ...vD, precoAtacado:vD.precoAtacado??'', precoVarejo:vD.precoVarejo??'', precoMilheiro:vD.precoMilheiro??'', precoUnidade:vD.precoUnidade??'' }); setModalVar({ modo:'editar', catId:cId, prodId:pId, dados:vD }); };
+  const abrirEditarVar = (cId,pId,vD) => { setFormVar({ ...vD, precoAtacado:vD.precoAtacado??'', precoMilheiro:vD.precoMilheiro??'', precoUnidade:vD.precoUnidade??'' }); setModalVar({ modo:'editar', catId:cId, prodId:pId, dados:vD }); };
 
   const pal = (color) => PALETA[color] ?? PALETA.purple;
 
@@ -936,9 +935,7 @@ export default function Precos() {
                                   <tr className={`${p.bg} ${p.text}`}>
                                     <th className="px-4 py-2.5 text-left font-bold">Tamanho / Ref.</th>
                                     <th className="px-3 py-2.5 text-left font-bold">Material</th>
-                                    <th className="px-3 py-2.5 text-left font-bold">Cor</th>
                                     <th className="px-3 py-2.5 text-right font-bold text-emerald-700">Atacado</th>
-                                    <th className="px-3 py-2.5 text-right font-bold text-blue-700">Varejo</th>
                                     <th className="px-3 py-2.5 text-right font-bold text-purple-700">/Milheiro</th>
                                     <th className="px-3 py-2.5 text-right font-bold text-orange-700">/Unidade</th>
                                     <th className="px-3 py-2.5 text-left font-bold">
@@ -950,17 +947,13 @@ export default function Precos() {
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
                                   {prod.variacoes.map((varD, idx) => {
-                                    const temPreco = [varD.precoAtacado, varD.precoVarejo, varD.precoMilheiro, varD.precoUnidade].some(x => x != null && x !== '');
+                                    const temPreco = [varD.precoAtacado, varD.precoMilheiro, varD.precoUnidade].some(x => x != null && x !== '');
                                     return (
                                       <tr key={varD.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/40'} hover:bg-purple-50/30 transition`}>
                                         <td className="px-4 py-2.5 font-semibold text-gray-800 whitespace-nowrap">{varD.tamanho || '—'}</td>
                                         <td className="px-3 py-2.5 text-gray-500 whitespace-nowrap">{varD.material || '—'}</td>
-                                        <td className="px-3 py-2.5 text-gray-500 whitespace-nowrap">{varD.cor || '—'}</td>
                                         <td className="px-3 py-2.5 text-right font-bold whitespace-nowrap">
                                           {brl(varD.precoAtacado) ? <span className="text-emerald-700">{brl(varD.precoAtacado)}</span> : <span className="text-gray-300">—</span>}
-                                        </td>
-                                        <td className="px-3 py-2.5 text-right font-bold whitespace-nowrap">
-                                          {brl(varD.precoVarejo) ? <span className="text-blue-700">{brl(varD.precoVarejo)}</span> : <span className="text-gray-300">—</span>}
                                         </td>
                                         <td className="px-3 py-2.5 text-right font-bold whitespace-nowrap">
                                           {brl(varD.precoMilheiro) ? <span className="text-purple-700">{brl(varD.precoMilheiro)}</span> : <span className="text-gray-300">—</span>}
@@ -989,7 +982,7 @@ export default function Precos() {
                                   })}
                                   {can.editarPrecos && (
                                     <tr>
-                                      <td colSpan={can.editarPrecos ? 10 : 9} className="px-4 py-2">
+                                      <td colSpan={can.editarPrecos ? 8 : 7} className="px-4 py-2">
                                         <button onClick={() => abrirNovaVar(cat.id, prod.id)}
                                           className={`flex items-center gap-1 ${p.text} hover:underline text-xs font-semibold`}>
                                           <Plus className="w-3 h-3"/> Adicionar variação
@@ -1077,7 +1070,7 @@ export default function Precos() {
             </div>
             <form onSubmit={salvarVar} className="p-5">
               <div className="grid grid-cols-2 gap-3">
-                {[{key:'tamanho',label:'Tamanho',ph:'ex: 16mm, 30x40cm…'},{key:'material',label:'Material',ph:'ex: PP, Nylon…'},{key:'cor',label:'Cor',ph:'ex: Amarelo, Azul…'},{key:'prazo',label:'Prazo',ph:'ex: 10–15 dias'}].map(f=>(
+                {[{key:'tamanho',label:'Tamanho',ph:'ex: 16mm, 30x40cm…'},{key:'material',label:'Material',ph:'ex: PP, Nylon…'},{key:'prazo',label:'Prazo',ph:'ex: 10–15 dias'}].map(f=>(
                   <div key={f.key}>
                     <label className="text-xs font-semibold text-gray-600">{f.label}</label>
                     <input className="border rounded-xl px-3 py-2 w-full mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"

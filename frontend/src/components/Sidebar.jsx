@@ -22,17 +22,17 @@ const menu = [
   // ADMIN + EXPEDICAO + SUPERVISAO
   { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
   // ADMIN + COMPRAS (não EXPEDICAO, não SUPERVISAO)
-  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS'] },
+  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS', 'EXPEDICAO'] },
   // ADMIN + EXPEDICAO + COMPRAS
   { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
   // ADMIN só (EXPEDICAO acessa via link de Pendentes)
-  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN'] },
+  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN', 'EXPEDICAO'] },
   // ADMIN só
   { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN'] },
   { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes',     allowed: ['ADMIN'] },
   { label: 'Usuários',   icon: LucideUserCog,          to: '/usuarios',      allowed: ['ADMIN'] },
-  // Todos veem Mídia
-  { label: 'Mídia',      icon: LucideImage,            to: '/midia'          },
+  // Todos exceto COMPRAS veem Mídia
+  { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'] },
 ];
 
 export default function Sidebar() {
