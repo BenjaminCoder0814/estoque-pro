@@ -119,7 +119,7 @@ export default function App() {
         {/* Chat — todos os perfis logados */}
         <Route path="/chat" element={
           <PrivateRoute>
-            <LayoutBase><Chat /></LayoutBase>
+            <LayoutBase noPadding><Chat /></LayoutBase>
           </PrivateRoute>
         } />
 

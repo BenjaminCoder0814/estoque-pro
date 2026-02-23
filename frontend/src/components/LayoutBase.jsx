@@ -2,7 +2,7 @@ import React from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
-export default function LayoutBase({ children }) {
+export default function LayoutBase({ children, noPadding = false }) {
   return (
     <div className="flex h-screen overflow-hidden bg-background relative">
       {/* ===== RIBBON BETA ===== */}
@@ -35,7 +35,11 @@ export default function LayoutBase({ children }) {
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <Topbar />
-        <main className="flex-1 p-6 md:p-8 bg-background overflow-y-auto animate-fadein">
+        <main className={`flex-1 bg-background animate-fadein ${
+          noPadding
+            ? 'overflow-hidden p-0'
+            : 'p-6 md:p-8 overflow-y-auto'
+        }`}>
           {children}
         </main>
       </div>

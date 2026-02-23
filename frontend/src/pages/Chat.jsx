@@ -354,7 +354,7 @@ export default function Chat() {
   // RENDER
   // ─────────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-[calc(100vh-64px)] bg-slate-900 overflow-hidden rounded-xl shadow-xl">
+    <div className="flex h-full bg-slate-900 overflow-hidden">
 
       {/* ═══════════════ PAINEL ESQUERDO — Lista de contatos ════════════ */}
       <aside
