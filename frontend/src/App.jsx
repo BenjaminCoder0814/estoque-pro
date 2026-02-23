@@ -17,6 +17,7 @@ import Sugestoes from './pages/Sugestoes';
 import Precos from './pages/Precos';
 import Midia from './pages/Midia';
 import Separacoes from './pages/Separacoes';
+import Chat from './pages/Chat';
 
 function PrivateRoute({ children, allowed }) {
   const { user } = useAuth();
@@ -112,6 +113,13 @@ export default function App() {
         <Route path="/separacoes" element={
           <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO']}>
             <LayoutBase><Separacoes /></LayoutBase>
+          </PrivateRoute>
+        } />
+
+        {/* Chat — todos os perfis logados */}
+        <Route path="/chat" element={
+          <PrivateRoute>
+            <LayoutBase><Chat /></LayoutBase>
           </PrivateRoute>
         } />
 

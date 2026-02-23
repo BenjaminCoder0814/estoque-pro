@@ -331,6 +331,9 @@ export function AuthProvider({ children }) {
     avancarSeparacao:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
     editarSeparacao:      user && ['ADMIN'].includes(user.perfil),
     cancelarSeparacao:    user && ['ADMIN'].includes(user.perfil),
+    // Chat
+    verChat:              !!user,
+    verChatTotal:         user?.perfil === 'ADMIN',
   };
 
   return (

@@ -1,11 +1,11 @@
 // Sidebar corporativa com gradiente escuro profissional
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LucideLayoutDashboard, LucideBox, LucideList, LucidePackageCheck,
   LucideUsers, LucideChevronLeft, LucideChevronRight,
   LucideAlertTriangle, LucideUserCog, LucideClipboardList, LucideLightbulb,
-  LucideClipboard, LucideTag, LucideImage, LucideTruck
+  LucideClipboard, LucideTag, LucideImage, LucideTruck, LucideMessageSquare
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEstoque } from '../contexts/EstoqueContext';
@@ -35,6 +35,8 @@ const menu = [
   { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO'] },
   // Todos exceto COMPRAS veem Mídia
   { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'] },
+  // Chat — todos os perfis
+  { label: 'Chat',       icon: LucideMessageSquare,   to: '/chat'           },
 ];
 
 export default function Sidebar() {
@@ -42,6 +44,30 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const { alertas } = useEstoque();
   const location = useLocation();
+
+  // Contagem de mensagens não lidas no chat
+  const [chatNaoLidas, setChatNaoLidas] = useState(0);
+  useEffect(() => {
+    function calcNaoLidas() {
+      if (!user) return 0;
+      try {
+        const convs = JSON.parse(localStorage.getItem('zkChat') || '[]');
+        const readMap = JSON.parse(localStorage.getItem('zkChatRead') || '{}');
+        const userRead = readMap[user.id] || {};
+        return convs
+          .filter(c => c.participantIds.includes(user.id))
+          .reduce((acc, c) => {
+            const visto = userRead[c.id] || 0;
+            return acc + c.messages.filter(m => m.de !== user.id && m.em > visto).length;
+          }, 0);
+      } catch { return 0; }
+    }
+    setChatNaoLidas(calcNaoLidas());
+    const timer = setInterval(() => setChatNaoLidas(calcNaoLidas()), 3000);
+    const onStorage = () => setChatNaoLidas(calcNaoLidas());
+    window.addEventListener('storage', onStorage);
+    return () => { clearInterval(timer); window.removeEventListener('storage', onStorage); };
+  }, [user]);
 
   return (
     <aside
@@ -98,11 +124,21 @@ export default function Sidebar() {
                         {alertas.length}
                       </span>
                     )}
+                    {item.to === '/chat' && chatNaoLidas > 0 && (
+                      <span className="bg-indigo-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center shadow">
+                        {chatNaoLidas}
+                      </span>
+                    )}
                   </span>
                 )}
                 {collapsed && item.to === '/alertas' && alertas.length > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow">
                     {alertas.length}
+                  </span>
+                )}
+                {collapsed && item.to === '/chat' && chatNaoLidas > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-indigo-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow">
+                    {chatNaoLidas}
                   </span>
                 )}
               </Link>
