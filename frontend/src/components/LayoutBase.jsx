@@ -35,9 +35,9 @@ export default function LayoutBase({ children, noPadding = false }) {
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <Topbar />
-        <main className={`flex-1 bg-background animate-fadein ${
+        <main className={`flex-1 min-h-0 bg-background animate-fadein ${
           noPadding
-            ? 'overflow-hidden p-0'
+            ? 'overflow-hidden p-0 flex flex-col'
             : 'p-6 md:p-8 overflow-y-auto'
         }`}>
           {children}
