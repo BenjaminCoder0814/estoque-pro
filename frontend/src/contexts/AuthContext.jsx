@@ -325,6 +325,12 @@ export function AuthProvider({ children }) {
     verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
     editarPrecos:         user && ['ADMIN'].includes(user.perfil),
     verMidia:             user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
+    // Separações
+    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO'].includes(user.perfil),
+    criarSeparacao:       user && ['ADMIN', 'COMERCIAL'].includes(user.perfil),
+    avancarSeparacao:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
+    editarSeparacao:      user && ['ADMIN'].includes(user.perfil),
+    cancelarSeparacao:    user && ['ADMIN'].includes(user.perfil),
   };
 
   return (

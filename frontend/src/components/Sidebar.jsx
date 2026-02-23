@@ -5,7 +5,7 @@ import {
   LucideLayoutDashboard, LucideBox, LucideList, LucidePackageCheck,
   LucideUsers, LucideChevronLeft, LucideChevronRight,
   LucideAlertTriangle, LucideUserCog, LucideClipboardList, LucideLightbulb,
-  LucideClipboard, LucideTag, LucideImage
+  LucideClipboard, LucideTag, LucideImage, LucideTruck
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEstoque } from '../contexts/EstoqueContext';
@@ -31,6 +31,8 @@ const menu = [
   { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN'] },
   { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes',     allowed: ['ADMIN'] },
   { label: 'Usuários',   icon: LucideUserCog,          to: '/usuarios',      allowed: ['ADMIN'] },
+  // ADMIN + EXPEDICAO + COMERCIAL + SUPERVISAO (gestão de separação)
+  { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO'] },
   // Todos exceto COMPRAS veem Mídia
   { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'] },
 ];

@@ -16,6 +16,7 @@ import Pendentes from './pages/Pendentes';
 import Sugestoes from './pages/Sugestoes';
 import Precos from './pages/Precos';
 import Midia from './pages/Midia';
+import Separacoes from './pages/Separacoes';
 
 function PrivateRoute({ children, allowed }) {
   const { user } = useAuth();
@@ -104,6 +105,13 @@ export default function App() {
         <Route path="/midia" element={
           <PrivateRoute>
             <LayoutBase><Midia /></LayoutBase>
+          </PrivateRoute>
+        } />
+
+        {/* Separações — ADMIN, EXPEDICAO, COMERCIAL, SUPERVISAO */}
+        <Route path="/separacoes" element={
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO']}>
+            <LayoutBase><Separacoes /></LayoutBase>
           </PrivateRoute>
         } />
 
