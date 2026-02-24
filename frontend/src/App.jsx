@@ -119,9 +119,9 @@ export default function App() {
 
         {/* Cubagem — todos os perfis logados */}
         <Route path="/cubagem" element={
-          <ProtectedRoute>
+          <PrivateRoute>
             <LayoutBase><Cubagem /></LayoutBase>
-          </ProtectedRoute>
+          </PrivateRoute>
         } />
 
         {/* Chat — todos os perfis logados */}

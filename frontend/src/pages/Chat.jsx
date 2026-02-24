@@ -10,7 +10,8 @@ import React, {
 import {
   LucideMessageSquare, LucideSend, LucidePaperclip, LucideX,
   LucideDownload, LucideSearch, LucideEye, LucideAlertCircle,
-  LucideChevronDown, LucideUser, LucideShield, LucideChevronLeft
+  LucideChevronDown, LucideUser, LucideShield, LucideChevronLeft,
+  LucideMic, LucideCamera, LucideStopCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -149,9 +150,16 @@ export default function Chat() {
   const [lightboxImg, setLightboxImg]     = useState(null);   // URL base64 da imagem ampliada
   const [mobileListVisible, setMobileListVisible] = useState(true);
 
-  const fileInputRef  = useRef(null);
-  const mensagensRef  = useRef(null);
-  const textAreaRef   = useRef(null);
+  const fileInputRef        = useRef(null);
+  const cameraInputRef      = useRef(null);
+  const mensagensRef        = useRef(null);
+  const textAreaRef         = useRef(null);
+  const mediaRecorderRef    = useRef(null);
+  const audioChunksRef      = useRef([]);
+  const recordingTimerRef   = useRef(null);
+
+  const [isRecording, setIsRecording]   = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
 
   // ── Sincronizar alterações de outro "tab" / login ────────────────────
   useEffect(() => {
@@ -297,6 +305,88 @@ export default function Chat() {
     reader.readAsDataURL(file);
   }, [convAtiva, user]);
 
+  // ── Cleanup de gravação ao desmontar ───────────────────────────────────
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current) {
+        try { mediaRecorderRef.current.stop(); } catch {}
+      }
+      clearInterval(recordingTimerRef.current);
+    };
+  }, []);
+
+  // ── Formatar segundos em m:ss ──────────────────────────────────────────
+  function formatarTempo(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  }
+
+  // ── Iniciar gravação de áudio ──────────────────────────────────────────
+  const iniciarGravacao = useCallback(async () => {
+    if (!convAtiva || !user) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const options = MediaRecorder.isTypeSupported('audio/webm')
+        ? { mimeType: 'audio/webm' }
+        : {};
+      const recorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        stream.getTracks().forEach(t => t.stop());
+        const mime = recorder.mimeType || 'audio/webm';
+        const blob = new Blob(audioChunksRef.current, { type: mime });
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const b64 = ev.target.result;
+          const msg = {
+            id: Date.now() + '_' + Math.random().toString(36).slice(2),
+            de: user.id,
+            deNome: user.nome,
+            tipo: 'audio',
+            conteudo: 'Mensagem de voz',
+            arquivo: { nome: 'audio.webm', mime, b64 },
+            em: Date.now(),
+          };
+          setConversas(prev => {
+            const updated = prev.map(c =>
+              c.id === convAtiva ? { ...c, messages: [...c.messages, msg] } : c
+            );
+            saveConversas(updated);
+            return updated;
+          });
+        };
+        reader.readAsDataURL(blob);
+      };
+
+      recorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(t => t + 1);
+      }, 1000);
+    } catch {
+      alert('Não foi possível acessar o microfone. Verifique as permissões do navegador.');
+    }
+  }, [convAtiva, user]);
+
+  // ── Parar gravação de áudio ────────────────────────────────────────────
+  const pararGravacao = useCallback(() => {
+    if (mediaRecorderRef.current) {
+      try { mediaRecorderRef.current.stop(); } catch {}
+      mediaRecorderRef.current = null;
+    }
+    clearInterval(recordingTimerRef.current);
+    setIsRecording(false);
+    setRecordingTime(0);
+  }, []);
+
   // ── Tecla Enter (sem Shift) envia ─────────────────────────────────────
   const onKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -333,6 +423,7 @@ export default function Chat() {
     if (!m) return 'Nenhuma mensagem ainda';
     if (m.tipo === 'imagem')  return '🖼️ Imagem';
     if (m.tipo === 'arquivo') return `📎 ${m.conteudo}`;
+    if (m.tipo === 'audio')   return '🎤 Mensagem de voz';
     const txt = m.conteudo || '';
     return txt.length > 40 ? txt.slice(0,40) + '…' : txt;
   }
@@ -656,6 +747,21 @@ export default function Chat() {
                           </a>
                         )}
 
+                        {m.tipo === 'audio' && (
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-1.5 text-xs opacity-70">
+                              <LucideMic className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span>Mensagem de voz</span>
+                            </div>
+                            <audio
+                              src={m.arquivo?.b64}
+                              controls
+                              className="w-48"
+                              style={{ height: '34px', colorScheme: 'dark' }}
+                            />
+                          </div>
+                        )}
+
                         {/* Timestamp */}
                         <div className={`text-[10px] mt-1 text-right ${isMeu ? 'text-indigo-200' : 'text-slate-500'}`}>
                           {formatTs(m.em)}
@@ -707,6 +813,47 @@ export default function Chat() {
                       e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
                     }}
                   />
+
+                  {/* Câmera */}
+                  <button
+                    onClick={() => cameraInputRef.current?.click()}
+                    title="Tirar foto com a câmera"
+                    className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition mb-0.5 flex-shrink-0"
+                  >
+                    <LucideCamera className="w-5 h-5" />
+                  </button>
+                  <input
+                    type="file"
+                    ref={cameraInputRef}
+                    onChange={enviarArquivo}
+                    className="hidden"
+                    accept="image/*"
+                    capture="environment"
+                  />
+
+                  {/* Microfone / parar gravação */}
+                  {isRecording ? (
+                    <>
+                      <span className="text-red-400 text-xs font-mono flex-shrink-0 self-center animate-pulse">
+                        🔴 {formatarTempo(recordingTime)}
+                      </span>
+                      <button
+                        onClick={pararGravacao}
+                        title="Parar e enviar áudio"
+                        className="p-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 transition mb-0.5 flex-shrink-0"
+                      >
+                        <LucideStopCircle className="w-5 h-5" />
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={iniciarGravacao}
+                      title="Gravar mensagem de áudio"
+                      className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition mb-0.5 flex-shrink-0"
+                    >
+                      <LucideMic className="w-5 h-5" />
+                    </button>
+                  )}
 
                   {/* Botão enviar */}
                   <button
