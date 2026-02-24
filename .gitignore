@@ -27,3 +27,6 @@ Thumbs.db
 
 # Uploads grandes (imagens opcionais)
 # backend/uploads/
+
+# Local Netlify folder
+.netlify
