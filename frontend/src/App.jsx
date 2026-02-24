@@ -18,6 +18,7 @@ import Precos from './pages/Precos';
 import Midia from './pages/Midia';
 import Separacoes from './pages/Separacoes';
 import Chat from './pages/Chat';
+import Cubagem from './pages/Cubagem';
 
 function PrivateRoute({ children, allowed }) {
   const { user } = useAuth();
@@ -114,6 +115,13 @@ export default function App() {
           <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO']}>
             <LayoutBase><Separacoes /></LayoutBase>
           </PrivateRoute>
+        } />
+
+        {/* Cubagem — todos os perfis logados */}
+        <Route path="/cubagem" element={
+          <ProtectedRoute>
+            <LayoutBase><Cubagem /></LayoutBase>
+          </ProtectedRoute>
         } />
 
         {/* Chat — todos os perfis logados */}

@@ -334,6 +334,7 @@ export function AuthProvider({ children }) {
     // Chat
     verChat:              !!user,
     verChatTotal:         user?.perfil === 'ADMIN',
+    verCubagem:           !!user,
   };
 
   return (

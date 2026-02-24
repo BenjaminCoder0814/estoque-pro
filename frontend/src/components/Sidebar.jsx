@@ -5,7 +5,7 @@ import {
   LucideLayoutDashboard, LucideBox, LucideList, LucidePackageCheck,
   LucideUsers, LucideChevronLeft, LucideChevronRight,
   LucideAlertTriangle, LucideUserCog, LucideClipboardList, LucideLightbulb,
-  LucideClipboard, LucideTag, LucideImage, LucideTruck, LucideMessageSquare
+  LucideClipboard, LucideTag, LucideImage, LucideTruck, LucideMessageSquare, LucideRuler
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEstoque } from '../contexts/EstoqueContext';
@@ -35,6 +35,8 @@ const menu = [
   { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO'] },
   // Todos exceto COMPRAS veem Mídia
   { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'] },
+  // Cubagem — todos os perfis
+  { label: 'Cubagem',    icon: LucideRuler,           to: '/cubagem'        },
   // Chat — todos os perfis
   { label: 'Chat',       icon: LucideMessageSquare,   to: '/chat'           },
 ];
