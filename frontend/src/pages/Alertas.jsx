@@ -13,6 +13,15 @@ function loadPendentes() {
 }
 function savePendentes(lista) { localStorage.setItem(PENDENTES_KEY, JSON.stringify(lista)); }
 
+// Imagem com fallback quando falha (404 / URL quebrada)
+function ImgComFallback({ src, alt, className, fallbackClass }) {
+  const [erro, setErro] = useState(false);
+  if (!src || erro) {
+    return <div className={fallbackClass || 'w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs flex-shrink-0'}>Sem img</div>;
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setErro(true)} />;
+}
+
 export default function Alertas() {
   const { alertas, editarProduto } = useEstoque();
   const { user, can } = useAuth();
@@ -113,9 +122,11 @@ export default function Alertas() {
             return (
               <div key={p.id} className={`bg-white border-2 rounded-xl p-5 shadow-sm ${jaPedido ? 'border-emerald-300' : 'border-red-300'}`}>
                 <div className="flex items-start gap-4">
-                  {p.imagem
-                    ? <img src={p.imagem} alt={p.nome} className="w-16 h-16 object-contain rounded-lg border flex-shrink-0" />
-                    : <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs flex-shrink-0">Sem img</div>}
+                  <ImgComFallback
+                    src={p.imagem}
+                    alt={p.nome}
+                    className="w-16 h-16 object-contain rounded-lg border flex-shrink-0"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-1 flex-wrap">
                       <h3 className="font-bold text-gray-800 leading-snug">{p.nome}</h3>

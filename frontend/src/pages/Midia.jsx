@@ -194,6 +194,7 @@ function FotoGrid({ fotos, onPreview }) {
               alt={f.nome}
               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 p-2"
               loading="lazy"
+              onError={e => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:2rem;">🖼️</div>'; }}
             />
           </div>
           {/* hover overlay */}

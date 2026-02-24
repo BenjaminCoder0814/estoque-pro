@@ -35,31 +35,50 @@ function corPeloNome(nome) {
 }
 
 // Mapeamento automático de imagens por palavras-chave no nome do produto
+// Usa apenas caminhos locais (public/imagens/) para evitar bloqueios de CDN externo
 const IMAGENS_PADRAO = {
-  'cadeado': 'https://cdn-icons-png.flaticon.com/512/1067/1067357.png',
-  'fita':    'https://cdn-icons-png.flaticon.com/512/1041/1041889.png',
-  'abraçadeira': 'https://cdn-icons-png.flaticon.com/512/2665/2665038.png',
-  'parafuso': 'https://cdn-icons-png.flaticon.com/512/2829/2829963.png',
-  'porca':    'https://cdn-icons-png.flaticon.com/512/2829/2829963.png',
-  'cabo':     'https://cdn-icons-png.flaticon.com/512/4213/4213958.png',
-  'luva':     'https://cdn-icons-png.flaticon.com/512/2972/2972494.png',
-  'capacete': 'https://cdn-icons-png.flaticon.com/512/1553/1553752.png',
-  'óculos':   'https://cdn-icons-png.flaticon.com/512/807/807296.png',
-  'bota':     'https://cdn-icons-png.flaticon.com/512/3281/3281283.png',
-  'colete':   'https://cdn-icons-png.flaticon.com/512/2917/2917996.png',
-  'mangueira':'https://cdn-icons-png.flaticon.com/512/2666/2666435.png',
-  'válvula':  'https://cdn-icons-png.flaticon.com/512/2965/2965567.png',
-  'sensor':   'https://cdn-icons-png.flaticon.com/512/2989/2989988.png',
-  'motor':    'https://cdn-icons-png.flaticon.com/512/3144/3144456.png',
-  'bomba':    'https://cdn-icons-png.flaticon.com/512/3144/3144456.png',
+  'cadeado':    '/imagens/cadeados/Cadeado Tradicional (latão).png',
+  'fita':       '/imagens/Fitas/Fita adesiva.png',
+  'isolante':   '/imagens/Fitas/Fita isolante.png',
+  'silver':     '/imagens/Fitas/Fita silver tape.png',
+  'zebrada':    '/imagens/Fitas/Fita zebrada.png',
+  'crepe':      '/imagens/Fitas/Fita crepe.png',
+  'abraçadeira':'/imagens/Abraçadeiras/Abraçadeira de Nylon — Padrão.png',
+  'zfix':       '/imagens/Abraçadeiras/ZFIX — Base Adesiva.png',
+  'lacre':      '/imagens/Lacres Plásticos/ancora.png',
+  'âncora':     '/imagens/Lacres Plásticos/ancora.png',
+  'arame':      '/imagens/Arames/Arame galvanizado para lacres (2 ou 3 fios).png',
+  'amarrilho':  '/imagens/Arames/Amarrilho - Fecho de Arame (Twist Ties).png',
+  'fitilho':    '/imagens/Arames/Fitilho plástico (PP) para amarração.png',
+  'máquina':    '/imagens/Máquinas/Máquina lacradora quadrada.png',
+  'lacradora':  '/imagens/Máquinas/Máquina lacradora quadrada.png',
+  'seladora':   '/imagens/Máquinas/Máquina seladora.png',
+  'refil':      '/imagens/Máquinas/Refil de selagem.png',
+  'malote':     '/imagens/Malotes, pastas e bolsas/Malote Correio.png',
+  'pasta':      '/imagens/Malotes, pastas e bolsas/Pasta para Documentos.png',
+  'bolsa':      '/imagens/Malotes, pastas e bolsas/Bolsa com Zíper (estilo Sacola).png',
+  'sacola':     '/imagens/Malotes, pastas e bolsas/Sacola com Rodízio.png',
+  'urna':       '/imagens/Malotes, pastas e bolsas/Urna em Lona.png',
+  'banner':     '/imagens/Banner.png',
 };
 
 function autoImagem(nome) {
   const lower = nome.toLowerCase();
-  for (const [chave, url] of Object.entries(IMAGENS_PADRAO)) {
-    if (lower.includes(chave)) return url;
+  // Ordena do maior para o menor para evitar matches parciais
+  const chaves = Object.keys(IMAGENS_PADRAO).sort((a, b) => b.length - a.length);
+  for (const chave of chaves) {
+    if (lower.includes(chave)) return IMAGENS_PADRAO[chave];
   }
   return '';
+}
+
+// Componente de imagem com fallback automático quando falha a carregar
+function ImgProduto({ src, alt, className, fallback }) {
+  const [erro, setErro] = React.useState(false);
+  if (!src || erro) {
+    return fallback || <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">—</div>;
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setErro(true)} />;
 }
 
 export default function Produtos() {
@@ -227,9 +246,12 @@ export default function Produtos() {
               <div className="col-span-2">
                 <label className="text-sm font-medium">Imagem</label>
                 <div className="flex gap-3 items-center mt-1">
-                  {form.imagem
-                    ? <img src={form.imagem} alt="preview" className="w-16 h-16 object-contain rounded border" />
-                    : <div className="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center text-gray-400 text-xs">Sem img</div>}
+                  <ImgProduto
+                    src={form.imagem}
+                    alt="preview"
+                    className="w-16 h-16 object-contain rounded border"
+                    fallback={<div className="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center text-gray-400 text-xs">Sem img</div>}
+                  />
                   <div className="flex flex-col gap-1">
                     <button type="button" onClick={() => fileRef.current.click()} className="text-sm text-blue-600 hover:underline">Upload de imagem</button>
                     <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImagem} />
@@ -296,9 +318,11 @@ export default function Produtos() {
             {lista.map(p => (
               <tr key={p.id} className={`border-t text-sm hover:bg-gray-50 transition ${alertaIds.has(p.id) ? 'bg-red-50' : ''} ${!p.ativo ? 'opacity-50' : ''}`}>
                 <td className="p-3">
-                  {p.imagem
-                    ? <img src={p.imagem} alt={p.nome} className="w-12 h-12 object-contain rounded" />
-                    : <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">—</div>}
+                  <ImgProduto
+                    src={p.imagem}
+                    alt={p.nome}
+                    className="w-12 h-12 object-contain rounded"
+                  />
                 </td>
                 <td className="p-3 font-medium max-w-[220px]">
                   <div className="flex flex-wrap items-center gap-1.5">

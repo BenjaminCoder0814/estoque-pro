@@ -16,6 +16,14 @@ function loadPendentes() {
 }
 function savePendentes(lista) { localStorage.setItem(PENDENTES_KEY, JSON.stringify(lista)); }
 
+function ImgComFallback({ src, alt, className }) {
+  const [erro, setErro] = useState(false);
+  if (!src || erro) {
+    return <div className="w-8 h-8 bg-gray-100 rounded border flex-shrink-0" />;
+  }
+  return <img src={src} alt={alt} className={className} onError={() => setErro(true)} />;
+}
+
 const STATUS_CONFIG = {
   PENDENTE:    { label: 'Pendente',     bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', icon: LucideClock },
   RECEBIDO:    { label: 'Recebido',     bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', icon: LucideCheckCircle },
@@ -183,9 +191,11 @@ export default function Pendentes() {
                   <tr key={p.id} className="border-t hover:bg-gray-50 transition">
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        {produto?.imagem
-                          ? <img src={produto.imagem} alt={produto.nome} className="w-8 h-8 object-contain rounded border flex-shrink-0" />
-                          : <div className="w-8 h-8 bg-gray-100 rounded border flex-shrink-0" />}
+                        <ImgComFallback
+                          src={produto?.imagem}
+                          alt={produto?.nome}
+                          className="w-8 h-8 object-contain rounded border flex-shrink-0"
+                        />
                         <div>
                           <p className="font-medium text-gray-800 leading-tight">{p.produtoNome}</p>
                           <p className="text-xs text-gray-400">{p.produtoCodigo} · {p.produtoCategoria}</p>
