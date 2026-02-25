@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v12';
+const CAT_VERSION = 'v13';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -581,21 +581,21 @@ const CATALOGO_SEED = [
     obs: 'Prazo 15–20 dias (malotes) / 20–30 dias (bolsas). Personalização +R$2,00/peça/cor (máx. 2 cores, mín. 10 pçs). Sem degradê. Tecidos Nylon e Emborrachado são impermeáveis.',
     produtos: [
       { id: 1601, nome: 'Malote Correio', variacoes: [
-        v(160101,'30x25x10cm', 'Courino','', null,  59.00, null, null, '15–20 dias', ''),
-        v(160102,'40x30x10cm', 'Courino','', null,  69.00, null, null, '15–20 dias', ''),
-        v(160103,'47x34x14cm', 'Courino','', null,  89.00, null, null, '15–20 dias', ''),
-        v(160104,'60x40x15cm', 'Courino','', null, 109.00, null, null, '15–20 dias', ''),
-        v(160105,'60x45x18cm', 'Courino','', null, 119.00, null, null, '15–20 dias', ''),
-        v(160106,'70x50x25cm', 'Courino','', null, 129.00, null, null, '15–20 dias', ''),
+        v(160101,'30x25x10cm', 'Courino','',  59.00, null, null, null, '15–20 dias', ''),
+        v(160102,'40x30x10cm', 'Courino','',  69.00, null, null, null, '15–20 dias', ''),
+        v(160103,'47x34x14cm', 'Courino','',  89.00, null, null, null, '15–20 dias', ''),
+        v(160104,'60x40x15cm', 'Courino','', 109.00, null, null, null, '15–20 dias', ''),
+        v(160105,'60x45x18cm', 'Courino','', 119.00, null, null, null, '15–20 dias', ''),
+        v(160106,'70x50x25cm', 'Courino','', 129.00, null, null, null, '15–20 dias', ''),
       ]},
       { id: 1602, nome: 'Pasta Nylon / Emborrachada', variacoes: [
-        v(160201,'40x35x8cm','Nylon/Emborrachado','', null, 23.00, null, null, '15–20 dias', 'Impermeável'),
-        v(160202,'30x40cm',  'Nylon/Emborrachado','', null, 21.00, null, null, '15–20 dias', 'Impermeável'),
-        v(160203,'15x20cm',  'Nylon/Emborrachado','', null, 19.00, null, null, '15–20 dias', 'Impermeável'),
+        v(160201,'40x35x8cm','Nylon/Emborrachado','', 23.00, null, null, null, '15–20 dias', 'Impermeável'),
+        v(160202,'30x40cm',  'Nylon/Emborrachado','', 21.00, null, null, null, '15–20 dias', 'Impermeável'),
+        v(160203,'15x20cm',  'Nylon/Emborrachado','', 19.00, null, null, null, '15–20 dias', 'Impermeável'),
       ]},
       { id: 1603, nome: 'Pasta Lona', variacoes: [
-        v(160301,'40x35x8cm','Lona','', null, 26.00, null, null, '15–20 dias', ''),
-        v(160302,'30x40cm',  'Lona','', null, 23.00, null, null, '15–20 dias', ''),
+        v(160301,'40x35x8cm','Lona','', 26.00, null, null, null, '15–20 dias', ''),
+        v(160302,'30x40cm',  'Lona','', 23.00, null, null, null, '15–20 dias', ''),
       ]},
       { id: 1604, nome: 'Malote Urna com Boca de Papelão', variacoes: [
         v(160401,'50x25x25cm Lona','Lona','', null, 102.00, null, null, '20–30 dias', 'Personalização bordado a partir de 30 pçs'),
