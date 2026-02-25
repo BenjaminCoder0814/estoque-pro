@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v10';
+const CAT_VERSION = 'v11';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -531,9 +531,9 @@ const CATALOGO_SEED = [
         v(140202,'7cm x 150m','PE','Preta/Amarela', 13.00, null, null, null, '3–7 dias', ''),
       ]},
       { id: 1403, nome: 'Fita Dupla Face', variacoes: [
-        v(140301,'24mm x 10m', '','', null,  8.33, null, null, '3–7 dias', 'por unidade'),
-        v(140302,'48mm x 10m', '','', null, 15.00, null, null, '3–7 dias', 'por unidade'),
-        v(140303,'24mm x 20m', '','', null, 15.99, null, null, '3–7 dias', 'por unidade'),
+        v(140301,'24mm x 10m', '','', null, null, null,  8.33, '3–7 dias', 'por unidade'),
+        v(140302,'48mm x 10m', '','', null, null, null, 15.00, '3–7 dias', 'por unidade'),
+        v(140303,'24mm x 20m', '','', null, null, null, 15.99, '3–7 dias', 'por unidade'),
       ]},
       { id: 1404, nome: 'Fita Adesiva', variacoes: [
         v(140401,'45mm x 100m','BOPP','Marrom/Transparente', null, 7.90, null, null, '3–7 dias', 'por unidade'),
