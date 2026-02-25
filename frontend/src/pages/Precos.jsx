@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v6';
+const CAT_VERSION = 'v7';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -434,9 +434,12 @@ const CATALOGO_SEED = [
         v(121001,'45mm','Latão','', 44.90, null, null, null, '15–20 dias', 'Mínimo 5 unidades'),
       ]},
       { id: 1203, nome: 'Cadeado Colorido PAPAIZ', variacoes: [
-        v(120301,'23mm','Liga','AM/AZ/BR/Cromado/PT/Rosa/VD/VM', null, 52.50, null, null, '—', 'Consultar disponibilidade de cor'),
-        v(120302,'25mm','Latão','Em estoque',                     null, 23.50, null, null, '—', 'Temos em estoque'),
-        v(120303,'40mm','Liga','Sob consulta',                    null, 46.90, null, null, '—', ''),
+        v(120301,'23mm','Liga','Cinza / Preto', 52.50, null, null, null, '—', ''),
+      ]},
+      { id: 1213, nome: 'Cadeado Colorido STAM', variacoes: [
+        v(121301,'25mm','Latão','Dourado',                       23.50, null, null, null, '—', 'Normal'),
+        v(121302,'40mm','Latão','Dourado',                       46.90, null, null, null, '—', 'Normal'),
+        v(121303,'25mm','Liga','AM/AZ/BR/Cromado/PT/Rosa/VD/VM', 23.00, null, null, null, '—', ''),
       ]},
       { id: 1211, nome: 'Cadeado Colorido GOLD', variacoes: [
         v(121101,'20mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
@@ -448,17 +451,24 @@ const CATALOGO_SEED = [
         v(121202,'25mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
         v(121203,'30mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
       ]},
-      { id: 1204, nome: 'Segredo Numérico GOLD / PAPAIZ', variacoes: [
-        v(120401,'20mm','Zinco','', null, 21.00, null, null, '—', 'Gold 12 pçs mín · Papaiz R$20,30'),
-        v(120402,'25mm','Zinco','', null, 24.50, null, null, '—', 'Gold 10 pçs mín · Papaiz R$24,50'),
-        v(120403,'30mm','Zinco','', null, 27.90, null, null, '—', 'Gold 10 pçs mín · Papaiz R$24,50'),
-        v(120404,'35mm','Zinco','', null, 36.50, null, null, '—', 'Gold 5 pçs mín  · Papaiz R$32,00'),
-        v(120405,'40mm','Zinco','', null, 46.50, null, null, '—', 'Gold 5 pçs mín  · Papaiz R$44,50'),
+      { id: 1204, nome: 'Segredo Igual GOLD', variacoes: [
+        v(120401,'20mm','Zinco','', 21.00, null, null, null, '—', 'Mínimo 12 pçs'),
+        v(120402,'25mm','Zinco','', 24.50, null, null, null, '—', 'Mínimo 10 pçs'),
+        v(120403,'30mm','Zinco','', 27.90, null, null, null, '—', 'Mínimo 10 pçs'),
+        v(120404,'35mm','Zinco','', 36.50, null, null, null, '—', 'Mínimo 5 pçs'),
+        v(120405,'40mm','Zinco','', 46.50, null, null, null, '—', 'Mínimo 5 pçs'),
+      ]},
+      { id: 1214, nome: 'Segredo Igual PAPAIZ', variacoes: [
+        v(121401,'20mm','Zinco','', 20.00, null, null, null, '—', 'Mínimo 12 pçs'),
+        v(121402,'25mm','Zinco','', 24.50, null, null, null, '—', 'Mínimo 10 pçs'),
+        v(121403,'30mm','Zinco','', 24.50, null, null, null, '—', 'Mínimo 10 pçs'),
+        v(121404,'35mm','Zinco','', 32.00, null, null, null, '—', 'Mínimo 5 pçs'),
+        v(121405,'40mm','Zinco','', 44.50, null, null, null, '—', 'Mínimo 5 pçs'),
       ]},
       { id: 1205, nome: 'Segredo Igual Tetra PAPAIZ', variacoes: [
-        v(120501,'50mm','Aço','', null, 189.00, null, null, '—', ''),
-        v(120502,'60mm','Aço','', null, 215.00, null, null, '—', ''),
-        v(120503,'70mm','Aço','', null, 256.00, null, null, '—', ''),
+        v(120501,'50mm','Aço','', 189.00, null, null, null, '—', ''),
+        v(120502,'60mm','Aço','', 215.00, null, null, null, '—', ''),
+        v(120503,'70mm','Aço','', 256.00, null, null, null, '—', ''),
       ]},
       { id: 1206, nome: 'Cadeado Bloqueio', variacoes: [
         v(120601,'25mm','Nylon+Aço','', null,  47.00, null, null, '—', ''),
