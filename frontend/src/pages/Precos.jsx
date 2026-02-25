@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v14';
+const CAT_VERSION = 'v15';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -598,7 +598,7 @@ const CATALOGO_SEED = [
         v(160302,'30x40cm',  'Lona','', 23.00, null, null, null, '15–20 dias', ''),
       ]},
       { id: 1604, nome: 'Malote Urna com Boca de Papelão', variacoes: [
-        v(160401,'50x25x25cm Lona','Lona','', null, 102.00, null, null, '20–30 dias', 'Personalização bordado a partir de 30 pçs'),
+        v(160401,'Urna Lona com Boca de Papelão 50x25x25cm','Lona','', 102.00, null, null, null, '20–30 dias', 'Personalização sob consulta'),
       ]},
       { id: 1605, nome: 'Porta Sacola Supermercado', variacoes: [
         v(160501,'Único','Lona','', null, 44.00, null, null, '20–30 dias', 'Somente vender o que tiver em estoque · Cima: 8x40x24cm · Baixo: 8x51x24cm'),
