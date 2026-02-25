@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v15';
+const CAT_VERSION = 'v16';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -601,7 +601,7 @@ const CATALOGO_SEED = [
         v(160401,'Urna Lona com Boca de Papelão 50x25x25cm','Lona','', 102.00, null, null, null, '20–30 dias', 'Personalização sob consulta'),
       ]},
       { id: 1605, nome: 'Porta Sacola Supermercado', variacoes: [
-        v(160501,'Único','Lona','', null, 44.00, null, null, '20–30 dias', 'Somente vender o que tiver em estoque · Cima: 8x40x24cm · Baixo: 8x51x24cm'),
+        v(160501,'Único','Lona','', 44.00, null, null, null, '20–30 dias', 'Somente vender o que tiver em estoque · Personalização bordado a partir de 30 pçs · Cima: 8x40x24cm · Baixo: 8x51x24cm'),
       ]},
       { id: 1606, nome: 'Pochete Nylon 600', variacoes: [
         v(160601,'Princ. 12x23x7cm · Bolso 8,5x13,5x3cm','Nylon 600','', null, 29.00, null, null, '20–30 dias', 'Lisa · Alça cinto regulável 2,5cm · Fecho aranha · Zíper nº6'),
