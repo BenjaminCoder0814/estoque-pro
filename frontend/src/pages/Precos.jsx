@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v18';
+const CAT_VERSION = 'v19';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -33,11 +33,7 @@ const CATALOGO_SEED = [
     obs: 'Varejo: +30% sobre materiais de estoque. Priorizar venda de estoque para saída mais rápida.',
     produtos: [
       { id: 101, nome: 'DT — Dupla Trava', variacoes: [
-        v(10101,'16mm','PP','',  95.00, null, 13.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
-        v(10102,'16mm','PP','',  85.00, null, 12.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
-        v(10103,'16mm','PP','',  89.00, null, null,  null, '10–15 dias', 'Sem varejo em pacote'),
-        v(10104,'16mm','PP','',   null, null, 108.00, null, '20–30 dias', ''),
-        v(10105,'16mm','PP','', 119.00, null, null,  null, '15–20 dias', 'Sem varejo em pacote'),
+        v(10101,'16mm','PP','', null, null, 108.00, null, '20–30 dias', ''),
         v(10106,'23mm','PP','', 139.00, null, null,  null, '20–30 dias', ''),
         v(10107,'25mm','PP','', 238.00, null, null,  null, '10–15 dias', ''),
         v(10108,'31mm','PP','', 204.00, null, 27.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
