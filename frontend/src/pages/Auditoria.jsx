@@ -1,10 +1,12 @@
 // Auditoria — Contagem física de estoque + registro de ações do sistema
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import {
   LucideClipboardList, LucideHistory, LucideCheckCircle2,
-  LucideAlertCircle, LucideCalculator, LucideSearch,
+  LucideAlertCircle, LucideCalculator, LucideSearch, LucideTag,
 } from 'lucide-react';
 
 const CONTAGENS_KEY = 'zkContagens';
@@ -17,7 +19,7 @@ export default function Auditoria() {
   const { produtos, auditoria } = useEstoque();
   const { user, can } = useAuth();
 
-  const [aba, setAba]                   = useState('contagem'); // 'contagem' | 'logs'
+  const [aba, setAba]                   = useState('contagem'); // 'contagem' | 'logs' | 'historico' | 'historico_precos'
   const [buscaCont, setBuscaCont]       = useState('');
   const [contagens, setContagens]       = useState(loadContagens);
   // contagem atual em andamento: { produtoId: qtdFisica }
@@ -27,6 +29,18 @@ export default function Auditoria() {
   const [busca, setBusca]               = useState('');
   const [filtroAcao, setFiltroAcao]     = useState('');
   const [expandido, setExpandido]       = useState(null);
+  // histórico de preços (Firebase)
+  const [historicoPrecos, setHistoricoPrecos]   = useState([]);
+  const [buscaPrecos, setBuscaPrecos]           = useState('');
+  const [filtroAcaoPrecos, setFiltroAcaoPrecos] = useState('');
+
+  useEffect(() => {
+    const q = query(collection(db, 'historico_precos'), orderBy('timestamp', 'desc'), limit(200));
+    const unsub = onSnapshot(q, snap => {
+      setHistoricoPrecos(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, []);
 
   if (!can.verAuditoria) {
     return (
@@ -134,9 +148,10 @@ export default function Auditoria() {
       {/* Abas */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
         {[
-          { id: 'contagem', label: 'Contagem de Estoque', icon: LucideCalculator },
-          { id: 'logs',     label: 'Registro de Ações',   icon: LucideHistory    },
-          { id: 'historico', label: 'Histórico de Contagens', icon: LucideClipboardList },
+          { id: 'contagem',         label: 'Contagem de Estoque',    icon: LucideCalculator    },
+          { id: 'logs',             label: 'Registro de Ações',        icon: LucideHistory        },
+          { id: 'historico',        label: 'Histórico de Contagens',  icon: LucideClipboardList  },
+          { id: 'historico_precos', label: 'Histórico de Preços',     icon: LucideTag            },
         ].map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => setAba(id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition
@@ -386,6 +401,122 @@ export default function Auditoria() {
               </table>
             </div>
           ))}
+        </div>
+      )}
+      {/* ── HISTÓRICO DE PREÇOS (Firebase) ─── */}
+      {aba === 'historico_precos' && (
+        <div>
+          <div className="flex gap-3 mb-5 flex-wrap items-center">
+            <div className="relative flex-1 min-w-48">
+              <LucideSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                className="pl-9 pr-3 py-2 border rounded-xl text-sm w-full focus:ring-2 focus:ring-purple-300"
+                placeholder="Buscar por usuário ou descrição..."
+                value={buscaPrecos}
+                onChange={e => setBuscaPrecos(e.target.value)}
+              />
+            </div>
+            <select
+              className="border rounded-lg px-3 py-2 text-sm"
+              value={filtroAcaoPrecos}
+              onChange={e => setFiltroAcaoPrecos(e.target.value)}
+            >
+              <option value="">Todas as ações</option>
+              {[...new Set(historicoPrecos.map(h => h.acao))].map(a => (
+                <option key={a} value={a}>{a.replace(/_/g, ' ')}</option>
+              ))}
+            </select>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50 text-gray-600 text-sm">
+                  <th className="p-3 text-left">Usuário</th>
+                  <th className="p-3 text-left">Perfil</th>
+                  <th className="p-3 text-left">Ação</th>
+                  <th className="p-3 text-left">Descrição</th>
+                  <th className="p-3 text-left">Data/Hora</th>
+                  <th className="p-3 text-center">Detalhes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historicoPrecos
+                  .filter(h =>
+                    (!buscaPrecos || h.usuario?.toLowerCase().includes(buscaPrecos.toLowerCase()) ||
+                      h.descricao?.toLowerCase().includes(buscaPrecos.toLowerCase())) &&
+                    (!filtroAcaoPrecos || h.acao === filtroAcaoPrecos)
+                  )
+                  .map(h => {
+                    const corAcaoP = {
+                      CRIAR_CATEGORIA:  'bg-green-100 text-green-700',
+                      EDITAR_CATEGORIA: 'bg-blue-100 text-blue-700',
+                      EXCLUIR_CATEGORIA:'bg-red-100 text-red-700',
+                      CRIAR_PRODUTO:    'bg-green-100 text-green-700',
+                      EDITAR_PRODUTO:   'bg-blue-100 text-blue-700',
+                      EXCLUIR_PRODUTO:  'bg-red-100 text-red-700',
+                      CRIAR_VARIACAO:   'bg-emerald-100 text-emerald-700',
+                      EDITAR_VARIACAO:  'bg-indigo-100 text-indigo-700',
+                      EXCLUIR_VARIACAO: 'bg-rose-100 text-rose-700',
+                    };
+                    return (
+                      <React.Fragment key={h.id}>
+                        <tr className="border-t text-sm hover:bg-gray-50 transition">
+                          <td className="p-3 font-medium">{h.usuario}</td>
+                          <td className="p-3 text-gray-500 text-xs">{h.perfil}</td>
+                          <td className="p-3">
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${corAcaoP[h.acao] ?? 'bg-gray-100 text-gray-600'}`}>
+                              {h.acao?.replace(/_/g, ' ')}
+                            </span>
+                          </td>
+                          <td className="p-3 text-gray-700 text-xs">{h.descricao}</td>
+                          <td className="p-3 text-gray-400 text-xs">
+                            {h.timestamp ? new Date(h.timestamp).toLocaleString('pt-BR') : '—'}
+                          </td>
+                          <td className="p-3 text-center">
+                            {(h.antes || h.depois) && (
+                              <button
+                                onClick={() => setExpandido(expandido === h.id ? null : h.id)}
+                                className="text-purple-500 hover:underline text-xs"
+                              >
+                                {expandido === h.id ? 'Ocultar' : 'Ver'}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                        {expandido === h.id && (
+                          <tr className="bg-gray-50 border-b">
+                            <td colSpan={6} className="p-4">
+                              <div className="grid grid-cols-2 gap-4 text-xs">
+                                {h.antes && (
+                                  <div>
+                                    <p className="font-semibold text-gray-600 mb-1">Antes:</p>
+                                    <pre className="bg-white border rounded p-2 overflow-auto max-h-48 text-gray-700">
+                                      {JSON.stringify(JSON.parse(h.antes), null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                                {h.depois && (
+                                  <div>
+                                    <p className="font-semibold text-gray-600 mb-1">Depois:</p>
+                                    <pre className="bg-white border rounded p-2 overflow-auto max-h-48 text-gray-700">
+                                      {JSON.stringify(JSON.parse(h.depois), null, 2)}
+                                    </pre>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                {historicoPrecos.length === 0 && (
+                  <tr><td colSpan={6} className="text-center p-8 text-gray-400">Nenhum registro ainda.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-gray-400 mt-2">{historicoPrecos.length} registro(s)</p>
         </div>
       )}
     </div>

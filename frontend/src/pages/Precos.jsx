@@ -1,6 +1,6 @@
 // Precos.jsx — Catálogo comercial completo · Tabela 12/2025
 // ADMIN + SUPERVISAO: editam tudo | COMERCIAL: somente visualização
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   ChevronDown, ChevronRight, Plus, Pencil, Trash2, X,
   Search, Tag, Package, Info, ShieldCheck, AlertTriangle,
@@ -8,6 +8,10 @@ import {
   Archive, Briefcase, Thermometer,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { db, logHistoricoPrecos } from '../firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+
+const FIRESTORE_DOC = () => doc(db, 'catalogo', 'precos');
 
 const CAT_KEY     = 'zkCatalogo';
 const CAT_VERSION = 'v20';
@@ -687,8 +691,28 @@ const CAMPOS_PRECO = [
 
 // ── COMPONENTE PRINCIPAL ──────────────────────────────────────────────────
 export default function Precos() {
-  const { can } = useAuth();
+  const { can, user } = useAuth();
   const [catalogo, setCatalogo]   = useState(initCatalogo);
+  const skipSnap = useRef(false);
+
+  // ── Sync em tempo real com Firestore ──────────────────────────────────
+  useEffect(() => {
+    const ref = FIRESTORE_DOC();
+    const unsub = onSnapshot(ref, (snap) => {
+      if (skipSnap.current) { skipSnap.current = false; return; }
+      if (snap.exists()) {
+        const remoto = snap.data().data;
+        if (remoto) { setCatalogo(remoto); saveCatalogo(remoto); }
+      } else {
+        // Firestore ainda vazio — faz upload do catálogo local atual
+        const local = initCatalogo();
+        skipSnap.current = true;
+        setDoc(ref, { data: local, updatedAt: new Date().toISOString() })
+          .catch(e => console.error('Seed Firestore error:', e));
+      }
+    });
+    return () => unsub();
+  }, []);
   const [busca, setBusca]         = useState('');
   const [filtroCat, setFiltroCat] = useState('');
   const [abertos, setAbertos]     = useState(() => {
@@ -706,7 +730,13 @@ export default function Precos() {
   const [formProd,  setFormProd]  = useState(VAZIO_PROD);
   const [formVar,   setFormVar]   = useState(VAZIO_VAR);
 
-  const persist = useCallback((novo) => { setCatalogo(novo); saveCatalogo(novo); }, []);
+  const persist = useCallback((novo) => {
+    setCatalogo(novo);
+    saveCatalogo(novo);
+    skipSnap.current = true;
+    setDoc(FIRESTORE_DOC(), { data: novo, updatedAt: new Date().toISOString() })
+      .catch(e => console.error('Firestore write error:', e));
+  }, []);
 
   const toggle = (key) => setAbertos(p => ({ ...p, [key]: !p[key] }));
 
@@ -744,8 +774,13 @@ export default function Precos() {
     e.preventDefault();
     if (modalCat.modo === 'novo') {
       persist([...catalogo, { id: nextId(catalogo), categoria: formCat.categoria, icon:'tag', color:'purple', obs:'', produtos:[] }]);
+      logHistoricoPrecos(user.nome, user.perfil, 'CRIAR_CATEGORIA',
+        `Categoria "${formCat.categoria}" criada`);
     } else {
+      const nomeBefore = modalCat.dados.categoria;
       persist(catalogo.map(c => c.id === modalCat.dados.id ? { ...c, categoria: formCat.categoria } : c));
+      logHistoricoPrecos(user.nome, user.perfil, 'EDITAR_CATEGORIA',
+        `Categoria "${nomeBefore}" renomeada para "${formCat.categoria}"`);
     }
     setModalCat(null);
   };
@@ -753,6 +788,7 @@ export default function Precos() {
   // CRUD Produto
   const salvarProd = (e) => {
     e.preventDefault();
+    const catNome = catalogo.find(c => c.id === modalProd.catId)?.categoria ?? '';
     persist(catalogo.map(c => {
       if (c.id !== modalProd.catId) return c;
       const prods = modalProd.modo === 'novo'
@@ -760,6 +796,13 @@ export default function Precos() {
         : c.produtos.map(p => p.id === modalProd.dados.id ? { ...p, nome: formProd.nome } : p);
       return { ...c, produtos: prods };
     }));
+    if (modalProd.modo === 'novo') {
+      logHistoricoPrecos(user.nome, user.perfil, 'CRIAR_PRODUTO',
+        `Produto "${formProd.nome}" adicionado em "${catNome}"`);
+    } else {
+      logHistoricoPrecos(user.nome, user.perfil, 'EDITAR_PRODUTO',
+        `Produto "${modalProd.dados.nome}" renomeado para "${formProd.nome}" em "${catNome}"`);
+    }
     setModalProd(null);
   };
 
@@ -768,6 +811,8 @@ export default function Precos() {
     e.preventDefault();
     const parseN = x => (x === '' || x == null) ? null : Number(x);
     const dv = { ...formVar, precoAtacado: parseN(formVar.precoAtacado), precoMilheiro: parseN(formVar.precoMilheiro), precoUnidade: parseN(formVar.precoUnidade) };
+    const catNome  = catalogo.find(c => c.id === modalVar.catId)?.categoria ?? '';
+    const prodNome = catalogo.find(c => c.id === modalVar.catId)?.produtos.find(p => p.id === modalVar.prodId)?.nome ?? '';
     persist(catalogo.map(c => {
       if (c.id !== modalVar.catId) return c;
       return { ...c, produtos: c.produtos.map(p => {
@@ -778,16 +823,28 @@ export default function Precos() {
         return { ...p, variacoes: vars };
       })};
     }));
+    if (modalVar.modo === 'novo') {
+      logHistoricoPrecos(user.nome, user.perfil, 'CRIAR_VARIACAO',
+        `Variação "${dv.tamanho}" adicionada a "${prodNome}" (${catNome})`,
+        null, dv);
+    } else {
+      logHistoricoPrecos(user.nome, user.perfil, 'EDITAR_VARIACAO',
+        `Variação "${dv.tamanho}" editada em "${prodNome}" (${catNome})`,
+        modalVar.dados, dv);
+    }
     setModalVar(null);
   };
 
   // Excluir
   const confirmarDel = () => {
     const { tipo, catId, prodId, varId } = modalDel;
+    const catObj  = catalogo.find(c => c.id === catId);
+    const prodObj = catObj?.produtos.find(p => p.id === prodId);
+    const varObj  = prodObj?.variacoes.find(vv => vv.id === varId);
     let cats = catalogo;
-    if (tipo === 'cat')  cats = cats.filter(c => c.id !== catId);
-    if (tipo === 'prod') cats = cats.map(c => c.id !== catId ? c : { ...c, produtos: c.produtos.filter(p => p.id !== prodId) });
-    if (tipo === 'var')  cats = cats.map(c => c.id !== catId ? c : { ...c, produtos: c.produtos.map(p => p.id !== prodId ? p : { ...p, variacoes: p.variacoes.filter(vv => vv.id !== varId) }) });
+    if (tipo === 'cat')  { cats = cats.filter(c => c.id !== catId); logHistoricoPrecos(user.nome, user.perfil, 'EXCLUIR_CATEGORIA', `Categoria "${catObj?.categoria}" excluída`); }
+    if (tipo === 'prod') { cats = cats.map(c => c.id !== catId ? c : { ...c, produtos: c.produtos.filter(p => p.id !== prodId) }); logHistoricoPrecos(user.nome, user.perfil, 'EXCLUIR_PRODUTO', `Produto "${prodObj?.nome}" excluído de "${catObj?.categoria}"`, prodObj); }
+    if (tipo === 'var')  { cats = cats.map(c => c.id !== catId ? c : { ...c, produtos: c.produtos.map(p => p.id !== prodId ? p : { ...p, variacoes: p.variacoes.filter(vv => vv.id !== varId) }) }); logHistoricoPrecos(user.nome, user.perfil, 'EXCLUIR_VARIACAO', `Variação "${varObj?.tamanho}" excluída de "${prodObj?.nome}"`, varObj); }
     persist(cats); setModalDel(null);
   };
 
