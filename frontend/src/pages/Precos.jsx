@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v9';
+const CAT_VERSION = 'v10';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -523,12 +523,12 @@ const CATALOGO_SEED = [
     obs: 'Prazo 3–7 dias. Outras medidas sob consulta.',
     produtos: [
       { id: 1401, nome: 'Fita Isolante Antichama', variacoes: [
-        v(140101,'5m', 'PVC','Preta', null, 1.36, null, null, '3–7 dias', ''),
-        v(140102,'10m','PVC','Preta', null, 2.30, null, null, '3–7 dias', ''),
+        v(140101,'5m', 'PVC','Preta',  1.36, null, null, null, '3–7 dias', ''),
+        v(140102,'10m','PVC','Preta',  2.30, null, null, null, '3–7 dias', ''),
       ]},
       { id: 1402, nome: 'Fita Zebrada para Sinalização', variacoes: [
-        v(140201,'7cm x 100m','PE','Preta/Amarela', null, 12.00, null, null, '3–7 dias', ''),
-        v(140202,'7cm x 150m','PE','Preta/Amarela', null, 13.00, null, null, '3–7 dias', ''),
+        v(140201,'7cm x 100m','PE','Preta/Amarela', 12.00, null, null, null, '3–7 dias', ''),
+        v(140202,'7cm x 150m','PE','Preta/Amarela', 13.00, null, null, null, '3–7 dias', ''),
       ]},
       { id: 1403, nome: 'Fita Dupla Face', variacoes: [
         v(140301,'24mm x 10m', '','', null,  8.33, null, null, '3–7 dias', 'por unidade'),
