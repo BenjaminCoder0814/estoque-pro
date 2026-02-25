@@ -1,5 +1,5 @@
 // Precos.jsx — Catálogo comercial completo · Tabela 12/2025
-// ADMIN: edita tudo | SUPERVISAO + COMERCIAL: somente visualização
+// ADMIN + SUPERVISAO: editam tudo | COMERCIAL: somente visualização
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   ChevronDown, ChevronRight, Plus, Pencil, Trash2, X,
@@ -881,7 +881,7 @@ export default function Precos() {
           {!can.editarPrecos && (
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 mb-4 text-blue-700 text-sm">
               <Info className="w-4 h-4 flex-shrink-0" />
-              Modo <b>somente visualização</b>. Apenas Admin pode editar o catálogo.
+              Modo <b>somente visualização</b>. Apenas Admin e Supervisão podem editar o catálogo.
             </div>
           )}
 

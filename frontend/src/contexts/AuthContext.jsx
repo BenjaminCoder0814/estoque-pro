@@ -324,7 +324,7 @@ export function AuthProvider({ children }) {
     verSugestoes:         !!user,
     gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
     verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS'].includes(user.perfil),
-    editarPrecos:         user && ['ADMIN'].includes(user.perfil),
+    editarPrecos:         user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
     verMidia:             user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
     // Separações
     verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO'].includes(user.perfil),
