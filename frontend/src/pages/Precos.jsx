@@ -589,9 +589,9 @@ const CATALOGO_SEED = [
         v(160106,'70x50x25cm', 'Courino','', 129.00, null, null, null, '15–20 dias', ''),
       ]},
       { id: 1602, nome: 'Pasta Nylon / Emborrachada', variacoes: [
-        v(160201,'40x35x8cm','Nylon/Emborrachado','', 23.00, null, null, null, '15–20 dias', 'Impermeável'),
-        v(160202,'30x40cm',  'Nylon/Emborrachado','', 21.00, null, null, null, '15–20 dias', 'Impermeável'),
-        v(160203,'15x20cm',  'Nylon/Emborrachado','', 19.00, null, null, null, '15–20 dias', 'Impermeável'),
+        v(160201,'40x35x8cm','Nylon ou Emborrachado','', 23.00, null, null, null, '15–20 dias', 'Impermeável'),
+        v(160202,'30x40cm',  'Nylon ou Emborrachado','', 21.00, null, null, null, '15–20 dias', 'Impermeável'),
+        v(160203,'15x20cm',  'Nylon ou Emborrachado','', 19.00, null, null, null, '15–20 dias', 'Impermeável'),
       ]},
       { id: 1603, nome: 'Pasta Lona', variacoes: [
         v(160301,'40x35x8cm','Lona','', 26.00, null, null, null, '15–20 dias', ''),
