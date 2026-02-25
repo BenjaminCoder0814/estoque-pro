@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v8';
+const CAT_VERSION = 'v9';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -497,21 +497,18 @@ const CATALOGO_SEED = [
     id: 13, categoria: 'Máquinas e Acessórios', icon: 'wrench', color: 'emerald',
     obs: 'Prazo 2–7 dias. Outros modelos de máquina lacradora ou seladora — sob consulta.',
     produtos: [
-      { id: 1301, nome: 'Máquina Lacradora Redonda', variacoes: [
-        v(130101,'Única','','Vermelha (disponível)', null, 109.00, null, null, '2–7 dias', 'No momento R$114,00 — disponível somente na cor vermelha'),
-      ]},
       { id: 1302, nome: 'Máquina Lacradora Quadrada', variacoes: [
-        v(130201,'Única','','', null, 59.90, null, null, '2–7 dias', ''),
+        v(130201,'Única','','', 59.90, null, null, null, '2–7 dias', ''),
       ]},
       { id: 1303, nome: 'Máquina de Selar', variacoes: [
-        v(130301,'20cm','','', null,  339.00, null, null, '2–7 dias', ''),
-        v(130302,'30cm','','', null,  416.00, null, null, '2–7 dias', 'Outras medidas sob consulta'),
+        v(130301,'20cm','','', 339.00, null, null, null, '2–7 dias', 'Outras medidas sob consulta'),
+        v(130302,'30cm','','', 416.00, null, null, null, '2–7 dias', 'Outras medidas sob consulta'),
       ]},
-      { id: 1304, nome: 'Refil para Máquina Selar 20cm', variacoes: [
-        v(130401,'20cm','','', null, 33.60, null, null, '2–7 dias', 'Outras medidas sob consulta'),
+      { id: 1304, nome: 'Refil para Máquina Selar', variacoes: [
+        v(130401,'20cm','','', 33.60, null, null, null, '2–7 dias', 'Outras medidas sob consulta'),
       ]},
       { id: 1305, nome: 'Fita para Máquina Lacradora / Selar', variacoes: [
-        v(130501,'12mm x 80m','','', null, 3.29, null, null, '2–7 dias', 'por unidade'),
+        v(130501,'12mm x 80m','','', null, null, null, 3.29, '2–7 dias', 'por unidade'),
       ]},
       { id: 1306, nome: 'Placas de Identificação / Etiqueta de Patrimônio', variacoes: [
         v(130601,'Sob medida','Alumínio / Inox','', null, null, null, null, '15–20 dias', 'Preço sob consulta — personalizadas'),
