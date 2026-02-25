@@ -2,7 +2,7 @@
 // Cada usuário vê apenas suas próprias conversas.
 // Admin pode ver TODAS as conversas de todos os usuários.
 // Suporta: texto, imagens, documentos, links automáticos.
-// Armazenamento: localStorage (compartilhado entre logins no mesmo browser).
+// Armazenamento: Firebase Firestore (tempo real) + localStorage (cache).
 
 import React, {
   useState, useEffect, useRef, useCallback, useMemo
@@ -14,6 +14,21 @@ import {
   LucideMic, LucideCamera, LucideStopCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import {
+  collection, doc, onSnapshot, setDoc, query, where,
+} from 'firebase/firestore';
+
+const CHAT_COL = 'chat_conversas';
+
+// Persiste conversa no Firestore
+function syncConvFirestore(conv) {
+  setDoc(doc(db, CHAT_COL, conv.id), {
+    participantIds: conv.participantIds,
+    messages: conv.messages,
+    updatedAt: Date.now(),
+  }).catch(e => console.error('Chat sync error:', e));
+}
 
 // ── Constantes de storage ──────────────────────────────────────────────
 const CHAT_KEY  = 'zkChat';       // Array de conversas
@@ -162,22 +177,23 @@ export default function Chat() {
   const [isRecording, setIsRecording]   = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
 
-  // ── Sincronizar alterações de outro "tab" / login ────────────────────
+  // ── Sincronizar com Firestore em tempo real ──────────────────────────
   useEffect(() => {
-    function onStorage(e) {
-      if (e.key === CHAT_KEY) setConversas(loadConversas());
-      if (e.key === READ_KEY) setReadMap(loadRead());
-    }
-    window.addEventListener('storage', onStorage);
-    // Poll a cada 1s para garantir mensagens em tempo real
-    const timer = setInterval(() => {
-      setConversas(loadConversas());
-    }, 1000);
-    return () => {
-      window.removeEventListener('storage', onStorage);
-      clearInterval(timer);
-    };
-  }, []);
+    if (!user) return;
+    const col = collection(db, CHAT_COL);
+    const q = isAdmin ? col : query(col, where('participantIds', 'array-contains', user.id));
+    const unsub = onSnapshot(q, snap => {
+      const convs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setConversas(prev => {
+        // Mescla: Firestore tem prioridade; mantém locais ainda não enviados
+        const merged = [...convs];
+        prev.forEach(lc => { if (!merged.find(fc => fc.id === lc.id)) merged.push(lc); });
+        saveConversas(merged);
+        return merged;
+      });
+    });
+    return () => unsub();
+  }, [user, isAdmin]);
 
   // ── Rolar para o fim quando muda conversa ou chegam mensagens ────────
   useEffect(() => {
@@ -248,6 +264,7 @@ export default function Chat() {
     if (novasConvs.length !== atualConvs.length) {
       saveConversas(novasConvs);
       setConversas(novasConvs);
+      syncConvFirestore(conv);
     }
     setConvAtiva(conv.id);
     setMobileListVisible(false);
@@ -270,6 +287,8 @@ export default function Chat() {
         c.id === convAtiva ? { ...c, messages: [...c.messages, msg] } : c
       );
       saveConversas(updated);
+      const updatedConv = updated.find(c => c.id === convAtiva);
+      if (updatedConv) syncConvFirestore(updatedConv);
       return updated;
     });
     setTextInput('');
@@ -284,7 +303,12 @@ export default function Chat() {
 
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const b64 = ev.target.result; // data:...; base64,...
+      const b64 = ev.target.result;
+      // Aviso se arquivo muito grande para Firestore (> 700KB base64)
+      if (b64.length > 700_000) {
+        alert('Arquivo muito grande para envio (máx. ~500KB). Tente compactar ou usar um arquivo menor.');
+        return;
+      }
       const tipo = file.type.startsWith('image/') ? 'imagem' : 'arquivo';
       const msg = {
         id: Date.now() + '_' + Math.random().toString(36).slice(2),
@@ -300,6 +324,8 @@ export default function Chat() {
           c.id === convAtiva ? { ...c, messages: [...c.messages, msg] } : c
         );
         saveConversas(updated);
+        const updatedConv = updated.find(c => c.id === convAtiva);
+        if (updatedConv) syncConvFirestore(updatedConv);
         return updated;
       });
     };
@@ -346,6 +372,10 @@ export default function Chat() {
         const reader = new FileReader();
         reader.onload = (ev) => {
           const b64 = ev.target.result;
+          if (b64.length > 700_000) {
+            alert('Áudio muito longo para envio. Tente uma mensagem mais curta.');
+            return;
+          }
           const msg = {
             id: Date.now() + '_' + Math.random().toString(36).slice(2),
             de: user.id,
@@ -360,6 +390,8 @@ export default function Chat() {
               c.id === convAtiva ? { ...c, messages: [...c.messages, msg] } : c
             );
             saveConversas(updated);
+            const updatedConv = updated.find(c => c.id === convAtiva);
+            if (updatedConv) syncConvFirestore(updatedConv);
             return updated;
           });
         };
