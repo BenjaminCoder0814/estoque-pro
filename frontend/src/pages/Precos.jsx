@@ -14,7 +14,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 const FIRESTORE_DOC = () => doc(db, 'catalogo', 'precos');
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v20';
+const CAT_VERSION = 'v21';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -195,10 +195,10 @@ const CATALOGO_SEED = [
   ══════════════════════════════════════════════════════ */
   {
     id: 7, categoria: 'Tag / Lacre Autenticidade Personalizado', icon: 'star', color: 'amber',
-    obs: 'Preços por milheiro conforme quantidade mínima.',
+    obs: 'Preços Varejo conforme quantidade mínima.',
     produtos: [
       { id: 701, nome: 'Tag Lacre Autenticidade Personalizado', variacoes: [
-        v(70101,'5.000 pçs', 'PP','Personalizável', null, null,  945.00, null, '15–20 dias', 'Preço por milheiro'),
+        v(70101,'5.000 pçs', 'PP','Personalizável', null, null,  945.00, null, '15–20 dias', 'Preço Varejo'),
         v(70102,'10.000 pçs','PP','Personalizável', null, null,  522.00, null, '15–20 dias', ''),
         v(70103,'15.000 pçs','PP','Personalizável', null, null,  374.00, null, '15–20 dias', ''),
         v(70104,'20.000 pçs','PP','Personalizável', null, null,  306.00, null, '15–20 dias', ''),
@@ -302,7 +302,7 @@ const CATALOGO_SEED = [
   ══════════════════════════════════════════════════════ */
   {
     id: 9, categoria: 'Abraçadeiras Nacional', icon: 'layers', color: 'blue',
-    obs: 'Preços por milheiro. Pacotes de 100 peças. Prazo 3–5 dias. Coloridas UV somente sob consulta.',
+    obs: 'Preços Varejo. Pacotes de 100 peças. Prazo 3–5 dias. Coloridas UV somente sob consulta.',
     produtos: [
       { id: 901, nome: 'Abraçadeira Nacional Padrão', variacoes: [
         v(90101,'2,5mm x 100mm','Nylon','Branca/Preta',       null, null,    39.00, null, '3–5 dias', ''),
@@ -399,8 +399,8 @@ const CATALOGO_SEED = [
         v(110402,'40mm · CX c/ 5.000 uni','PP','', null, null, null, 17.00, '—', ''),
       ]},
       { id: 1105, nome: 'Fixador Autoadesivo para Fios', variacoes: [
-        v(110501,'19x19mm','PP','Branca/Preta', null, null, 354.00, null, '—', 'Por milheiro'),
-        v(110502,'30x30mm','PP','Branca/Preta', null, null, 544.00, null, '—', 'Por milheiro'),
+        v(110501,'19x19mm','PP','Branca/Preta', null, null, 354.00, null, '—', 'Varejo'),
+        v(110502,'30x30mm','PP','Branca/Preta', null, null, 544.00, null, '—', 'Varejo'),
       ]},
       { id: 1106, nome: 'Trava Anel', variacoes: [
         v(110601,'CX c/ 5.000 uni','Nylon','', null, null, null, 33.00, '5–7 dias', ''),
