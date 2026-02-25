@@ -685,7 +685,7 @@ const VAZIO_VAR  = { tamanho:'', material:'', precoAtacado:'', precoMilheiro:'',
 
 const CAMPOS_PRECO = [
   { key:'precoAtacado',  label:'Atacado',   cls:'text-emerald-700 font-bold' },
-  { key:'precoMilheiro', label:'/Milheiro', cls:'text-purple-700 font-bold'  },
+  { key:'precoMilheiro', label:'Varejo',    cls:'text-purple-700 font-bold'  },
   { key:'precoUnidade',  label:'/Unidade',  cls:'text-orange-700 font-bold'  },
 ];
 
@@ -1018,7 +1018,7 @@ export default function Precos() {
                                     <th className="px-4 py-2.5 text-left font-bold">Tamanho / Ref.</th>
                                     <th className="px-3 py-2.5 text-left font-bold">Material</th>
                                     <th className="px-3 py-2.5 text-right font-bold text-emerald-700">Atacado</th>
-                                    <th className="px-3 py-2.5 text-right font-bold text-purple-700">/Milheiro</th>
+                                    <th className="px-3 py-2.5 text-right font-bold text-purple-700">Varejo</th>
                                     <th className="px-3 py-2.5 text-right font-bold text-orange-700">/Unidade</th>
                                     <th className="px-3 py-2.5 text-left font-bold">
                                       <Clock className="w-3 h-3 inline mr-1"/>Prazo
