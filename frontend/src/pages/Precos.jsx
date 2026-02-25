@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v4';
+const CAT_VERSION = 'v5';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -397,20 +397,14 @@ const CATALOGO_SEED = [
         v(110302,'7,6mm x 250mm Branca','Nylon','Branca', null, null, 849.00, null, '—', ''),
       ]},
       { id: 1104, nome: 'Zpin', variacoes: [
-        v(110401,'25mm','PP','', null, null, 17.00, null, '—', 'Vem 5.000 na caixa'),
-        v(110402,'40mm','PP','', null, null, 17.00, null, '—', 'Vem 5.000 na caixa'),
+        v(110401,'25mm','PP','', null, null, null, 17.00, '—', 'Caixa com 5.000 uni'),
+        v(110402,'40mm','PP','', null, null, null, 17.00, '—', 'Caixa com 5.000 uni'),
       ]},
       { id: 1105, nome: 'Fixador Autoadesivo para Fios', variacoes: [
         v(110501,'19x19mm','PP','Branca/Preta', null, null, 354.00, null, '—', 'Por milheiro'),
         v(110502,'30x30mm','PP','Branca/Preta', null, null, 544.00, null, '—', 'Por milheiro'),
       ]},
-      { id: 1106, nome: 'Tubo Espiral', variacoes: [
-        v(110601,'1/8" Branca', 'PE','', null, 1.80,  null, null, '—', 'por metro'),
-        v(110602,'1/4" Branca', 'PE','', null, 1.99,  null, null, '—', 'por metro'),
-        v(110603,'1/2" Branca', 'PE','', null, 4.65,  null, null, '—', 'por metro'),
-        v(110604,'3/4" Branca', 'PE','', null, 7.99,  null, null, '—', 'por metro'),
-        v(110605,'1"   Branca', 'PE','', null, 13.50, null, null, '—', 'por metro'),
-      ]},
+
     ],
   },
   /* ══════════════════════════════════════════════════════
@@ -421,18 +415,23 @@ const CATALOGO_SEED = [
     obs: 'Desconto somente acima de R$800,00 em compras. Prazo 15–20 dias para grandes quantidades.',
     produtos: [
       { id: 1201, nome: 'Cadeado Tradicional GOLD', variacoes: [
-        v(120101,'20mm','Latão','', null, 16.90,  null, null, '15–20 dias', ''),
-        v(120102,'25mm','Latão','', null, 19.90,  null, null, '15–20 dias', ''),
-        v(120103,'30mm','Latão','', null, 23.50,  null, null, '15–20 dias', ''),
-        v(120104,'35mm','Latão','', null, 29.90,  null, null, '15–20 dias', ''),
-        v(120105,'40mm','Latão','', null, 37.50,  null, null, '15–20 dias', ''),
-        v(120106,'45mm','Latão','', null, 44.90,  null, null, '15–20 dias', ''),
-        v(120107,'50mm','Latão','', null, 48.50,  null, null, '15–20 dias', ''),
-        v(120108,'60mm','Latão','', null, 79.90,  null, null, '15–20 dias', ''),
-        v(120109,'70mm','Latão','', null, 103.90, null, null, '15–20 dias', ''),
+        v(120101,'20mm','Latão','',  16.90, null, null, null, '15–20 dias', ''),
+        v(120102,'25mm','Latão','',  19.90, null, null, null, '15–20 dias', ''),
+        v(120103,'30mm','Latão','',  23.50, null, null, null, '15–20 dias', ''),
+        v(120104,'35mm','Latão','',  29.90, null, null, null, '15–20 dias', ''),
+        v(120105,'40mm','Latão','',  37.50, null, null, null, '15–20 dias', ''),
+        v(120107,'50mm','Latão','',  48.50, null, null, null, '15–20 dias', ''),
+        v(120108,'60mm','Latão','',  79.90, null, null, null, '15–20 dias', ''),
+        v(120109,'70mm','Latão','', 103.90, null, null, null, '15–20 dias', ''),
       ]},
       { id: 1202, nome: 'Cadeado Tradicional PAPAIZ', variacoes: [
-        v(120201,'50mm','Latão','', null, 54.50, null, null, '15–20 dias', ''),
+        v(120201,'50mm','Latão','', 54.50, null, null, null, '15–20 dias', ''),
+      ]},
+      { id: 1209, nome: 'Cadeado Tradicional PADO', variacoes: [
+        v(120901,'50mm','Latão','', 54.50, null, null, null, '15–20 dias', ''),
+      ]},
+      { id: 1210, nome: 'Cadeado Tradicional STAM', variacoes: [
+        v(121001,'45mm','Latão','', 44.90, null, null, null, '15–20 dias', 'Mínimo 5 unidades'),
       ]},
       { id: 1203, nome: 'Cadeado Colorido PAPAIZ / STAM', variacoes: [
         v(120301,'23mm','Liga','AM/AZ/BR/Cromado/PT/Rosa/VD/VM', null, 52.50, null, null, '—', 'Consultar disponibilidade de cor'),
