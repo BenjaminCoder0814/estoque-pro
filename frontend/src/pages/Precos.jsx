@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v5';
+const CAT_VERSION = 'v6';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -433,10 +433,20 @@ const CATALOGO_SEED = [
       { id: 1210, nome: 'Cadeado Tradicional STAM', variacoes: [
         v(121001,'45mm','Latão','', 44.90, null, null, null, '15–20 dias', 'Mínimo 5 unidades'),
       ]},
-      { id: 1203, nome: 'Cadeado Colorido PAPAIZ / STAM', variacoes: [
+      { id: 1203, nome: 'Cadeado Colorido PAPAIZ', variacoes: [
         v(120301,'23mm','Liga','AM/AZ/BR/Cromado/PT/Rosa/VD/VM', null, 52.50, null, null, '—', 'Consultar disponibilidade de cor'),
         v(120302,'25mm','Latão','Em estoque',                     null, 23.50, null, null, '—', 'Temos em estoque'),
         v(120303,'40mm','Liga','Sob consulta',                    null, 46.90, null, null, '—', ''),
+      ]},
+      { id: 1211, nome: 'Cadeado Colorido GOLD', variacoes: [
+        v(121101,'20mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
+        v(121102,'25mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
+        v(121103,'30mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
+      ]},
+      { id: 1212, nome: 'Cadeado Colorido PADO', variacoes: [
+        v(121201,'20mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
+        v(121202,'25mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
+        v(121203,'30mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
       ]},
       { id: 1204, nome: 'Segredo Numérico GOLD / PAPAIZ', variacoes: [
         v(120401,'20mm','Zinco','', null, 21.00, null, null, '—', 'Gold 12 pçs mín · Papaiz R$20,30'),
