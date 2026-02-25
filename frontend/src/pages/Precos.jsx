@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v7';
+const CAT_VERSION = 'v8';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -471,16 +471,22 @@ const CATALOGO_SEED = [
         v(120503,'70mm','Aço','', 256.00, null, null, null, '—', ''),
       ]},
       { id: 1206, nome: 'Cadeado Bloqueio', variacoes: [
-        v(120601,'25mm','Nylon+Aço','', null,  47.00, null, null, '—', ''),
-        v(120602,'38mm','Nylon+Aço','', null,  48.00, null, null, '—', ''),
-        v(120603,'50mm','Nylon+Aço','', null,  53.00, null, null, '—', ''),
-        v(120604,'35/50mm (haste longa)','Nylon+Aço','', null, null, null, null, '—', 'Sob consulta'),
+        v(120601,'25mm',          'Nylon+Aço','',  47.00, null, null, null, '—', ''),
+        v(120602,'38mm',          'Nylon+Aço','',  48.00, null, null, null, '—', ''),
+        v(120603,'50mm',          'Nylon+Aço','',  53.00, null, null, null, '—', ''),
+        v(120604,'Haste longa',   'Nylon+Aço','',  null,  null, null, null, '—', 'Sob análise'),
       ]},
       { id: 1207, nome: 'Haste Média e Longa Colorido', variacoes: [
-        v(120701,'25–75mm / vários','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta — PADO / PAPAIZ / STAM'),
-      ]},
-      { id: 1208, nome: 'Corrente para Cadeado', variacoes: [
-        v(120801,'Único','Aço','', null, 6.90, null, null, '—', 'por unidade'),
+        v(120701,'25/30mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120702,'30/40mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120703,'30/50mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120704,'30/70mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120705,'30/75mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120706,'35/50mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120707,'35/70mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120708,'35/75mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120709,'45/50mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
+        v(120710,'45/75mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'PADO / PAPAIZ / STAM — Sob consulta'),
       ]},
     ],
   },
