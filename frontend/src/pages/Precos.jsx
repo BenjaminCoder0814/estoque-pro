@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v19';
+const CAT_VERSION = 'v20';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ const CATALOGO_SEED = [
       { id: 103, nome: 'ES — Escada Alta', variacoes: [
         v(10307,'16mm','PP','',  89.00, null, null,  null, '10–15 dias', 'Normal'),
         v(10308,'16mm','PP','',  85.00, null, null,  null, '10–15 dias', 'Corte Fácil'),
-        v(10301,'23mm','PP','', 115.00, null, 15.00, null, '10–15 dias', 'Normal — Acima de 11 pcts atacado / Varejo até 10 pcts'),
+        v(10301,'23mm Corte Fácil','PP','', 115.00, null, 15.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
         v(10302,'23mm','PP','', 119.00, null, null,  null, '10–15 dias', 'Normal — Sem varejo em pacote'),
         v(10303,'28mm','PP','', 259.00, null, null,  null, '10–15 dias', 'Escada Dupla ou Corte Fácil'),
         v(10304,'30mm','PP','', 374.00, null, null,  null, '20–30 dias', 'ES Protocolo — Mínimo 1.000 pçs'),
