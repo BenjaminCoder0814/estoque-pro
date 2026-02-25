@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v11';
+const CAT_VERSION = 'v12';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -536,22 +536,22 @@ const CATALOGO_SEED = [
         v(140303,'24mm x 20m', '','', null, null, null, 15.99, '3–7 dias', 'por unidade'),
       ]},
       { id: 1404, nome: 'Fita Adesiva', variacoes: [
-        v(140401,'45mm x 100m','BOPP','Marrom/Transparente', null, 7.90, null, null, '3–7 dias', 'por unidade'),
-        v(140402,'48mm x 45m', 'BOPP','Marrom/Transparente', null, 4.80, null, null, '3–7 dias', 'por unidade'),
+        v(140401,'45mm x 100m','BOPP','Marrom/Transparente', null, null, null,  7.90, '3–7 dias', 'por unidade — outras medidas sob consulta'),
+        v(140402,'48mm x 45m', 'BOPP','Marrom/Transparente', null, null, null,  4.80, '3–7 dias', 'por unidade'),
       ]},
       { id: 1405, nome: 'Fita de Demarcação de Solo', variacoes: [
-        v(140501,'48mm x 30m','PE','Amarela/Azul/Vermelha', null, 39.00, null, null, '3–7 dias', 'por unidade'),
+        v(140501,'48mm x 30m','PE','Amarela/Azul/Vermelha', null, null, null, 39.00, '3–7 dias', 'por unidade'),
       ]},
       { id: 1406, nome: 'Fita Silver Tape', variacoes: [
-        v(140601,'48mm x 50m','PE','Prata', null, 75.00, null, null, '3–7 dias', 'por rolo'),
+        v(140601,'48mm x 50m','PE','Prata', 75.00, null, null, null, '3–7 dias', 'por rolo'),
       ]},
       { id: 1407, nome: 'Fita Crepe', variacoes: [
-        v(140701,'18mm x 50m','Papel','', null,  6.90, null, null, '3–7 dias', 'por unidade'),
-        v(140702,'24mm x 50m','Papel','', null,  9.92, null, null, '3–7 dias', 'por unidade'),
-        v(140703,'45mm x 50m','Papel','', null, 11.20, null, null, '3–7 dias', 'por unidade'),
+        v(140701,'18mm x 50m','Papel','', null, null, null,  6.90, '3–7 dias', 'por unidade'),
+        v(140702,'24mm x 50m','Papel','', null, null, null,  9.92, '3–7 dias', 'por unidade'),
+        v(140703,'45mm x 50m','Papel','', null, null, null, 11.20, '3–7 dias', 'por unidade'),
       ]},
       { id: 1408, nome: 'Suporte para Fita Adesiva (embalagens)', variacoes: [
-        v(140801,'Universal','','', null, 49.00, null, null, '3–7 dias', 'por unidade'),
+        v(140801,'Universal','','', null, null, null, 49.00, '3–7 dias', 'por unidade'),
       ]},
     ],
   },
@@ -563,13 +563,13 @@ const CATALOGO_SEED = [
     obs: '',
     produtos: [
       { id: 1501, nome: 'Fitilho Torcido Grosso Cinza — Rolo', variacoes: [
-        v(150101,'Rolo 7kg ~500m','PP','Cinza', null, null, null, null, '—', 'R$274,00/rolo · acima de 15 rolos R$139,00/rolo'),
+        v(150101,'Rolo 7kg ~500m','PP','Cinza', 139.00, null, null, 274.00, '—', 'Atacado: acima de 15 rolos — Avulso: /Unidade'),
       ]},
       { id: 1502, nome: 'Fitilho de Rafia Médio Cinza — Rolo', variacoes: [
-        v(150201,'Rolo ~7kg','Rafia','Cinza', null, null, null, null, '—', 'R$11,20 por kg / 500 metros'),
+        v(150201,'Rolo 1kg ~500m','Rafia','Cinza', 11.20, null, null, null, '—', 'por rolo'),
       ]},
       { id: 1503, nome: 'Fitilho Macio Fino Branco — Rolo', variacoes: [
-        v(150301,'Rolo 182m','PP','Branco', null, 19.99, null, null, '—', ''),
+        v(150301,'Rolo 182m','PP','Branco', null, null, null, 19.99, '—', 'por rolo'),
       ]},
     ],
   },
