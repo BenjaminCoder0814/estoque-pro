@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v17';
+const CAT_VERSION = 'v18';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -619,14 +619,14 @@ const CATALOGO_SEED = [
     obs: '',
     produtos: [
       { id: 1701, nome: 'Etiqueta Adesiva Couche 34x23mm', variacoes: [
-        v(170101,'1.900 etiq./rolo · mín. 5 rolos', 'Papel couche','', null, 135.00, null, null, '—', ''),
-        v(170102,'1.900 etiq./rolo · mín. 10 rolos','Papel couche','', null, 109.00, null, null, '—', ''),
+        v(170101,'1.900 etiq./rolo · mín. 5 rolos', 'Papel couche','', 135.00, null, null, null, '—', 'Rolo 34x23x1mm'),
+        v(170102,'1.900 etiq./rolo · mín. 10 rolos','Papel couche','', 109.00, null, null, null, '—', 'Rolo 34x23x1mm'),
       ]},
       { id: 1702, nome: 'Dispenser de Senha', variacoes: [
-        v(170201,'Único','','', null, null, null, null, '—', 'Sob consulta'),
+        v(170201,'Único','','', 82.00, null, null, null, '—', 'Cor sob consulta'),
       ]},
       { id: 1703, nome: 'Rolo de Senha', variacoes: [
-        v(170301,'Único','','', null, 82.00, null, null, '—', ''),
+        v(170301,'Único','','', null, null, null, null, '—', 'Sob consulta'),
       ]},
       { id: 1704, nome: 'Lacre Etiqueta', variacoes: [
         v(170401,'Único','','', null, null, null, null, '—', 'Sob consulta'),
