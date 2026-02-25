@@ -51,20 +51,20 @@ const CATALOGO_SEED = [
         v(10205,'37mm','PP','', 519.00, null, null, null, '15–20 dias', ''),
       ]},
       { id: 103, nome: 'ES — Escada Alta', variacoes: [
-        v(10307,'16mm','PP','',  89.00, null, null,  null, '10–15 dias', 'Normal'),
-        v(10308,'16mm','PP','',  85.00, null, null,  null, '10–15 dias', 'Corte Fácil'),
+        v(10307,'16mm Normal','PP','',  89.00, null, null,  null, '10–15 dias', ''),
+        v(10308,'16mm Corte Fácil','PP','',  85.00, null, null,  null, '10–15 dias', ''),
         v(10301,'23mm Corte Fácil','PP','', 115.00, null, 15.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
         v(10302,'23mm','PP','', 119.00, null, null,  null, '10–15 dias', 'Normal — Sem varejo em pacote'),
         v(10303,'28mm','PP','', 259.00, null, null,  null, '10–15 dias', 'Escada Dupla ou Corte Fácil'),
-        v(10304,'30mm','PP','', 374.00, null, null,  null, '20–30 dias', 'ES Protocolo — Mínimo 1.000 pçs'),
-        v(10305,'35mm','PP','', 349.00, null, null,  null, '20–30 dias', 'Corte Fácil'),
-        v(10306,'45mm','PP','', 449.00, null, null,  null, '20–30 dias', 'Corte Fácil'),
+        v(10304,'30mm ES Protocolo','PP','', 374.00, null, null,  null, '20–30 dias', 'Mínimo 1.000 pçs'),
+        v(10305,'35mm Escada Dupla','PP','', 349.00, null, null,  null, '20–30 dias', ''),
+        v(10306,'45mm Escada Dupla','PP','', 449.00, null, null,  null, '20–30 dias', ''),
       ]},
       { id: 104, nome: 'EP — Espinha de Peixe', variacoes: [
-        v(10404,'16mm','PP','',  95.00, null, null, null, '10–15 dias', 'Normal'),
-        v(10405,'16mm','PP','', 119.00, null, null, null, '10–20 dias', 'Corte Fácil'),
-        v(10401,'23mm','PP','', 125.00, null, null, null, '10–15 dias', 'Normal — Acima de 11 pcts'),
-        v(10402,'23mm Corte Fácil','PP','', 189.00, null, null, null, '10–20 dias', 'Corte Fácil'),
+        v(10404,'16mm Normal','PP','',  95.00, null, null, null, '10–15 dias', ''),
+        v(10405,'16mm Corte Fácil','PP','', 119.00, null, null, null, '10–20 dias', ''),
+        v(10401,'23mm Normal','PP','', 125.00, null, null, null, '10–15 dias', 'Acima de 11 pcts'),
+        v(10402,'23mm Corte Fácil','PP','', 189.00, null, null, null, '10–20 dias', ''),
         v(10403,'42mm','PP','', 309.00, null, null, null, '10–15 dias', 'Sem varejo em pacote'),
       ]},
       { id: 105, nome: 'TU — Trava Única', variacoes: [
@@ -122,9 +122,9 @@ const CATALOGO_SEED = [
     obs: 'Dimensões: 45x16x21mm · Gravação a Laser',
     produtos: [
       { id: 401, nome: 'Lacre MZA / ALC', variacoes: [
-        v(40101,'45x16x21mm','PP','Liso',         null, null, 170.00, null, '15–20 dias', ''),
-        v(40102,'45x16x21mm','PP','Personalizado', null, null, 180.00, null, '30–45 dias', '+R$10,00/mlr personalização'),
-        v(40103,'45x16x21mm','PP','Numerado',      null, null, 180.00, null, '30–45 dias', '+R$10,00/mlr numeração'),
+        v(40101,'45x16x21mm · Liso',         'PP','', null, null, 170.00, null, '15–20 dias', ''),
+        v(40102,'45x16x21mm · Personalizado', 'PP','', null, null, 180.00, null, '30–45 dias', '+R$10,00/mlr personalização'),
+        v(40103,'45x16x21mm · Numerado',      'PP','', null, null, 180.00, null, '30–45 dias', '+R$10,00/mlr numeração'),
       ]},
     ],
   },
@@ -141,16 +141,15 @@ const CATALOGO_SEED = [
         v(50104,'Policarbonato','Policarbonato','',  null, null, 435.00, null, '—',          ''),
       ]},
       { id: 502, nome: 'Znan com Arame 2x26', variacoes: [
-        v(50201,'20cm','PP+Arame','', null, null, 239.00, null, '20–30 dias', ''),
-        v(50202,'25cm','PP+Arame','', null, null, 250.00, null, '20–30 dias', ''),
-        v(50203,'30cm','PP+Arame','', null, null, 269.00, null, '20–30 dias', ''),
-        v(50204,'35cm','PP+Arame','', null, null, 275.00, null, '20–30 dias', ''),
-        v(50205,'40cm','PP+Arame','', null, null, 296.00, null, '20–30 dias', ''),
-        v(50206,'45cm','PP+Arame','', null, null, 310.00, null, '20–30 dias', ''),
-        v(50207,'50cm','PP+Arame','', null, null, 340.00, null, '20–30 dias', ''),
-        v(50208,'55cm','PP+Arame','', null, null, 370.00, null, '20–30 dias', ''),
-        v(50209,'70cm','PP+Arame','', null, null, 532.00, null, '20–30 dias', ''),
-        v(50210,'100cm','PP+Arame','', null, null, 616.00, null, '20–30 dias', ''),
+        v(50201,'15cm','PP+Arame','', null, null, 239.00, null, '20–30 dias', ''),
+        v(50202,'20cm','PP+Arame','', null, null, 252.00, null, '20–30 dias', ''),
+        v(50203,'30cm','PP+Arame','', null, null, 315.00, null, '20–30 dias', ''),
+        v(50204,'35cm','PP+Arame','', null, null, 354.00, null, '20–30 dias', ''),
+        v(50205,'40cm','PP+Arame','', null, null, 399.00, null, '20–30 dias', ''),
+        v(50206,'50cm','PP+Arame','', null, null, 430.00, null, '20–30 dias', ''),
+        v(50207,'60cm','PP+Arame','', null, null, 453.00, null, '20–30 dias', ''),
+        v(50208,'70cm','PP+Arame','', null, null, 532.00, null, '20–30 dias', ''),
+        v(50209,'100cm','PP+Arame','', null, null, 616.00, null, '20–30 dias', ''),
       ]},
       { id: 503, nome: 'Znan Fita Metálica (2ª linha)', variacoes: [
         v(50301,'20cm','Fita metálica','', null, null, 239.00, null, '35–45 dias', ''),
@@ -371,7 +370,6 @@ const CATALOGO_SEED = [
       { id: 1101, nome: 'Abraçadeira Identificável (ZID)', variacoes: [
         v(110101,'2,5mm x 100mm Branca','Nylon','Branca', null, null,  241.00, null, '5–7 dias', ''),
         v(110102,'2,5mm x 110mm Branca','Nylon','Branca', null, null,  675.00, null, '5–7 dias', ''),
-        v(110103,'Trava Anel CX',        'Nylon','',       null, null,  null,   33.00, '5–7 dias', 'Caixa com 5.000 uni'),
       ]},
       { id: 1102, nome: 'Abraçadeira Inox', variacoes: [
         v(110201,'150x4,6mm','Aço inox','', null, null,  218.00, null, '—', ''),
@@ -393,12 +391,15 @@ const CATALOGO_SEED = [
         v(110302,'7,6mm x 250mm Branca','Nylon','Branca', null, null, 849.00, null, '—', ''),
       ]},
       { id: 1104, nome: 'Zpin', variacoes: [
-        v(110401,'25mm','PP','', null, null, null, 17.00, '—', 'Caixa com 5.000 uni'),
-        v(110402,'40mm','PP','', null, null, null, 17.00, '—', 'Caixa com 5.000 uni'),
+        v(110401,'25mm · CX c/ 5.000 uni','PP','', null, null, null, 17.00, '—', ''),
+        v(110402,'40mm · CX c/ 5.000 uni','PP','', null, null, null, 17.00, '—', ''),
       ]},
       { id: 1105, nome: 'Fixador Autoadesivo para Fios', variacoes: [
         v(110501,'19x19mm','PP','Branca/Preta', null, null, 354.00, null, '—', 'Por milheiro'),
         v(110502,'30x30mm','PP','Branca/Preta', null, null, 544.00, null, '—', 'Por milheiro'),
+      ]},
+      { id: 1106, nome: 'Trava Anel', variacoes: [
+        v(110601,'CX c/ 5.000 uni','Nylon','', null, null, null, 33.00, '5–7 dias', ''),
       ]},
 
     ],
@@ -417,11 +418,13 @@ const CATALOGO_SEED = [
         v(120104,'35mm','Latão','',  29.90, null, null, null, '15–20 dias', ''),
         v(120105,'40mm','Latão','',  37.50, null, null, null, '15–20 dias', ''),
         v(120107,'50mm','Latão','',  48.50, null, null, null, '15–20 dias', ''),
-        v(120108,'60mm','Latão','',  79.90, null, null, null, '15–20 dias', ''),
-        v(120109,'70mm','Latão','', 103.90, null, null, null, '15–20 dias', ''),
+        v(120108,'60mm','Latão','',  null,  null, null, null, '—', 'Sob consulta'),
+        v(120109,'70mm','Latão','',  null,  null, null, null, '—', 'Sob consulta'),
       ]},
       { id: 1202, nome: 'Cadeado Tradicional PAPAIZ', variacoes: [
-        v(120201,'50mm','Latão','', 54.50, null, null, null, '15–20 dias', ''),
+        v(120201,'50mm','Latão','',  54.50, null, null, null, '15–20 dias', 'Mínimo 6 uni'),
+        v(120202,'60mm','Latão','',  79.90, null, null, null, '15–20 dias', 'Mínimo 6 uni'),
+        v(120203,'70mm','Latão','', 103.90, null, null, null, '15–20 dias', 'Mínimo 6 uni'),
       ]},
       { id: 1209, nome: 'Cadeado Tradicional PADO', variacoes: [
         v(120901,'50mm','Latão','', 54.50, null, null, null, '15–20 dias', ''),
@@ -433,9 +436,9 @@ const CATALOGO_SEED = [
         v(120301,'23mm','Liga','Cinza / Preto', 52.50, null, null, null, '—', ''),
       ]},
       { id: 1213, nome: 'Cadeado Colorido STAM', variacoes: [
-        v(121301,'25mm','Latão','Dourado',                       23.50, null, null, null, '—', 'Normal'),
-        v(121302,'40mm','Latão','Dourado',                       46.90, null, null, null, '—', 'Normal'),
-        v(121303,'25mm','Liga','AM/AZ/BR/Cromado/PT/Rosa/VD/VM', 23.00, null, null, null, '—', ''),
+        v(121301,'25mm · Dourado','Latão','Dourado',                        23.50, null, null, null, '—', ''),
+        v(121302,'40mm · Dourado','Latão','Dourado',                        46.90, null, null, null, '—', ''),
+        v(121303,'25mm · Colorido','Liga','AM/AZ/BR/Cromado/PT/Rosa/VD/VM', 23.00, null, null, null, '—', ''),
       ]},
       { id: 1211, nome: 'Cadeado Colorido GOLD', variacoes: [
         v(121101,'20mm','Liga','AM/AZ/VD/VM', null, null, null, null, '—', 'Sob consulta'),
@@ -562,7 +565,7 @@ const CATALOGO_SEED = [
         v(150101,'Rolo 7kg ~500m','PP','Cinza', 139.00, null, null, 274.00, '—', 'Atacado: acima de 15 rolos — Avulso: /Unidade'),
       ]},
       { id: 1502, nome: 'Fitilho de Rafia Médio Cinza — Rolo', variacoes: [
-        v(150201,'Rolo 1kg ~500m','Rafia','Cinza', 11.20, null, null, null, '—', 'por rolo'),
+        v(150201,'Rolo 1kg · 500m','Rafia','Cinza', null, null, null, 11.20, '—', 'por rolo'),
       ]},
       { id: 1503, nome: 'Fitilho Macio Fino Branco — Rolo', variacoes: [
         v(150301,'Rolo 182m','PP','Branco', null, null, null, 19.99, '—', 'por rolo'),
