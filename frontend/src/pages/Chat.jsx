@@ -173,9 +173,42 @@ export default function Chat() {
   const mediaRecorderRef    = useRef(null);
   const audioChunksRef      = useRef([]);
   const recordingTimerRef   = useRef(null);
+  const lastMsgTsRef        = useRef({});   // { convId: lastTimestamp } — controle de notificações
+  const convAtivaRef        = useRef(null); // espelho de convAtiva p/ usar dentro do onSnapshot
 
   const [isRecording, setIsRecording]   = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+
+  // ── Manter ref de convAtiva sincronizado ─────────────────────────────
+  useEffect(() => { convAtivaRef.current = convAtiva; }, [convAtiva]);
+
+  // ── Pedir permissão de notificação ao montar ─────────────────────────
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // ── Som de notificação (Web Audio API — sem arquivo externo) ─────────
+  function tocarSom() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const gain = ctx.createGain();
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+      [0, 0.18].forEach(delay => {
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime + delay);
+        osc.frequency.linearRampToValueAtTime(660, ctx.currentTime + delay + 0.18);
+        osc.connect(gain);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + 0.25);
+      });
+    } catch { /* silencia em browsers que bloqueiam */ }
+  }
 
   // ── Sincronizar com Firestore em tempo real ──────────────────────────
   useEffect(() => {
@@ -184,6 +217,37 @@ export default function Chat() {
     const q = isAdmin ? col : query(col, where('participantIds', 'array-contains', user.id));
     const unsub = onSnapshot(q, snap => {
       const convs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // ── Detectar mensagens novas de outros usuários ──────────────────
+      convs.forEach(conv => {
+        const lastMsg = conv.messages?.at(-1);
+        if (!lastMsg) return;
+        const lastKnown = lastMsgTsRef.current[conv.id];
+        // lastKnown === undefined → primeira carga → apenas registra, não notifica
+        if (lastKnown !== undefined && lastMsg.em > lastKnown && lastMsg.de !== user.id) {
+          // Não notifica se o usuário já está com essa conversa aberta E a aba está em foco
+          const jaAberta = convAtivaRef.current === conv.id && document.visibilityState === 'visible';
+          if (!jaAberta) {
+            tocarSom();
+            if ('Notification' in window && Notification.permission === 'granted') {
+              const remetente = TODOS_USUARIOS.find(u => u.id === lastMsg.de)?.nome || 'Usuário';
+              const corpo =
+                lastMsg.tipo === 'texto'  ? lastMsg.conteudo :
+                lastMsg.tipo === 'audio'  ? '🎤 Mensagem de voz' :
+                lastMsg.tipo === 'imagem' ? '🖼️ Imagem' : '📎 Arquivo';
+              const notif = new Notification(`💬 ${remetente}`, {
+                body: corpo,
+                icon: '/favicon.ico',
+                tag: conv.id,
+              });
+              // Clicar na notificação foca a aba e abre a conversa
+              notif.onclick = () => { window.focus(); setConvAtiva(conv.id); setMobileListVisible(false); };
+            }
+          }
+        }
+        lastMsgTsRef.current[conv.id] = lastMsg.em;
+      });
+
       setConversas(prev => {
         // Mescla: Firestore tem prioridade; mantém locais ainda não enviados
         const merged = [...convs];
