@@ -12,9 +12,10 @@ const USUARIOS_PADRAO = [
   { id: 3, email: 'compras@zenith.com',     senha: 'lari2026',  nome: 'Compras',       perfil: 'COMPRAS',     restricaoHorario: true  },
   { id: 4, email: 'supervisao@zenith.com',  senha: 'super2026', nome: 'Supervisão',    perfil: 'SUPERVISAO',  restricaoHorario: true  },
   { id: 5, email: 'comercial@zenith.com',   senha: 'com2026',   nome: 'Comercial',     perfil: 'COMERCIAL',   restricaoHorario: true  },
+  { id: 6, email: 'producao@zenith.com',    senha: 'prod2026',  nome: 'Produção',      perfil: 'PRODUCAO',    restricaoHorario: true  },
 ];
 
-export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL'];
+export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO'];
 
 // ──────────────────────────────────────────────
 // SESSÃO ATIVA (controle de acesso único não-admin)
@@ -88,7 +89,7 @@ export function verificarHorarioComercial() {
 // ──────────────────────────────────────────────
 // HELPERS localStorage
 // ──────────────────────────────────────────────
-const USUARIOS_VERSION = 'v4'; // Incremente para forçar reset dos usuários padrão
+const USUARIOS_VERSION = 'v5'; // Incremente para forçar reset dos usuários padrão
 
 function loadUsuarios() {
   try {
@@ -310,31 +311,31 @@ export function AuthProvider({ children }) {
   const can = {
     verDashboard:         user && ['ADMIN'].includes(user.perfil),
     verProdutos:          !!user,
-    editarProdutos:       user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
+    editarProdutos:       user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
     excluirProdutos:      user && ['ADMIN'].includes(user.perfil),
-    fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
-    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO'].includes(user.perfil),
-    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS'].includes(user.perfil),
+    fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO'].includes(user.perfil),
     verAuditoria:         user && ['ADMIN'].includes(user.perfil),
-    verEntrada:           user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
-    confirmarEntrada:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
+    verEntrada:           user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    confirmarEntrada:     user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
     marcarPedido:         user && ['COMPRAS'].includes(user.perfil),
-    verSugestoes:         user && ['ADMIN'].includes(user.perfil),
+    verSugestoes:         !!user,
     gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
-    verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
+    verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS'].includes(user.perfil),
     editarPrecos:         user && ['ADMIN'].includes(user.perfil),
-    verMidia:             user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
+    verMidia:             user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
     // Separações
-    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO'].includes(user.perfil),
+    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO'].includes(user.perfil),
     criarSeparacao:       user && ['ADMIN', 'COMERCIAL'].includes(user.perfil),
-    avancarSeparacao:     user && ['ADMIN', 'EXPEDICAO'].includes(user.perfil),
+    avancarSeparacao:     user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
     editarSeparacao:      user && ['ADMIN'].includes(user.perfil),
     cancelarSeparacao:    user && ['ADMIN'].includes(user.perfil),
     // Chat
     verChat:              !!user,
     verChatTotal:         user?.perfil === 'ADMIN',
-    verCubagem:           !!user,
+    verCubagem:           user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
   };
 
   return (

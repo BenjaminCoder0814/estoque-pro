@@ -197,10 +197,6 @@ export default function Produtos() {
                 <input required className="border rounded-lg px-3 py-2 w-full mt-1" value={form.nome} onChange={handleNome} />
               </div>
               <div>
-                <label className="text-sm font-medium">Código (SKU) *</label>
-                <input required className="border rounded-lg px-3 py-2 w-full mt-1" value={form.codigo} onChange={e => setForm(f => ({ ...f, codigo: e.target.value }))} />
-              </div>
-              <div>
                 <label className="text-sm font-medium">Categoria</label>
                 <input className="border rounded-lg px-3 py-2 w-full mt-1" value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} list="cats-list" />
                 <datalist id="cats-list">{categorias.map(c => <option key={c} value={c} />)}</datalist>
@@ -294,7 +290,6 @@ export default function Produtos() {
             <tr className="bg-gray-50 text-gray-600 text-sm select-none">
               <th className="p-3 text-left">Imagem</th>
               <th className="p-3 text-left">Nome</th>
-              <th className="p-3 text-left">Código</th>
               <th className="p-3 text-left">Categoria</th>
               <th className="p-3 text-left">Modelo</th>
               <th className="p-3 text-left">Tamanho</th>
@@ -332,7 +327,6 @@ export default function Produtos() {
                     )}
                   </div>
                 </td>
-                <td className="p-3 text-gray-500">{p.codigo}</td>
                 <td className="p-3 text-gray-500">{p.categoria}</td>
                 <td className="p-3 text-gray-500 text-xs">{p.modelo || <span className="text-gray-300">—</span>}</td>
                 <td className="p-3 text-gray-500 text-xs whitespace-nowrap">{p.tamanho || <span className="text-gray-300">—</span>}</td>

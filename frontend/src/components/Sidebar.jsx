@@ -17,26 +17,27 @@ const menu = [
   { label: 'Dashboard',  icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN'] },
   // Todos veem Produtos
   { label: 'Produtos',   icon: LucideBox,              to: '/produtos'      },
-  // ADMIN + SUPERVISAO + COMERCIAL (catálogo comercial)
-  { label: 'Preços',     icon: LucideTag,              to: '/precos',        allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL'] },
-  // ADMIN + EXPEDICAO + SUPERVISAO
-  { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'] },
-  // ADMIN + COMPRAS (não EXPEDICAO, não SUPERVISAO)
-  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS', 'EXPEDICAO'] },
-  // ADMIN + EXPEDICAO + COMPRAS
-  { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS'] },
-  // ADMIN só (EXPEDICAO acessa via link de Pendentes)
-  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN', 'EXPEDICAO'] },
+  // ADMIN + SUPERVISAO + COMERCIAL + COMPRAS
+  { label: 'Preços',     icon: LucideTag,              to: '/precos',        allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS'] },
+  // ADMIN + EXPEDICAO + SUPERVISAO + PRODUCAO
+  { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO'] },
+  // ADMIN + COMPRAS + EXPEDICAO + PRODUCAO
+  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO'] },
+  // ADMIN + EXPEDICAO + COMPRAS + PRODUCAO
+  { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO'] },
+  // ADMIN + EXPEDICAO + PRODUCAO
+  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN', 'EXPEDICAO', 'PRODUCAO'] },
   // ADMIN só
   { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN'] },
-  { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes',     allowed: ['ADMIN'] },
+  // Sugestões — TODOS os perfis
+  { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes'     },
   { label: 'Usuários',   icon: LucideUserCog,          to: '/usuarios',      allowed: ['ADMIN'] },
-  // ADMIN + EXPEDICAO + COMERCIAL + SUPERVISAO (gestão de separação)
-  { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO'] },
-  // Todos exceto COMPRAS veem Mídia
-  { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'COMERCIAL'] },
-  // Cubagem — todos os perfis
-  { label: 'Cubagem',    icon: LucideRuler,           to: '/cubagem'        },
+  // ADMIN + EXPEDICAO + COMERCIAL + SUPERVISAO + PRODUCAO
+  { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO'] },
+  // Mídia — apenas ADMIN, SUPERVISAO, COMERCIAL (sem EXPEDICAO, COMPRAS, PRODUCAO)
+  { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL'] },
+  // Cubagem — apenas ADMIN, SUPERVISAO, COMERCIAL (sem EXPEDICAO, COMPRAS, PRODUCAO)
+  { label: 'Cubagem',    icon: LucideRuler,            to: '/cubagem',       allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL'] },
   // Chat — todos os perfis
   { label: 'Chat',       icon: LucideMessageSquare,   to: '/chat'           },
 ];
@@ -65,7 +66,7 @@ export default function Sidebar() {
       } catch { return 0; }
     }
     setChatNaoLidas(calcNaoLidas());
-    const timer = setInterval(() => setChatNaoLidas(calcNaoLidas()), 3000);
+    const timer = setInterval(() => setChatNaoLidas(calcNaoLidas()), 1000);
     const onStorage = () => setChatNaoLidas(calcNaoLidas());
     window.addEventListener('storage', onStorage);
     return () => { clearInterval(timer); window.removeEventListener('storage', onStorage); };

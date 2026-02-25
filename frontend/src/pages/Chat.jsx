@@ -26,6 +26,7 @@ const TODOS_USUARIOS = [
   { id: 3, nome: 'Compras',       perfil: 'COMPRAS' },
   { id: 4, nome: 'Supervisão',    perfil: 'SUPERVISAO' },
   { id: 5, nome: 'Comercial',     perfil: 'COMERCIAL' },
+  { id: 6, nome: 'Produção',      perfil: 'PRODUCAO' },
 ];
 
 const BADGES_PERFIL = {
@@ -168,10 +169,10 @@ export default function Chat() {
       if (e.key === READ_KEY) setReadMap(loadRead());
     }
     window.addEventListener('storage', onStorage);
-    // Poll a cada 3s para o caso de estar na mesma tab (mesmo origin)
+    // Poll a cada 1s para garantir mensagens em tempo real
     const timer = setInterval(() => {
       setConversas(loadConversas());
-    }, 3000);
+    }, 1000);
     return () => {
       window.removeEventListener('storage', onStorage);
       clearInterval(timer);

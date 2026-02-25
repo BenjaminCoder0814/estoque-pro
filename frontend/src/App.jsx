@@ -47,23 +47,23 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Histórico — ADMIN, EXPEDICAO, SUPERVISAO apenas */}
+        {/* Histórico — ADMIN, EXPEDICAO, SUPERVISAO, PRODUCAO */}
         <Route path="/movimentacoes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO']}>
             <LayoutBase><Movimentacoes /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Alertas — ADMIN, COMPRAS (EXPEDICAO e SUPERVISAO não vêem) */}
+        {/* Alertas — ADMIN, COMPRAS, EXPEDICAO, PRODUCAO */}
         <Route path="/alertas" element={
-          <PrivateRoute allowed={['ADMIN', 'COMPRAS']}>
+          <PrivateRoute allowed={['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO']}>
             <LayoutBase><Alertas /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Pendentes — ADMIN, EXPEDICAO, COMPRAS */}
+        {/* Pendentes — ADMIN, EXPEDICAO, COMPRAS, PRODUCAO */}
         <Route path="/pendentes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO']}>
             <LayoutBase><Pendentes /></LayoutBase>
           </PrivateRoute>
         } />
@@ -75,16 +75,16 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Entrada — ADMIN + EXPEDICAO (acessível via link dos Pendentes) */}
+        {/* Entrada — ADMIN + EXPEDICAO + PRODUCAO */}
         <Route path="/entrada" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'PRODUCAO']}>
             <LayoutBase><Entrada /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Sugestões — ADMIN apenas */}
+        {/* Sugestões — todos os perfis */}
         <Route path="/sugestoes" element={
-          <PrivateRoute allowed={['ADMIN']}>
+          <PrivateRoute>
             <LayoutBase><Sugestoes /></LayoutBase>
           </PrivateRoute>
         } />
@@ -96,30 +96,30 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Preços — ADMIN, SUPERVISAO, COMERCIAL (catálogo comercial) */}
+        {/* Preços — ADMIN, SUPERVISAO, COMERCIAL, COMPRAS */}
         <Route path="/precos" element={
-          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL']}>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS']}>
             <LayoutBase><Precos /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Mídia — todos os perfis */}
+        {/* Mídia — ADMIN, SUPERVISAO, COMERCIAL */}
         <Route path="/midia" element={
-          <PrivateRoute>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL']}>
             <LayoutBase><Midia /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Separações — ADMIN, EXPEDICAO, COMERCIAL, SUPERVISAO */}
+        {/* Separações — ADMIN, EXPEDICAO, COMERCIAL, SUPERVISAO, PRODUCAO */}
         <Route path="/separacoes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO']}>
             <LayoutBase><Separacoes /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Cubagem — todos os perfis logados */}
+        {/* Cubagem — ADMIN, SUPERVISAO, COMERCIAL */}
         <Route path="/cubagem" element={
-          <PrivateRoute>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL']}>
             <LayoutBase><Cubagem /></LayoutBase>
           </PrivateRoute>
         } />
