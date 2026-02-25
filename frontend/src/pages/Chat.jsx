@@ -599,7 +599,7 @@ export default function Chat() {
       </aside>
 
       {/* ═══════════════ PAINEL DIREITO — Conversa ══════════════════════ */}
-      <main className={`flex-1 flex flex-col min-w-0 ${mobileListVisible ? 'hidden md:flex' : 'flex'}`}>
+      <main className={`flex-1 flex flex-col min-w-0 relative ${mobileListVisible ? 'hidden md:flex' : 'flex'}`}>
 
         {convAtiva && convAtivaObj ? (
           <>
@@ -870,30 +870,32 @@ export default function Chat() {
           </>
         ) : (
           // ── Estado vazio: nenhuma conversa selecionada ──
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-600 gap-4">
-            <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center shadow-xl">
-              <LucideMessageSquare className="w-9 h-9 text-indigo-500/60" />
-            </div>
-            <div className="text-center">
-              <div className="text-base font-semibold text-slate-400 mb-1">Chat Interno Zenith</div>
-              <div className="text-sm text-slate-600">
-                {modoAdminTotal
-                  ? 'Selecione uma conversa para visualizar'
-                  : 'Selecione um contato para começar a conversar'
-                }
+          <div className="flex-1 relative w-full h-full min-h-0">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-600">
+              <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center shadow-xl">
+                <LucideMessageSquare className="w-9 h-9 text-indigo-500/60" />
               </div>
+              <div className="text-center">
+                <div className="text-base font-semibold text-slate-400 mb-1">Chat Interno Zenith</div>
+                <div className="text-sm text-slate-600">
+                  {modoAdminTotal
+                    ? 'Selecione uma conversa para visualizar'
+                    : 'Selecione um contato para começar a conversar'
+                  }
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] text-slate-700 bg-slate-800/40 rounded-lg px-4 py-2">
+                <LucideAlertCircle className="w-3.5 h-3.5 text-indigo-600" />
+                Apenas você e o destinatário veem a conversa
+              </div>
+              {/* Mobile: botão para abrir lista */}
+              <button
+                className="md:hidden mt-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-xl transition"
+                onClick={() => setMobileListVisible(true)}
+              >
+                Ver contatos
+              </button>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-700 bg-slate-800/40 rounded-lg px-4 py-2">
-              <LucideAlertCircle className="w-3.5 h-3.5 text-indigo-600" />
-              Apenas você e o destinatário veem a conversa
-            </div>
-            {/* Mobile: botão para abrir lista */}
-            <button
-              className="md:hidden mt-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm rounded-xl transition"
-              onClick={() => setMobileListVisible(true)}
-            >
-              Ver contatos
-            </button>
           </div>
         )}
       </main>
