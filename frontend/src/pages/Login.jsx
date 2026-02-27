@@ -1,7 +1,7 @@
 // Tela de login — glassmorphism profissional sobre fundo animado
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LucideLock, LucideUser, LucideEye, LucideEyeOff, LucideLoader, LucideAlertTriangle } from 'lucide-react';
+import { LucideLock, LucideUser, LucideEye, LucideEyeOff, LucideLoader, LucideAlertTriangle, LucideBriefcase } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -10,12 +10,11 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [demoReady, setDemoReady] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
+    if (user) { navigate('/'); }
   }, [user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -23,6 +22,19 @@ export default function Login() {
     setKickedMessage(null);
     setLoading(true);
     await login(email, senha);
+    setLoading(false);
+  };
+
+  const preencherDemo = () => {
+    setEmail('visitante@zenith.com');
+    setSenha('demo2026');
+    setDemoReady(true);
+  };
+
+  const loginDemo = async () => {
+    setKickedMessage(null);
+    setLoading(true);
+    await login('visitante@zenith.com', 'demo2026');
     setLoading(false);
   };
 
@@ -155,6 +167,56 @@ export default function Login() {
             </span>
           ) : 'Entrar no Sistema'}
         </button>
+
+        {/* ──── SEPARADOR ──── */}
+        <div className="flex items-center gap-3 my-5">
+          <span className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+          <span className="text-xs text-slate-500 font-medium">ou</span>
+          <span className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+        </div>
+
+        {/* ──── CARD VISITANTE PORTFÓLIO ──── */}
+        <div
+          className="rounded-2xl p-4"
+          style={{ background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.3)' }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <LucideBriefcase className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">Acesso Portfolio</span>
+          </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
+            Quer explorar o sistema? Clique abaixo para entrar como <strong className="text-slate-300">Visitante</strong> e visualizar todas as funcionalidades com tour guiado.
+          </p>
+          {!demoReady ? (
+            <button
+              type="button"
+              onClick={preencherDemo}
+              className="w-full py-2.5 rounded-xl font-bold text-white text-xs tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ background: 'linear-gradient(90deg,#6366f1,#8b5cf6)' }}
+            >
+              👁️ Preencher Acesso Visitante
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <div className="rounded-lg px-3 py-2 text-[11px]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(99,102,241,0.25)' }}>
+                <span className="text-slate-500">Email: </span><span className="text-indigo-300 font-mono">visitante@zenith.com</span><br/>
+                <span className="text-slate-500">Senha: </span><span className="text-indigo-300 font-mono">demo2026</span>
+              </div>
+              <p className="text-[11px] text-emerald-400 text-center font-semibold">✔ Credenciais preenchidas! Clique em Entrar ⬆️</p>
+              <button
+                type="button"
+                onClick={loginDemo}
+                disabled={loading}
+                className="w-full py-2.5 rounded-xl font-bold text-white text-xs tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+                style={{ background: 'linear-gradient(90deg,#10b981,#059669)' }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2"><LucideLoader className="w-3 h-3 animate-spin" /> Entrando...</span>
+                ) : '🚀 Entrar como Visitante'}
+              </button>
+            </div>
+          )}
+        </div>
 
         <p className="text-center text-[11px] text-slate-500 mt-6 tracking-wide">
           ZENITH &bull; Estoque Pro &bull; Sistema v2.1

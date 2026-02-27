@@ -13,33 +13,32 @@ import { useEstoque } from '../contexts/EstoqueContext';
 // Cada item tem `allowed` listando os perfis que PODEM ver
 // Se `allowed` é undefined → todos os perfis logados veem
 const menu = [
-  // ADMIN: tudo
-  { label: 'Dashboard',  icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN'] },
+  // ADMIN + VISITANTE: Dashboard
+  { label: 'Dashboard',  icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN', 'VISITANTE'] },
   // Todos veem Produtos
   { label: 'Produtos',   icon: LucideBox,              to: '/produtos'      },
-  // ADMIN + SUPERVISAO + COMERCIAL + COMPRAS
-  { label: 'Preços',     icon: LucideTag,              to: '/precos',        allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS'] },
-  // ADMIN + EXPEDICAO + SUPERVISAO + PRODUCAO
-  { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO'] },
-  // ADMIN + COMPRAS + EXPEDICAO + PRODUCAO
-  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO'] },
-  // ADMIN + EXPEDICAO + COMPRAS + PRODUCAO
-  { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO'] },
-  // ADMIN + EXPEDICAO + PRODUCAO
-  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN', 'EXPEDICAO', 'PRODUCAO'] },
-  // ADMIN só
-  { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN'] },
+  // ADMIN + SUPERVISAO + COMERCIAL + COMPRAS + VISITANTE
+  { label: 'Preços',     icon: LucideTag,              to: '/precos',        allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'] },
+  // ADMIN + EXPEDICAO + SUPERVISAO + PRODUCAO + VISITANTE
+  { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'] },
+  // ADMIN + COMPRAS + EXPEDICAO + PRODUCAO + VISITANTE
+  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'] },
+  // ADMIN + EXPEDICAO + COMPRAS + PRODUCAO + VISITANTE
+  { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'] },
+  // ADMIN + EXPEDICAO + PRODUCAO + VISITANTE
+  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'] },
+  // ADMIN + VISITANTE
+  { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN', 'VISITANTE'] },
   // Sugestões — TODOS os perfis
   { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes'     },
   { label: 'Usuários',   icon: LucideUserCog,          to: '/usuarios',      allowed: ['ADMIN'] },
-  // ADMIN + EXPEDICAO + COMERCIAL + SUPERVISAO + PRODUCAO
-  { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO'] },
-  // Mídia — apenas ADMIN, SUPERVISAO, COMERCIAL (sem EXPEDICAO, COMPRAS, PRODUCAO)
-  { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL'] },
-  // Cubagem — apenas ADMIN, SUPERVISAO, COMERCIAL (sem EXPEDICAO, COMPRAS, PRODUCAO)
-  { label: 'Cubagem',    icon: LucideRuler,            to: '/cubagem',       allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL'] },
-  // Chat — todos os perfis
-  { label: 'Chat',       icon: LucideMessageSquare,   to: '/chat'           },
+  // ADMIN + EXPEDICAO + COMERCIAL + SUPERVISAO + PRODUCAO + VISITANTE
+  { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'] },
+  // Mídia + Cubagem — VISITANTE incluso
+  { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'] },
+  { label: 'Cubagem',    icon: LucideRuler,            to: '/cubagem',       allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'] },
+  // Chat — não exibido para VISITANTE
+  { label: 'Chat',       icon: LucideMessageSquare,   to: '/chat',          allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO'] },
 ];
 
 export default function Sidebar() {
@@ -148,6 +147,20 @@ export default function Sidebar() {
             );
           })}
       </nav>
+
+      {/* Badge Modo Visitante */}
+      {user?.perfil === 'VISITANTE' && !collapsed && (
+        <div
+          className="mx-3 mb-3 rounded-xl px-3 py-2.5 flex items-center gap-2"
+          style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)' }}
+        >
+          <span className="text-base">👁️</span>
+          <div>
+            <div className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Modo Visitante</div>
+            <div className="text-[9px] text-slate-500 leading-tight">Somente visualização</div>
+          </div>
+        </div>
+      )}
 
       {/* Colapso */}
       <button

@@ -13,9 +13,11 @@ const USUARIOS_PADRAO = [
   { id: 4, email: 'supervisao@zenith.com',  senha: 'super2026', nome: 'Supervisão',    perfil: 'SUPERVISAO',  restricaoHorario: true  },
   { id: 5, email: 'comercial@zenith.com',   senha: 'com2026',   nome: 'Comercial',     perfil: 'COMERCIAL',   restricaoHorario: true  },
   { id: 6, email: 'producao@zenith.com',    senha: 'prod2026',  nome: 'Produção',      perfil: 'PRODUCAO',    restricaoHorario: true  },
+  // Visitante de portfólio — somente visualização, sem restrição de horário
+  { id: 99, email: 'visitante@zenith.com',  senha: 'demo2026',  nome: 'Visitante',     perfil: 'VISITANTE',   restricaoHorario: false },
 ];
 
-export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO'];
+export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO', 'VISITANTE'];
 
 // ──────────────────────────────────────────────
 // SESSÃO ATIVA (controle de acesso único não-admin)
@@ -89,7 +91,7 @@ export function verificarHorarioComercial() {
 // ──────────────────────────────────────────────
 // HELPERS localStorage
 // ──────────────────────────────────────────────
-const USUARIOS_VERSION = 'v5'; // Incremente para forçar reset dos usuários padrão
+const USUARIOS_VERSION = 'v6'; // Incremente para forçar reset dos usuários padrão
 
 function loadUsuarios() {
   try {
@@ -230,6 +232,8 @@ export function AuthProvider({ children }) {
         enviarSinalKick(sessao.sessionId, found.nome);
         setSessaoAtiva(null);
       }
+    } else if (found.perfil === 'VISITANTE') {
+      // VISITANTE: sempre permitido, sem bloquear outros
     } else {
       // Não-admin: bloqueia se outro usuário diferente já está ativo
       if (sessao && sessao.id !== found.id) {
@@ -252,8 +256,8 @@ export function AuthProvider({ children }) {
     setUser(userData);
     localStorage.setItem('zkuser', JSON.stringify(userData));
 
-    // Registra sessão ativa apenas para não-admin
-    if (found.perfil !== 'ADMIN') setSessaoAtiva(userData);
+    // Registra sessão ativa apenas para não-admin e não-visitante
+    if (found.perfil !== 'ADMIN' && found.perfil !== 'VISITANTE') setSessaoAtiva(userData);
 
     return true;
   }
@@ -308,34 +312,35 @@ export function AuthProvider({ children }) {
   // COMPRAS:    Produtos (vis.), Alertas, Pendentes (criar pedido)
   // SUPERVISAO: Produtos (vis.), Histórico
   // COMERCIAL:  Somente Produtos (visualização)
+  const isVisitante = user?.perfil === 'VISITANTE';
   const can = {
-    verDashboard:         user && ['ADMIN'].includes(user.perfil),
+    verDashboard:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
     verProdutos:          !!user,
-    editarProdutos:       user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    excluirProdutos:      user && ['ADMIN'].includes(user.perfil),
-    fazerMovimentacoes:   user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO'].includes(user.perfil),
-    verAuditoria:         user && ['ADMIN'].includes(user.perfil),
-    verEntrada:           user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    confirmarEntrada:     user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    marcarPedido:         user && ['COMPRAS'].includes(user.perfil),
+    editarProdutos:       !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    excluirProdutos:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    fazerMovimentacoes:   !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verAuditoria:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
+    verEntrada:           user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    confirmarEntrada:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    marcarPedido:         !isVisitante && user && ['COMPRAS'].includes(user.perfil),
     verSugestoes:         !!user,
-    gerenciarUsuarios:    user && ['ADMIN'].includes(user.perfil),
-    verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS'].includes(user.perfil),
-    editarPrecos:         user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
-    verMidia:             user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
+    gerenciarUsuarios:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'].includes(user.perfil),
+    editarPrecos:         !isVisitante && user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
+    verMidia:             user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
     // Separações
-    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO'].includes(user.perfil),
-    criarSeparacao:       user && ['ADMIN', 'COMERCIAL'].includes(user.perfil),
-    avancarSeparacao:     user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    editarSeparacao:      user && ['ADMIN'].includes(user.perfil),
-    cancelarSeparacao:    user && ['ADMIN'].includes(user.perfil),
-    // Chat
-    verChat:              !!user,
+    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    criarSeparacao:       !isVisitante && user && ['ADMIN', 'COMERCIAL'].includes(user.perfil),
+    avancarSeparacao:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    editarSeparacao:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    cancelarSeparacao:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    // Chat — visitante não participa do chat interno
+    verChat:              !!user && !isVisitante,
     verChatTotal:         user?.perfil === 'ADMIN',
-    verCubagem:           user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL'].includes(user.perfil),
+    verCubagem:           user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
   };
 
   return (
