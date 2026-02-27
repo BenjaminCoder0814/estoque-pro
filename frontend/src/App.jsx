@@ -33,9 +33,9 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        {/* Dashboard — ADMIN somente */}
+        {/* Dashboard — ADMIN + VISITANTE (modo leitura) */}
         <Route path="/" element={
-          <PrivateRoute allowed={['ADMIN']}>
+          <PrivateRoute allowed={['ADMIN', 'VISITANTE']}>
             <LayoutBase><Dashboard /></LayoutBase>
           </PrivateRoute>
         } />
@@ -47,37 +47,37 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Histórico — ADMIN, EXPEDICAO, SUPERVISAO, PRODUCAO */}
+        {/* Histórico — ADMIN, EXPEDICAO, SUPERVISAO, PRODUCAO, VISITANTE */}
         <Route path="/movimentacoes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE']}>
             <LayoutBase><Movimentacoes /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Alertas — ADMIN, COMPRAS, EXPEDICAO, PRODUCAO */}
+        {/* Alertas — ADMIN, COMPRAS, EXPEDICAO, PRODUCAO, VISITANTE */}
         <Route path="/alertas" element={
-          <PrivateRoute allowed={['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO']}>
+          <PrivateRoute allowed={['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE']}>
             <LayoutBase><Alertas /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Pendentes — ADMIN, EXPEDICAO, COMPRAS, PRODUCAO */}
+        {/* Pendentes — ADMIN, EXPEDICAO, COMPRAS, PRODUCAO, VISITANTE */}
         <Route path="/pendentes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE']}>
             <LayoutBase><Pendentes /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Auditoria — ADMIN apenas */}
+        {/* Auditoria — ADMIN + VISITANTE (somente leitura) */}
         <Route path="/auditoria" element={
-          <PrivateRoute allowed={['ADMIN']}>
+          <PrivateRoute allowed={['ADMIN', 'VISITANTE']}>
             <LayoutBase><Auditoria /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Entrada — ADMIN + EXPEDICAO + PRODUCAO */}
+        {/* Entrada — ADMIN + EXPEDICAO + PRODUCAO + VISITANTE (leitura) */}
         <Route path="/entrada" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'PRODUCAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE']}>
             <LayoutBase><Entrada /></LayoutBase>
           </PrivateRoute>
         } />
@@ -96,37 +96,37 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Preços — ADMIN, SUPERVISAO, COMERCIAL, COMPRAS */}
+        {/* Preços — ADMIN, SUPERVISAO, COMERCIAL, COMPRAS, VISITANTE (leitura) */}
         <Route path="/precos" element={
-          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS']}>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE']}>
             <LayoutBase><Precos /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Mídia — ADMIN, SUPERVISAO, COMERCIAL */}
+        {/* Mídia — ADMIN, SUPERVISAO, COMERCIAL, VISITANTE */}
         <Route path="/midia" element={
-          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL']}>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE']}>
             <LayoutBase><Midia /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Separações — ADMIN, EXPEDICAO, COMERCIAL, SUPERVISAO, PRODUCAO */}
+        {/* Separações — ADMIN, EXPEDICAO, COMERCIAL, SUPERVISAO, PRODUCAO, VISITANTE (leitura) */}
         <Route path="/separacoes" element={
-          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO']}>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE']}>
             <LayoutBase><Separacoes /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Cubagem — ADMIN, SUPERVISAO, COMERCIAL */}
+        {/* Cubagem — ADMIN, SUPERVISAO, COMERCIAL, VISITANTE */}
         <Route path="/cubagem" element={
-          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL']}>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE']}>
             <LayoutBase><Cubagem /></LayoutBase>
           </PrivateRoute>
         } />
 
-        {/* Chat — todos os perfis logados */}
+        {/* Chat — todos os perfis exceto VISITANTE */}
         <Route path="/chat" element={
-          <PrivateRoute>
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO']}>
             <LayoutBase noPadding><Chat /></LayoutBase>
           </PrivateRoute>
         } />
