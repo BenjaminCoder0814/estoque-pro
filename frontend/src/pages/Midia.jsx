@@ -180,6 +180,12 @@ function humanDate(iso) {
 
 // ── Sub-componente: grade de fotos de uma categoria ────────────────────────
 function FotoGrid({ fotos, onPreview }) {
+  const cdn = (url) => {
+    if (!url || typeof window === 'undefined') return url;
+    const abs = url.startsWith('http') ? url : `${window.location.origin}${url.startsWith('/') ? url : `/${url}`}`;
+    return `/.netlify/images?url=${encodeURIComponent(abs)}&w=900&fit=inside&auto=format`;
+  };
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
       {fotos.map((f, idx) => (
@@ -191,7 +197,7 @@ function FotoGrid({ fotos, onPreview }) {
         >
           <div className="aspect-square overflow-hidden bg-gray-50">
             <img
-              src={f.url}
+              src={cdn(f.url) || f.url}
               alt={f.nome}
               width={300}
               height={300}
@@ -200,7 +206,7 @@ function FotoGrid({ fotos, onPreview }) {
               decoding="async"
               fetchpriority={idx < 6 ? 'high' : 'low'}
               sizes="(min-width:1280px) 16vw, (min-width:1024px) 20vw, (min-width:768px) 25vw, 45vw"
-              onError={e => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:2rem;">🖼️</div>'; }}
+              onError={e => { e.target.onerror = null; e.target.src = f.url; }}
             />
           </div>
           {/* hover overlay */}

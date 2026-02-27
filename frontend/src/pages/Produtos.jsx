@@ -75,12 +75,20 @@ function autoImagem(nome) {
 // Componente de imagem com fallback automático quando falha a carregar
 function ImgProduto({ src, alt, className, fallback }) {
   const [erro, setErro] = React.useState(false);
+
+  function cdn(url) {
+    if (!url || typeof window === 'undefined') return url;
+    const abs = url.startsWith('http') ? url : `${window.location.origin}${url.startsWith('/') ? url : `/${url}`}`;
+    return `/.netlify/images?url=${encodeURIComponent(abs)}&w=600&fit=inside&auto=format`;
+  }
+
   if (!src || erro) {
     return fallback || <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">—</div>;
   }
+  const optimized = cdn(src);
   return (
     <img
-      src={src}
+      src={optimized || src}
       alt={alt}
       className={className}
       onError={() => setErro(true)}
