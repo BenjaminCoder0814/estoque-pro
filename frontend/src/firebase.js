@@ -2,15 +2,27 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
+// Lê configuração do Firebase a partir de variáveis de ambiente Vite (.env / Netlify UI)
 const firebaseConfig = {
-  apiKey:            'AIzaSyDpOQ48NLldEPwAsLlTI24y-TDFDMQjhxo',
-  authDomain:        'zenith-estoque.firebaseapp.com',
-  projectId:         'zenith-estoque',
-  storageBucket:     'zenith-estoque.firebasestorage.app',
-  messagingSenderId: '300902589140',
-  appId:             '1:300902589140:web:b84ce78fd06e0daeba5141',
-  measurementId:     'G-SBV8WPNEX7',
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+// Validação leve para evitar build/start sem variáveis
+const missing = Object.entries(firebaseConfig)
+  .filter(([, v]) => !v)
+  .map(([k]) => k);
+if (missing.length) {
+  console.warn(
+    '[firebase] Variáveis ausentes:', missing.join(', '),
+    '\nDefina-as em .env.local ou no painel de variáveis (Netlify).'
+  );
+}
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
