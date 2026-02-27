@@ -293,6 +293,32 @@ function calcularEmbalagens(material, modelo, tamanho, quantidade, fonte) {
   return resultados;
 }
 
+// Sugestão de transportadora por região/UF
+const UF_REGIAO = {
+  AC: 'N', AL: 'NE', AM: 'N', AP: 'N', BA: 'NE', CE: 'NE', DF: 'CO', ES: 'SE', GO: 'CO',
+  MA: 'NE', MT: 'CO', MS: 'CO', MG: 'SE', PA: 'N', PB: 'NE', PR: 'S', PE: 'NE', PI: 'NE',
+  RJ: 'SE', RN: 'NE', RO: 'N', RR: 'N', RS: 'S', SC: 'S', SE: 'NE', SP: 'SE', TO: 'N',
+};
+
+const TRANSP = {
+  N_NE: ['Unitras', 'Viktoria', 'Trans Império', 'Impakto Transportes', 'Trans Winter', 'Braspress', 'Transporte Generoso'],
+  S_SE: ['Impakto Transportes', 'Aceville', 'Smat LOG (11 99305-6360)', 'Rodonaves', 'Braspress', 'M2000', 'Rodoviário Camilo dos Santos', 'Transporte Generoso', 'Gamper (11 5668-9800)'],
+  CO:   ['Impakto Transportes', 'Mandala', 'Solidez Transporte', 'Aceville', 'Transporte Generoso'],
+  SP:   ['TDB', 'Rodomax'],
+  DF:   ['Sonic Transporte'],
+};
+
+function sugerirTransportadora(uf) {
+  if (!uf) return null;
+  if (uf === 'SP') return { regiao: 'São Paulo', lista: TRANSP.SP };
+  if (uf === 'DF') return { regiao: 'Distrito Federal', lista: TRANSP.DF };
+  const reg = UF_REGIAO[uf];
+  if (reg === 'N' || reg === 'NE') return { regiao: 'Norte / Nordeste', lista: TRANSP.N_NE };
+  if (reg === 'S' || reg === 'SE') return { regiao: 'Sul / Sudeste', lista: TRANSP.S_SE };
+  if (reg === 'CO') return { regiao: 'Centro-Oeste', lista: TRANSP.CO };
+  return null;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // SUB-COMPONENTES
 // ─────────────────────────────────────────────────────────────────────────────
@@ -413,7 +439,9 @@ function Calculadora({ fonteLabel, fonte }) {
   const [modelo,   setModelo]   = useState('');
   const [tamanho,  setTamanho]  = useState('');
   const [qtd,      setQtd]      = useState('');
+  const [uf,       setUf]       = useState('');
   const [resultado, setResultado] = useState(null);
+  const [sugestao, setSugestao] = useState(null);
 
   const modelos = material === 'plastico' ? MODELOS_PLASTICO : material === 'metalico' ? MODELOS_METALICO : [];
   const tamanhos = useMemo(() => {
@@ -425,10 +453,11 @@ function Calculadora({ fonteLabel, fonte }) {
   function calcular() {
     const res = calcularEmbalagens(material, modelo, tamanho, qtd, fonte);
     setResultado(res);
+    setSugestao(sugerirTransportadora(uf));
   }
 
   function limpar() {
-    setMaterial(''); setModelo(''); setTamanho(''); setQtd(''); setResultado(null);
+    setMaterial(''); setModelo(''); setTamanho(''); setQtd(''); setUf(''); setResultado(null); setSugestao(null);
   }
 
   return (
@@ -497,6 +526,21 @@ function Calculadora({ fonteLabel, fonte }) {
             value={qtd}
             onChange={e => { setQtd(e.target.value); setResultado(null); }}
           />
+        </div>
+
+        {/* UF Destino */}
+        <div>
+          <label className="text-xs font-semibold text-gray-600 mb-1 block">Estado (destino)</label>
+          <select
+            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+            value={uf}
+            onChange={e => { setUf(e.target.value); setSugestao(null); }}
+          >
+            <option value="">Selecionar…</option>
+            {['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'].map(sigla => (
+              <option key={sigla} value={sigla}>{sigla}</option>
+            ))}
+          </select>
         </div>
       </div>
 

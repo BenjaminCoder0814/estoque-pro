@@ -173,6 +173,11 @@ export default function Produtos() {
         )}
       </div>
 
+      <div className="mb-4 bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm rounded-lg px-4 py-3 flex items-center gap-2">
+        <span className="text-base">ℹ️</span>
+        <span>Todos os produtos estão listados em ordem alfabética para qualquer login.</span>
+      </div>
+
       {/* Filtros */}
       <div className="flex gap-3 mb-5 flex-wrap bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
         <input
