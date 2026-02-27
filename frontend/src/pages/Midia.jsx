@@ -182,7 +182,7 @@ function humanDate(iso) {
 function FotoGrid({ fotos, onPreview }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-      {fotos.map(f => (
+      {fotos.map((f, idx) => (
         <div
           key={f.url}
           onClick={() => onPreview(f.url, f.nome)}
@@ -193,8 +193,13 @@ function FotoGrid({ fotos, onPreview }) {
             <img
               src={f.url}
               alt={f.nome}
+              width={300}
+              height={300}
               className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 p-2"
               loading="lazy"
+              decoding="async"
+              fetchpriority={idx < 6 ? 'high' : 'low'}
+              sizes="(min-width:1280px) 16vw, (min-width:1024px) 20vw, (min-width:768px) 25vw, 45vw"
               onError={e => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#d1d5db;font-size:2rem;">🖼️</div>'; }}
             />
           </div>
