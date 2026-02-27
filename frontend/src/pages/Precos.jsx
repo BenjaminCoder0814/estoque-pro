@@ -14,7 +14,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 const FIRESTORE_DOC = () => doc(db, 'catalogo', 'precos');
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v21';
+const CAT_VERSION = 'v22';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -175,12 +175,12 @@ const CATALOGO_SEED = [
   ══════════════════════════════════════════════════════ */
   {
     id: 6, categoria: 'Amarrilho e Arames', icon: 'scissors', color: 'teal',
-    obs: 'Prazo 3–7 dias',
+    obs: 'Prazo 3–7 dias. Cortes especiais: pedido mínimo 25kg.',
     produtos: [
       { id: 601, nome: 'Amarrilho / Fecho Lacre de Arame', variacoes: [
-        v(60101,'8cm / 10cm (1.340 pçs/kg)','Papel+Arame','Preto/Branco',  36.00, null, null, null, '5–10 dias', 'Por kg — demais cores sob consulta'),
-        v(60102,'15cm (890 pçs/kg)','Papel+Arame','Preto/Branco',           36.00, null, null, null, '5–10 dias', 'Por kg'),
-        v(60103,'60cm','Papel+Arame','Preto/Branco',                           36.00, null, null, null, '5–10 dias', 'Por kg — outras medidas sob consulta'),
+        v(60101,'8cm / 10cm (1.340 pçs/kg)','Papel+Arame','Preto/Branco',  36.00, null, null, null, '5–10 dias', 'Por kg — demais cores sob consulta. Cortes especiais: mín. 25kg'),
+        v(60102,'15cm (890 pçs/kg)','Papel+Arame','Preto/Branco',           36.00, null, null, null, '5–10 dias', 'Por kg. Cortes especiais: mín. 25kg'),
+        v(60103,'60cm','Papel+Arame','Preto/Branco',                           36.00, null, null, null, '5–10 dias', 'Por kg — outras medidas sob consulta. Cortes especiais: mín. 25kg'),
       ]},
       { id: 602, nome: 'Arames Galvanizados', variacoes: [
         v(60201,'2x26 ou 3x26','Aço galvanizado','', 119.00, null, null, null, '3–7 dias', 'Por rolo/kg'),
