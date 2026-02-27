@@ -679,6 +679,22 @@ function initCatalogo() {
 }
 function saveCatalogo(data) { localStorage.setItem(CAT_KEY, JSON.stringify(data)); }
 
+// Ordena catálogo, produtos e variações alfabeticamente (pt-BR, sem acento)
+function sortCatalogoData(data) {
+  const cmp = (a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' });
+  return [...data]
+    .map(cat => ({
+      ...cat,
+      produtos: [...cat.produtos]
+        .sort((a, b) => cmp(a.nome, b.nome))
+        .map(prod => ({
+          ...prod,
+          variacoes: [...prod.variacoes].sort((a, b) => cmp(String(a.tamanho || ''), String(b.tamanho || ''))),
+        })),
+    }))
+    .sort((a, b) => cmp(a.categoria, b.categoria));
+}
+
 const VAZIO_CAT  = { categoria: '' };
 const VAZIO_PROD = { nome: '' };
 const VAZIO_VAR  = { tamanho:'', material:'', precoAtacado:'', precoMilheiro:'', precoUnidade:'', prazo:'', obs:'' };
@@ -692,7 +708,7 @@ const CAMPOS_PRECO = [
 // ── COMPONENTE PRINCIPAL ──────────────────────────────────────────────────
 export default function Precos() {
   const { can, user } = useAuth();
-  const [catalogo, setCatalogo]   = useState(initCatalogo);
+  const [catalogo, setCatalogo]   = useState(() => sortCatalogoData(initCatalogo()));
   const skipSnap = useRef(false);
 
   // ── Sync em tempo real com Firestore ──────────────────────────────────
@@ -702,10 +718,14 @@ export default function Precos() {
       if (skipSnap.current) { skipSnap.current = false; return; }
       if (snap.exists()) {
         const remoto = snap.data().data;
-        if (remoto) { setCatalogo(remoto); saveCatalogo(remoto); }
+        if (remoto) {
+          const ordenado = sortCatalogoData(remoto);
+          setCatalogo(ordenado);
+          saveCatalogo(ordenado);
+        }
       } else {
         // Firestore ainda vazio — faz upload do catálogo local atual
-        const local = initCatalogo();
+        const local = sortCatalogoData(initCatalogo());
         skipSnap.current = true;
         setDoc(ref, { data: local, updatedAt: new Date().toISOString() })
           .catch(e => console.error('Seed Firestore error:', e));
@@ -731,10 +751,11 @@ export default function Precos() {
   const [formVar,   setFormVar]   = useState(VAZIO_VAR);
 
   const persist = useCallback((novo) => {
-    setCatalogo(novo);
-    saveCatalogo(novo);
+    const ordenado = sortCatalogoData(novo);
+    setCatalogo(ordenado);
+    saveCatalogo(ordenado);
     skipSnap.current = true;
-    setDoc(FIRESTORE_DOC(), { data: novo, updatedAt: new Date().toISOString() })
+    setDoc(FIRESTORE_DOC(), { data: ordenado, updatedAt: new Date().toISOString() })
       .catch(e => console.error('Firestore write error:', e));
   }, []);
 

@@ -78,13 +78,26 @@ function ImgProduto({ src, alt, className, fallback }) {
   if (!src || erro) {
     return fallback || <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-gray-300 text-xs">—</div>;
   }
-  return <img src={src} alt={alt} className={className} onError={() => setErro(true)} />;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setErro(true)}
+      loading="lazy"
+      decoding="async"
+      width={64}
+      height={64}
+      fetchpriority="low"
+    />
+  );
 }
 
 export default function Produtos() {
   const { produtos, alertas, criarProduto, editarProduto, excluirProduto } = useEstoque();
   const { user, can } = useAuth();
   const fileRef = useRef();
+  const cmpNome = (a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
 
   const [busca, setBusca] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
@@ -96,14 +109,17 @@ export default function Produtos() {
   const [showForm, setShowForm] = useState(false);
 
   const alertaIds = new Set(alertas.map(p => p.id));
-  const categorias = [...new Set(produtos.map(p => p.categoria).filter(Boolean))];
+  const categorias = [...new Set(produtos.map(p => p.categoria).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
-  let lista = produtos.filter(p =>
-    (!busca || p.nome.toLowerCase().includes(busca.toLowerCase()) || p.codigo.toLowerCase().includes(busca.toLowerCase())) &&
-    (!filtroCategoria || p.categoria === filtroCategoria) &&
-    (!filtroAlerta || (filtroAlerta === 'sim' ? alertaIds.has(p.id) : !alertaIds.has(p.id))) &&
-    (!filtroStatus || (filtroStatus === 'ativo' ? p.ativo : !p.ativo))
-  );
+  let lista = [...produtos]
+    .sort(cmpNome)
+    .filter(p =>
+      (!busca || p.nome.toLowerCase().includes(busca.toLowerCase()) || p.codigo.toLowerCase().includes(busca.toLowerCase())) &&
+      (!filtroCategoria || p.categoria === filtroCategoria) &&
+      (!filtroAlerta || (filtroAlerta === 'sim' ? alertaIds.has(p.id) : !alertaIds.has(p.id))) &&
+      (!filtroStatus || (filtroStatus === 'ativo' ? p.ativo : !p.ativo))
+    );
   if (ordemEstoque === 'asc') lista = [...lista].sort((a, b) => a.estoqueAtual - b.estoqueAtual);
   if (ordemEstoque === 'desc') lista = [...lista].sort((a, b) => b.estoqueAtual - a.estoqueAtual);
 
