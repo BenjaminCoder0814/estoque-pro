@@ -276,7 +276,8 @@ function calcularEmbalagens(material, modelo, tamanho, quantidade, fonte) {
       if (r.material !== material) continue;
       if (!r.modelos.includes(modelo)) continue;
       if (!r.tamanhos.includes(Number(tamanho))) continue;
-      if (qtd <= r.maxPecas) {
+      // Só mostra embalagens que comportam pelo menos 1 unidade
+      if (r.maxPecas > 0) {
         resultados.push({
           embalagemNome: emb.nome,
           embalagemDim:  emb.dimensoes,
@@ -286,8 +287,8 @@ function calcularEmbalagens(material, modelo, tamanho, quantidade, fonte) {
           obs:           r.obs || null,
           qtdEmbalagens: Math.ceil(qtd / r.maxPecas),
         });
-        break; // apenas primeira regra compatível por embalagem
       }
+      break; // apenas primeira regra compatível por embalagem
     }
   }
   return resultados;
@@ -611,6 +612,21 @@ function Calculadora({ fonteLabel, fonte }) {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+          {/* Transportadoras sempre visível após cálculo */}
+          {sugestao && (
+            <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+              <div className="flex items-center gap-2 mb-2">
+                <LucideInfo className="w-4 h-4 text-blue-600" />
+                <span className="text-sm font-semibold text-blue-700">Sugestão de transporte — {sugestao.regiao}</span>
+              </div>
+              <div className="text-xs text-gray-600 mb-1">UF destino: <span className="font-semibold text-gray-800">{uf}</span></div>
+              <div className="text-sm text-gray-700 flex flex-wrap gap-2">
+                {sugestao.lista.map((t, idx) => (
+                  <span key={idx} className="px-2 py-1 rounded-full bg-white border border-blue-200 text-xs font-semibold text-blue-700">{t}</span>
+                ))}
               </div>
             </div>
           )}
