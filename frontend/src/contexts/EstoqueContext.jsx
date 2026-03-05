@@ -76,7 +76,11 @@ const produtosIniciais = [
   prod(48, 'Pino Bolt Seal',                  'LMT-009', 'Lacres Metálicos',   0,  50, true,  '/imagens/lacres-metalicos/zpino-bolt-seal.png'),
 
   // ── LACRES PLÁSTICOS ──
-  prod(49, 'Lacre Âncora',                     'LPL-001', 'Lacres Plásticos',   0, 300, true,  '/imagens/lacres-plasticos/ancora.png'),
+  prod(49, 'Lacre Âncora PP com rabicho',      'LPL-001A', 'Lacres Plásticos',   0, 150, true,  '/imagens/lacres-plasticos/lacre-ancora-com-rabicho.png'),
+  prod(50, 'Lacre Âncora PP sem rabicho',      'LPL-001B', 'Lacres Plásticos',   0, 150, true,  '/imagens/lacres-plasticos/lacre-ancora-sem-rabicho.png'),
+  prod(51, 'Lacre Âncora PP sem rabicho azul', 'LPL-001C', 'Lacres Plásticos',   0, 100, true,  '/imagens/lacres-plasticos/lacre-ancora-sem-rabicho-azul.png'),
+  prod(52, 'Lacre Âncora PP com rabicho amarelo','LPL-001D', 'Lacres Plásticos', 0, 100, true,  '/imagens/lacres-plasticos/lacre-ancora-com-rabicho-amarelo.png'),
+  prod(53, 'Lacre Âncora Policarbonato vermelho','LPL-001E', 'Lacres Plásticos', 0, 100, true,  '/imagens/lacres-plasticos/ancora.png'),
   prod(50, 'Anel Extintor',                    'LPL-002', 'Lacres Plásticos',   0, 100, true,  '/imagens/lacres-plasticos/anel-extintor.png'),
   prod(51, 'Aplicador para Lacre Sacola',      'LPL-003', 'Lacres Plásticos',   0,   3, true,  '/imagens/lacres-plasticos/aplicador-lacre-sacola.png'),
   prod(52, 'Dupla Trava DT',                   'LPL-004', 'Lacres Plásticos',   0, 200, true,  '/imagens/lacres-plasticos/dupla-trava-dt.png'),
