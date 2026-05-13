@@ -30,7 +30,7 @@ export default function GerenciarUsuarios() {
 
   function iniciarEdicao(u) {
     setEditandoId(u.id);
-    setForm({ nome: u.nome, email: u.email, senha: u.senha, perfil: u.perfil });
+    setForm({ nome: u.nome, email: u.email, senha: '', perfil: u.perfil });
     setConfirmarExcluir(null);
   }
 
@@ -41,7 +41,7 @@ export default function GerenciarUsuarios() {
 
   function salvar(e) {
     e.preventDefault();
-    if (!form.nome.trim() || !form.email.trim() || !form.senha.trim()) {
+    if (!form.nome.trim() || !form.email.trim() || (!editandoId && !form.senha.trim())) {
       flash('err', 'Preencha todos os campos obrigatórios.');
       return;
     }
@@ -50,7 +50,12 @@ export default function GerenciarUsuarios() {
     if (emailUsado) { flash('err', 'Este e-mail já está cadastrado.'); return; }
 
     if (editandoId) {
-      editarUsuario(editandoId, { ...form, restricaoHorario: form.perfil !== 'ADMIN' });
+      const payload = {
+        ...form,
+        restricaoHorario: form.perfil !== 'ADMIN',
+      };
+      if (!payload.senha.trim()) delete payload.senha;
+      editarUsuario(editandoId, payload);
       flash('ok', 'Usuário atualizado com sucesso!');
     } else {
       criarUsuario({ ...form, restricaoHorario: form.perfil !== 'ADMIN' });

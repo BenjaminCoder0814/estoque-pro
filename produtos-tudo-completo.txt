@@ -1,0 +1,528 @@
+# Lista Completa de Produtos e Preços
+
+---
+
+## Produtos do Estoque
+
+(Informações extraídas de EstoqueContext.jsx)
+
+Cadeado Tradicional Latão 20mm
+Código: CAD-001
+Categoria: Cadeados
+Estoque Atual: 100
+Estoque Mínimo: 20
+Modelo: 
+Tamanho: 20mm
+Material: Latão
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Tradicional (latão).png
+---
+Cadeado Tradicional Latão 25mm
+Código: CAD-001B
+Categoria: Cadeados
+Estoque Atual: 73
+Estoque Mínimo: 10
+Modelo: 
+Tamanho: 25mm
+Material: Latão
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Tradicional (latão).png
+---
+Cadeado Tradicional Latão 30mm
+Código: CAD-001C
+Categoria: Cadeados
+Estoque Atual: 17
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 30mm
+Material: Latão
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Tradicional (latão).png
+---
+Cadeado Tradicional Latão 40mm
+Código: CAD-001D
+Categoria: Cadeados
+Estoque Atual: 2
+Estoque Mínimo: 2
+Modelo: 
+Tamanho: 40mm
+Material: Latão
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Tradicional (latão).png
+---
+Cadeado Tradicional Latão 50mm
+Código: CAD-001E
+Categoria: Cadeados
+Estoque Atual: 1
+Estoque Mínimo: 2
+Modelo: 
+Tamanho: 50mm
+Material: Latão
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Tradicional (latão).png
+---
+Cadeado Tradicional Latão 60mm
+Código: CAD-001F
+Categoria: Cadeados
+Estoque Atual: 2
+Estoque Mínimo: 2
+Modelo: 
+Tamanho: 60mm
+Material: Latão
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Tradicional (latão).png
+---
+Cadeado Tetra 30mm
+Código: CAD-002
+Categoria: Cadeados
+Estoque Atual: 13
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 30mm
+Material: 
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Tetra.png
+---
+Cadeado Haste Longa 35mm
+Código: CAD-003
+Categoria: Cadeados
+Estoque Atual: 19
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 35mm
+Material: 
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Haste Longa.png
+---
+Cadeado Colorido
+Código: CAD-004
+Categoria: Cadeados
+Estoque Atual: 0
+Estoque Mínimo: 10
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Colorido.png
+---
+Cadeado Bloqueio
+Código: CAD-005
+Categoria: Cadeados
+Estoque Atual: 0
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Bloqueio.png
+---
+Cadeado Segredo Igual
+Código: CAD-006
+Categoria: Cadeados
+Estoque Atual: 0
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/cadeados/Cadeado segredo igual.png
+---
+Cadeado Segredo Numérico 25mm
+Código: CAD-007
+Categoria: Cadeados
+Estoque Atual: 4
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 25mm
+Material: 
+Cor: 
+Imagem: /imagens/cadeados/Cadeado Segredo Numérico.png
+---
+Abraçadeira de Nylon Padrão
+Código: ABR-001
+Categoria: Abraçadeiras
+Estoque Atual: 0
+Estoque Mínimo: 50
+Modelo: 
+Tamanho: 
+Material: Nylon
+Cor: 
+Imagem: /imagens/abracadeiras/Abraçadeira de Nylon — Padrão.png
+---
+Abraçadeira Identificável
+Código: ABR-002
+Categoria: Abraçadeiras
+Estoque Atual: 0
+Estoque Mínimo: 30
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/abracadeiras/Abraçadeira Identificável.png
+---
+Abraçadeira Metálica
+Código: ABR-003
+Categoria: Abraçadeiras
+Estoque Atual: 0
+Estoque Mínimo: 20
+Modelo: 
+Tamanho: 
+Material: Metal
+Cor: 
+Imagem: /imagens/abracadeiras/Abraçadeira Metálica.png
+---
+ZFIX — Base Adesiva
+Código: ABR-004
+Categoria: Abraçadeiras
+Estoque Atual: 0
+Estoque Mínimo: 25
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/abracadeiras/ZFIX — Base Adesiva.png
+---
+Amarrilho — Fecho de Arame
+Código: ARM-001
+Categoria: Arames
+Estoque Atual: 0
+Estoque Mínimo: 100
+Modelo: 
+Tamanho: 
+Material: Arame
+Cor: 
+Imagem: /imagens/Arames/Amarrilho - Fecho de Arame (Twist Ties).png
+---
+Arame Galvanizado para Lacres
+Código: ARM-002
+Categoria: Arames
+Estoque Atual: 6
+Estoque Mínimo: 10
+Modelo: 
+Tamanho: 
+Material: Arame galvanizado
+Cor: 
+Imagem: /imagens/Arames/Arame galvanizado para lacres (2 ou 3 fios).png
+---
+Fitilho Plástico para Amarração
+Código: ARM-003
+Categoria: Arames
+Estoque Atual: 0
+Estoque Mínimo: 80
+Modelo: 
+Tamanho: 
+Material: Plástico
+Cor: 
+Imagem: /imagens/Arames/Fitilho plástico (PP) para amarração.png
+---
+Fita Adesiva 45x100
+Código: FIT-001
+Categoria: Fitas
+Estoque Atual: 100
+Estoque Mínimo: 20
+Modelo: 
+Tamanho: 45x100
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita adesiva.png
+---
+Fita Crepe Média
+Código: FIT-002
+Categoria: Fitas
+Estoque Atual: 72
+Estoque Mínimo: 12
+Modelo: 
+Tamanho: Média
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita crepe.png
+---
+Fita Crepe Fina
+Código: FIT-002F
+Categoria: Fitas
+Estoque Atual: 233
+Estoque Mínimo: 30
+Modelo: 
+Tamanho: Fina
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita crepe.png
+---
+Fita Crepe Grossa
+Código: FIT-002G
+Categoria: Fitas
+Estoque Atual: 12
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: Grossa
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita crepe.png
+---
+Fita Dupla Face
+Código: FIT-003
+Categoria: Fitas
+Estoque Atual: 0
+Estoque Mínimo: 15
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita dupla face.png
+---
+Fita Isolante Antichama
+Código: FIT-004
+Categoria: Fitas
+Estoque Atual: 0
+Estoque Mínimo: 10
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita isolante antichama.png
+---
+Fita Isolante 5m
+Código: FIT-005A
+Categoria: Fitas
+Estoque Atual: 850
+Estoque Mínimo: 100
+Modelo: 
+Tamanho: 5m
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita isolante.png
+---
+Fita Isolante 10m
+Código: FIT-005B
+Categoria: Fitas
+Estoque Atual: 310
+Estoque Mínimo: 50
+Modelo: 
+Tamanho: 10m
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita isolante.png
+---
+Fita para Máquina Lacradora Azul
+Código: FIT-006A
+Categoria: Fitas
+Estoque Atual: 35
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: Azul
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita para máquina lacradora.png
+---
+Fita para Máquina Lacradora Vermelha
+Código: FIT-006B
+Categoria: Fitas
+Estoque Atual: 1
+Estoque Mínimo: 2
+Modelo: 
+Tamanho: Vermelha
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita para máquina lacradora.png
+---
+Fita Silver Tape
+Código: FIT-007
+Categoria: Fitas
+Estoque Atual: 0
+Estoque Mínimo: 12
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita silver tape.png
+---
+Fita Zebrada
+Código: FIT-008
+Categoria: Fitas
+Estoque Atual: 5
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita zebrada.png
+---
+Fita Transparente
+Código: FIT-009T
+Categoria: Fitas
+Estoque Atual: 50
+Estoque Mínimo: 10
+Modelo: 
+Tamanho: Transparente
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita adesiva.png
+---
+Fita Marrom
+Código: FIT-009M
+Categoria: Fitas
+Estoque Atual: 100
+Estoque Mínimo: 15
+Modelo: 
+Tamanho: Marrom
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita adesiva.png
+---
+Fita Branca
+Código: FIT-009B
+Categoria: Fitas
+Estoque Atual: 87
+Estoque Mínimo: 15
+Modelo: 
+Tamanho: Branca
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita adesiva.png
+---
+Fita para Embalagem 19x19 Branca
+Código: FIT-010E
+Categoria: Fitas
+Estoque Atual: 5100
+Estoque Mínimo: 500
+Modelo: 
+Tamanho: 19x19 Branca
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita adesiva.png
+---
+Fita Personalizada
+Código: FIT-011
+Categoria: Fitas
+Estoque Atual: 2
+Estoque Mínimo: 1
+Modelo: 
+Tamanho: Personalizada
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita zebrada.png
+---
+Fita de Demarcação
+Código: FIT-012
+Categoria: Fitas
+Estoque Atual: 1
+Estoque Mínimo: 1
+Modelo: 
+Tamanho: Demarcação
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Fita zebrada.png
+---
+Lacre Etiqueta (rolo)
+Código: FIT-013
+Categoria: Fitas
+Estoque Atual: 0
+Estoque Mínimo: 50
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Lacre etiqueta.png
+---
+Suporte para Fita Adesiva
+Código: FIT-014
+Categoria: Fitas
+Estoque Atual: 0
+Estoque Mínimo: 5
+Modelo: 
+Tamanho: 
+Material: 
+Cor: 
+Imagem: /imagens/Fitas/Suporte para fita adesiva.png
+---
+# ...continua para todos os produtos do estoque...
+
+## Produtos Comerciais e Preços
+
+(Informações extraídas de Precos.jsx)
+
+Categoria: Lacres PP
+Obs: Varejo: +30% sobre materiais de estoque. Priorizar venda de estoque para saída mais rápida.
+Produto: DT — Dupla Trava
+Variações:
+- 16mm (PP): Milheiro: R$108,00 | Prazo: 20–30 dias
+- 23mm (PP): Atacado: R$139,00 | Prazo: 20–30 dias
+- 25mm (PP): Atacado: R$238,00 | Prazo: 10–15 dias
+- 31mm (PP): Milheiro: R$204,00 | Prazo: 10–15 dias | Obs: Acima de 11 pcts atacado / Varejo até 10 pcts
+- 36mm (PP): Milheiro: R$239,00 | Prazo: 10–15 dias | Obs: Acima de 11 pcts atacado / Varejo até 10 pcts
+- 41mm (PP): Milheiro: R$279,00 | Prazo: 10–15 dias | Obs: Acima de 11 pcts atacado / Varejo até 10 pcts
+- 45mm (PP): Milheiro: R$339,00 | Prazo: 10–15 dias | Obs: Acima de 11 pcts atacado / Varejo até 10 pcts
+- 50mm (PP): Milheiro: R$379,00 | Prazo: 10–15 dias | Obs: Somente se tiver em estoque
+- 55mm (PP): Milheiro: R$419,00 | Prazo: 10–15 dias | Obs: Acima de 11 pcts atacado / Varejo até 10 pcts
+---
+# ...continua para todas as categorias, produtos e variações...
+
+# Malotes, Pastas e Bolsas
+- Bolsa com Zíper (Sacola): Código: MPB-001 | Categoria: Malotes, Pastas e Bolsas | Estoque: 0 | Estoque Mínimo: 5 | Imagem: /imagens/malotes/Bolsa com Zíper (estilo Sacola).png
+- Porta Sacola Supermercado: Código: MPB-004 | Categoria: Malotes, Pastas e Bolsas | Estoque: 0 | Estoque Mínimo: 10 | Imagem: /imagens/malotes/Porta Sacola Supermercado.png
+- Sacola com Rodízio: Código: MPB-005 | Categoria: Malotes, Pastas e Bolsas | Estoque: 0 | Estoque Mínimo: 5 | Imagem: /imagens/malotes/Sacola com Rodízio.png
+- Urna em Lona: Código: MPB-006 | Categoria: Malotes, Pastas e Bolsas | Estoque: 0 | Estoque Mínimo: 5 | Imagem: /imagens/malotes/Urna em Lona.png
+- Malote Correio 30x25x10 Marrom: Código: MPB-M01 | Categoria: Malotes, Pastas e Bolsas | Estoque: 1 | Estoque Mínimo: 2 | Imagem: /imagens/malotes/Malote Correio.png
+- Malote Correio 56x36x10 Azul: Código: MPB-M02 | Categoria: Malotes, Pastas e Bolsas | Estoque: 5 | Estoque Mínimo: 2 | Imagem: /imagens/malotes/Malote Correio.png
+- Malote Lona 52x34x17 Laranja: Código: MPB-M03 | Categoria: Malotes, Pastas e Bolsas | Estoque: 4 | Estoque Mínimo: 2 | Imagem: /imagens/malotes/Malote Correio.png
+- Pasta Emborrachada 30x40 Azul: Código: MPB-P01 | Categoria: Malotes, Pastas e Bolsas | Estoque: 18 | Estoque Mínimo: 5 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Pasta Lona 30x40: Código: MPB-P02 | Categoria: Malotes, Pastas e Bolsas | Estoque: 5 | Estoque Mínimo: 3 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Pasta Lona 40x35 c/ Visores Verde: Código: MPB-P03 | Categoria: Malotes, Pastas e Bolsas | Estoque: 13 | Estoque Mínimo: 3 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Pasta Lona 34x27 Verde: Código: MPB-P04 | Categoria: Malotes, Pastas e Bolsas | Estoque: 15 | Estoque Mínimo: 3 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Pasta Lona 40x35 Azul: Código: MPB-P05 | Categoria: Malotes, Pastas e Bolsas | Estoque: 21 | Estoque Mínimo: 5 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Pasta Lona 30x40 Visor Lateral Verde: Código: MPB-P06 | Categoria: Malotes, Pastas e Bolsas | Estoque: 3 | Estoque Mínimo: 2 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Pasta Lona 21x36 Preto: Código: MPB-P07 | Categoria: Malotes, Pastas e Bolsas | Estoque: 49 | Estoque Mínimo: 5 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Pasta 40x26 Preto: Código: MPB-P18 | Categoria: Malotes, Pastas e Bolsas | Estoque: 4 | Estoque Mínimo: 2 | Imagem: /imagens/malotes/Pasta para Documentos.png
+- Bolsa Preta Lona 37x39x21: Código: MPB-B01 | Categoria: Malotes, Pastas e Bolsas | Estoque: 4 | Estoque Mínimo: 2 | Imagem: /imagens/malotes/Bolsa com Zíper (estilo Sacola).png
+
+# Saquinhos Plásticos
+- Saquinho Plástico 25x35x6: Código: SAQ-001 | Categoria: Saquinhos Plásticos | Estoque: 8 | Estoque Mínimo: 2
+- Saquinho Plástico 45x20x6: Código: SAQ-002 | Categoria: Saquinhos Plásticos | Estoque: 8 | Estoque Mínimo: 2
+- Saquinho Plástico 30x60x6: Código: SAQ-003 | Categoria: Saquinhos Plásticos | Estoque: 15 | Estoque Mínimo: 2
+- Saquinho Plástico 20x35x6: Código: SAQ-004 | Categoria: Saquinhos Plásticos | Estoque: 1 | Estoque Mínimo: 1
+- Saquinho Plástico 20x25x6: Código: SAQ-005 | Categoria: Saquinhos Plásticos | Estoque: 2 | Estoque Mínimo: 1
+- Saquinho Plástico 30x70x6: Código: SAQ-006 | Categoria: Saquinhos Plásticos | Estoque: 19 | Estoque Mínimo: 3
+- Saquinho Plástico 30x35x6: Código: SAQ-007 | Categoria: Saquinhos Plásticos | Estoque: 8 | Estoque Mínimo: 2
+- Saquinho Plástico 38x45x6: Código: SAQ-008 | Categoria: Saquinhos Plásticos | Estoque: 6 | Estoque Mínimo: 2
+- Saquinho Plástico 12x17: Código: SAQ-009 | Categoria: Saquinhos Plásticos | Estoque: 3 | Estoque Mínimo: 1
+
+# Máquinas
+- Máquina Lacradora Quadrada: Código: MAQ-001 | Categoria: Máquinas | Estoque: 72 | Estoque Mínimo: 2 | Imagem: /imagens/maquinas/Máquina lacradora quadrada.png
+- Máquina Lacradora Redonda: Código: MAQ-002 | Categoria: Máquinas | Estoque: 16 | Estoque Mínimo: 2 | Imagem: /imagens/maquinas/Máquina lacradora redonda.png
+- Máquina Seladora: Código: MAQ-003 | Categoria: Máquinas | Estoque: 0 | Estoque Mínimo: 1 | Imagem: /imagens/maquinas/Máquina seladora.png
+- Refil de Selagem / Fios Etiqueta: Código: MAQ-004 | Categoria: Máquinas | Estoque: 12 | Estoque Mínimo: 3 | Imagem: /imagens/maquinas/Refil de selagem.png
+
+# Lacres Plásticos
+- Lacre Âncora PP com rabicho: Código: LPL-001A | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 150 | Imagem: /imagens/lacres-plasticos/lacre-ancora-com-rabicho.png
+- Lacre Âncora PP sem rabicho: Código: LPL-001B | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 150 | Imagem: /imagens/lacres-plasticos/lacre-ancora-sem-rabicho.png
+- Lacre Âncora PP sem rabicho azul: Código: LPL-001C | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/lacre-ancora-sem-rabicho-azul.png
+- Lacre Âncora PP com rabicho amarelo: Código: LPL-001D | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/lacre-ancora-com-rabicho-amarelo.png
+- Lacre Âncora Policarbonato vermelho: Código: LPL-001E | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/ancora.png
+- Anel Extintor: Código: LPL-002 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/anel-extintor.png
+- Aplicador para Lacre Sacola: Código: LPL-003 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 3 | Imagem: /imagens/lacres-plasticos/aplicador-lacre-sacola.png
+- Dupla Trava DT: Código: LPL-004 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 200 | Imagem: /imagens/lacres-plasticos/dupla-trava-dt.png
+- Escada Alta ES: Código: LPL-005 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 150 | Imagem: /imagens/lacres-plasticos/escada-alta-es.png
+- Espinha de Peixe: Código: LPL-006 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/espinha-de-peixe.png
+- Lacre de Sacola — Zni: Código: LPL-007 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 500 | Imagem: /imagens/lacres-plasticos/Lacre de Sacola — Zni.png
+- Znan Policarbonato: Código: LPL-012 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/znan-policarbonato.png
+- Znan Sem Rabicho: Código: LPL-013 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/znan-sem-rabicho.png
+- Znan Com Rabicho: Código: LPL-014 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-plasticos/znan-com-rabicho.png
+- Lacre para Caixas ALC: Código: LPL-008 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 200 | Imagem: /imagens/lacres-plasticos/lacre-caixas-alc.png
+- Lacre Tag Autenticidade: Código: LPL-009 | Categoria: Lacres Plásticos | Estoque: 10 | Estoque Mínimo: 50 | Imagem: /imagens/lacres-plasticos/lacre-tag-autenticidade.png
+- Lacre Pino Anel 25mm: Código: LPL-009P | Categoria: Lacres Plásticos | Estoque: 17 | Estoque Mínimo: 20 | Imagem: /imagens/lacres-plasticos/ancora.png
+- Trava Anel: Código: LPL-010 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 150 | Imagem: /imagens/lacres-plasticos/trava-anel.png
+- ZLS TM 35 — Trava Metálica: Código: LPL-011 | Categoria: Lacres Plásticos | Estoque: 0 | Estoque Mínimo: 80 | Imagem: /imagens/lacres-plasticos/ZLS TM 35 — Trava Metálica (TM).png
+
+# Lacres Metálicos
+- Lacre Metálico Amarelo: Código: LMT-001 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-metalicos/Amarelo 1.png
+- Lacre Metálico Azul: Código: LMT-002 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-metalicos/Azul 1.png
+- Lacre Metálico Vermelho: Código: LMT-003 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 100 | Imagem: /imagens/lacres-metalicos/Vermelho 1.png
+- Lacre Chumbo Sinete: Código: LMT-004 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 60 | Imagem: /imagens/lacres-metalicos/lacre-chumbo-sinete.png
+- Lacre Sextavado: Código: LMT-005 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 70 | Imagem: /imagens/lacres-metalicos/lacre-sextavado.png
+- Ajuste Caixa Ajustável: Código: LMT-006 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 40 | Imagem: /imagens/lacres-metalicos/zajuste-caixa-ajustavel.png
+- Zlock 3 Folha Flandres: Código: LMT-007 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 35 | Imagem: /imagens/lacres-metalicos/zlock-3-folha-flandres.png
+- Zlock Manivela: Código: LMT-008 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 30 | Imagem: /imagens/lacres-metalicos/zlock-manivela.png
+- Pino Bolt Seal: Código: LMT-009 | Categoria: Lacres Metálicos | Estoque: 0 | Estoque Mínimo: 50 | Imagem: /imagens/lacres-metalicos/zpino-bolt-seal.png
+
+# ...continua para todas as categorias, produtos e variações...
+

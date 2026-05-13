@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  name              String
+  passwordHash      String
+  role              String    @default("VISITANTE")
+  active            Boolean   @default(true)
+  restrictBusiness  Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  movements         Movement[]
+  pendingOrders     PendingOrder[]
+  mediaAssets       MediaAsset[]
+  auditLogs         AuditLog[]
+}
+
+model Product {
+  id               Int       @id @default(autoincrement())
+  name             String
+  code             String    @default("")
+  category         String
+  model            String    @default("")
+  size             String    @default("")
+  material         String    @default("")
+  color            String    @default("")
+  stockCurrent     Int       @default(0)
+  stockMinimum     Int       @default(0)
+  controlsStock    Boolean   @default(true)
+  alertEnabled     Boolean   @default(true)
+  active           Boolean   @default(true)
+  image            String    @default("")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  movements        Movement[]
+  pendingOrders    PendingOrder[]
+
+  @@index([category])
+  @@index([name])
+}
+
+model Movement {
+  id           Int          @id @default(autoincrement())
+  productId    Int
+  userId       Int?
+  type         String
+  quantity     Int
+  note         String       @default("")
+  createdAt    DateTime     @default(now())
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model PendingOrder {
+  id              Int           @id @default(autoincrement())
+  productId       Int
+  requestedById   Int?
+  quantity        Int
+  note            String        @default("")
+  status          String        @default("PENDENTE")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  requestedBy     User?         @relation(fields: [requestedById], references: [id], onDelete: SetNull)
+}
+
+model MediaAsset {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String    @default("")
+  type         String    @default("FOTO")
+  url          String
+  uploadedById Int?
+  createdAt    DateTime  @default(now())
+  uploadedBy   User?     @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  entity      String
+  action      String
+  beforeJson  String?
+  afterJson   String?
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

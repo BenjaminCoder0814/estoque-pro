@@ -6,6 +6,19 @@ import TourGuide from './TourGuide';
 export default function LayoutBase({ children, noPadding = false }) {
   return (
     <div className="flex h-screen overflow-hidden bg-background relative">
+      <a
+        href="https://lacres.com.br/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed top-3 left-3 z-[9998] rounded-full px-4 py-2 text-xs font-semibold text-white shadow-lg transition hover:scale-[1.03]"
+        style={{
+          background: 'linear-gradient(135deg,#0f766e 0%,#0ea5e9 100%)',
+          border: '1px solid rgba(255,255,255,0.35)',
+        }}
+      >
+        Voltar para o site
+      </a>
+
       {/* ===== RIBBON BETA ===== */}
       <div
         className="fixed top-0 right-0 z-[9999] select-none overflow-hidden"

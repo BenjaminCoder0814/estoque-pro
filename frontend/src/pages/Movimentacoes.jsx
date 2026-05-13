@@ -191,9 +191,9 @@ export default function Movimentacoes() {
                 <td className="p-3 font-semibold text-slate-700">{m.produtoNome}</td>
                 <td className="p-3 text-center font-bold text-slate-700">{m.quantidade}</td>
                 <td className="p-3 text-center text-slate-500">
-                  <span className="font-mono">{m.estoqueAntes}</span>
+                  <span className="font-mono">{m.estoqueAntes ?? '-'}</span>
                   <span className="text-slate-400 mx-1">→</span>
-                  <span className={`font-mono font-semibold ${m.tipo === 'ENTRADA' ? 'text-emerald-600' : 'text-red-600'}`}>{m.estoqueDepois}</span>
+                  <span className={`font-mono font-semibold ${m.tipo === 'ENTRADA' ? 'text-emerald-600' : 'text-red-600'}`}>{m.estoqueDepois ?? '-'}</span>
                 </td>
                 <td className="p-3 text-slate-500">{m.usuario} <span className="text-[10px] text-slate-400 bg-slate-100 rounded px-1">({m.usuarioPerfil})</span></td>
                 <td className="p-3 text-slate-400 italic">{m.observacao || '—'}</td>

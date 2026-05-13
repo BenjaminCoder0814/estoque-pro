@@ -85,7 +85,7 @@ export default function Sidebar() {
           className="w-10 h-10 rounded-xl flex items-center justify-center shadow-glow flex-shrink-0"
           style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}
         >
-          <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="w-7 h-7 object-contain" />
         </div>
         {!collapsed && (
           <div>

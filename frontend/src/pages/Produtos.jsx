@@ -4,6 +4,15 @@ import { useAuth } from '../contexts/AuthContext';
 
 const VAZIO = { nome: '', codigo: '', categoria: '', modelo: '', tamanho: '', material: '', cor: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
 
+function withBase(url) {
+  if (!url || typeof url !== 'string') return url;
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+  const base = import.meta.env.BASE_URL || '/';
+  if (url.startsWith(base)) return url;
+  if (url.startsWith('/')) return `${base}${url.slice(1)}`;
+  return `${base}${url}`;
+}
+
 // Mapa de nomes de cores em português → hex
 const COR_MAP = {
   'preto': '#1a1a1a', 'branco': '#f5f5f5', 'vermelho': '#ef4444',
@@ -67,7 +76,7 @@ function autoImagem(nome) {
   // Ordena do maior para o menor para evitar matches parciais
   const chaves = Object.keys(IMAGENS_PADRAO).sort((a, b) => b.length - a.length);
   for (const chave of chaves) {
-    if (lower.includes(chave)) return IMAGENS_PADRAO[chave];
+    if (lower.includes(chave)) return withBase(IMAGENS_PADRAO[chave]);
   }
   return '';
 }
@@ -121,15 +130,26 @@ export default function Produtos() {
     .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
   let lista = [...produtos]
-    .sort(cmpNome)
     .filter(p =>
       (!busca || p.nome.toLowerCase().includes(busca.toLowerCase()) || p.codigo.toLowerCase().includes(busca.toLowerCase())) &&
       (!filtroCategoria || p.categoria === filtroCategoria) &&
       (!filtroAlerta || (filtroAlerta === 'sim' ? alertaIds.has(p.id) : !alertaIds.has(p.id))) &&
       (!filtroStatus || (filtroStatus === 'ativo' ? p.ativo : !p.ativo))
     );
-  if (ordemEstoque === 'asc') lista = [...lista].sort((a, b) => a.estoqueAtual - b.estoqueAtual);
-  if (ordemEstoque === 'desc') lista = [...lista].sort((a, b) => b.estoqueAtual - a.estoqueAtual);
+  // Zeros sempre no final em qualquer situação
+  const semZero = lista.filter(p => Number(p.estoqueAtual) > 0);
+  const comZero  = lista.filter(p => !(Number(p.estoqueAtual) > 0));
+
+  // Ordenação por estoque quando o filtro estiver ativo
+  if (ordemEstoque === 'asc' || ordemEstoque === 'desc') {
+    semZero.sort((a, b) => {
+      const qa = Number(a.estoqueAtual);
+      const qb = Number(b.estoqueAtual);
+      return ordemEstoque === 'desc' ? qb - qa : qa - qb;
+    });
+  }
+
+  lista = [...semZero, ...comZero];
 
   function abrirNovo() { setForm(VAZIO); setEditandoId(null); setShowForm(true); }
   function abrirEdicao(p) { setForm({ ...p }); setEditandoId(p.id); setShowForm(true); }

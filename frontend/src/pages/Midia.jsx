@@ -1,6 +1,6 @@
 ﻿// Midia.jsx — Galeria de mídia e design (v4 — beautiful redesign)
 // Catálogo PDF com capa, fotos por categoria, banners e mídias salvas
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   LucideImage, LucideFileText, LucideLayout, LucideFolderOpen,
   LucidePlus, LucideTrash2, LucideExternalLink, LucideDownload,
@@ -8,6 +8,16 @@ import {
   LucideChevronRight, LucideGrid3x3, LucideZoomIn,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { apiRequest } from '../services/apiClient';
+
+function withBase(url) {
+  if (!url || typeof url !== 'string') return url;
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+  const base = import.meta.env.BASE_URL || '/';
+  if (url.startsWith(base)) return url;
+  if (url.startsWith('/')) return `${base}${url.slice(1)}`;
+  return `${base}${url}`;
+}
 
 // ── localStorage ──────────────────────────────────────────────────────────
 const MIDIA_KEY = 'zkMidia';
@@ -16,6 +26,27 @@ function loadMidia() {
   catch { return []; }
 }
 function saveMidia(arr) { localStorage.setItem(MIDIA_KEY, JSON.stringify(arr)); }
+
+function fromApiMidia(item) {
+  return {
+    id: item.id,
+    nome: item.name || '',
+    descricao: item.description || '',
+    tipo: item.type || 'outro',
+    url: item.url || '',
+    addedBy: item.addedBy?.name || item.user?.name || item.addedByName || 'Sistema',
+    addedAt: item.createdAt || new Date().toISOString(),
+  };
+}
+
+function toApiMidia(item) {
+  return {
+    name: item.nome,
+    description: item.descricao || '',
+    type: item.tipo || 'outro',
+    url: item.url,
+  };
+}
 
 // ── Catálogo ───────────────────────────────────────────────────────────────
 const CATALOG = {
@@ -189,15 +220,18 @@ function FotoGrid({ fotos, onPreview }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
       {fotos.map((f, idx) => (
+        (() => {
+          const resolvedUrl = withBase(f.url);
+          return (
         <div
-          key={f.url}
-          onClick={() => onPreview(f.url, f.nome)}
+          key={resolvedUrl}
+          onClick={() => onPreview(resolvedUrl, f.nome)}
           className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden cursor-pointer
                      shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200"
         >
           <div className="aspect-square overflow-hidden bg-gray-50">
             <img
-              src={cdn(f.url) || f.url}
+              src={cdn(resolvedUrl) || resolvedUrl}
               alt={f.nome}
               width={300}
               height={300}
@@ -206,7 +240,7 @@ function FotoGrid({ fotos, onPreview }) {
               decoding="async"
               fetchpriority={idx < 6 ? 'high' : 'low'}
               sizes="(min-width:1280px) 16vw, (min-width:1024px) 20vw, (min-width:768px) 25vw, 45vw"
-              onError={e => { e.target.onerror = null; e.target.src = f.url; }}
+              onError={e => { e.target.onerror = null; e.target.src = resolvedUrl; }}
             />
           </div>
           {/* hover overlay */}
@@ -220,6 +254,8 @@ function FotoGrid({ fotos, onPreview }) {
             <p className="text-[11px] text-gray-600 leading-tight text-center truncate" title={f.nome}>{f.nome}</p>
           </div>
         </div>
+          );
+        })()
       ))}
     </div>
   );
@@ -245,6 +281,23 @@ export default function Midia() {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [preview, setPreview] = useState(null); // { url, nome }
 
+  useEffect(() => {
+    let mounted = true;
+
+    async function syncMidia() {
+      const resp = await apiRequest('/api/media');
+      if (!mounted) return;
+      if (resp.ok && resp.data?.ok && Array.isArray(resp.data.data)) {
+        const mapped = resp.data.data.map(fromApiMidia);
+        setItens(mapped);
+        saveMidia(mapped);
+      }
+    }
+
+    syncMidia();
+    return () => { mounted = false; };
+  }, []);
+
   function handleAdicionar(e) {
     e.preventDefault();
     if (!form.nome.trim() || !form.url.trim()) return;
@@ -259,12 +312,26 @@ export default function Midia() {
     };
     const arr = [novo, ...itens];
     setItens(arr); saveMidia(arr);
+
+    apiRequest('/api/media', {
+      method: 'POST',
+      body: JSON.stringify(toApiMidia(novo)),
+    }).then((resp) => {
+      if (resp.ok && resp.data?.ok && resp.data?.data) {
+        const apiItem = fromApiMidia(resp.data.data);
+        setItens((prev) => prev.map((i) => (i.id === novo.id ? apiItem : i)));
+      }
+    });
+
     setForm(VAZIO_FORM); setShowForm(false);
   }
 
   function remover(id) {
     const arr = itens.filter(i => i.id !== id);
     setItens(arr); saveMidia(arr);
+
+    apiRequest(`/api/media/${id}`, { method: 'DELETE' });
+
     setConfirmDelete(null);
   }
 
@@ -341,10 +408,10 @@ export default function Midia() {
                   <div
                     className="w-56 rounded-xl overflow-hidden shadow-lg border border-gray-200 cursor-pointer
                                hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group"
-                    onClick={() => setPreview({ url: CATALOG.capa, nome: 'Catálogo Zenith — Capa' })}
+                    onClick={() => setPreview({ url: withBase(CATALOG.capa), nome: 'Catálogo Zenith — Capa' })}
                   >
                     <img
-                      src={CATALOG.capa}
+                      src={withBase(CATALOG.capa)}
                       alt="Capa do Catálogo Zenith"
                       className="w-full object-cover"
                     />
@@ -367,7 +434,7 @@ export default function Midia() {
                   <div className="flex flex-wrap gap-3 mb-6">
                     {/* Visualizar */}
                     <a
-                      href={CATALOG.pdf}
+                      href={withBase(CATALOG.pdf)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white
@@ -379,7 +446,7 @@ export default function Midia() {
 
                     {/* Baixar */}
                     <a
-                      href={CATALOG.pdf}
+                      href={withBase(CATALOG.pdf)}
                       download="Catálogo ZENITH.pdf"
                       className="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white
                                  px-6 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
@@ -472,10 +539,10 @@ export default function Midia() {
                   {/* Preview do banner */}
                   <div
                     className="relative cursor-pointer group"
-                    onClick={() => setPreview({ url: b.url, nome: b.nome })}
+                    onClick={() => setPreview({ url: withBase(b.url), nome: b.nome })}
                   >
                     <img
-                      src={b.url}
+                      src={withBase(b.url)}
                       alt={b.nome}
                       className="w-full object-cover max-h-72"
                     />
@@ -498,7 +565,7 @@ export default function Midia() {
                       {b.descricao && <p className="text-xs text-gray-400">{b.descricao}</p>}
                     </div>
                     <a
-                      href={b.url}
+                      href={withBase(b.url)}
                       download={b.nome}
                       className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white
                                  text-xs font-semibold px-3 py-2 rounded-lg shadow transition"
@@ -514,10 +581,10 @@ export default function Midia() {
               <div className="bg-white rounded-2xl border border-green-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div
                   className="relative cursor-pointer group bg-green-50 flex items-center justify-center py-10"
-                  onClick={() => setPreview({ url: '/imagens/icone wpp.png', nome: 'Ícone WhatsApp' })}
+                  onClick={() => setPreview({ url: withBase('/imagens/icone wpp.png'), nome: 'Ícone WhatsApp' })}
                 >
                   <img
-                    src="/imagens/icone wpp.png"
+                    src={withBase('/imagens/icone wpp.png')}
                     alt="Ícone WhatsApp"
                     className="h-40 object-contain"
                   />
@@ -538,7 +605,7 @@ export default function Midia() {
                     <p className="text-xs text-gray-400">Para uso em perfil e divulgação</p>
                   </div>
                   <a
-                    href="/imagens/icone wpp.png"
+                    href={withBase('/imagens/icone wpp.png')}
                     download="Ícone WhatsApp Zenith.png"
                     className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white
                                text-xs font-semibold px-3 py-2 rounded-lg shadow transition"
@@ -553,10 +620,10 @@ export default function Midia() {
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div
                   className="relative cursor-pointer group bg-gray-50 flex items-center justify-center py-10"
-                  onClick={() => setPreview({ url: '/imagens/Logo da Zenith.jpg', nome: 'Logo Zenith' })}
+                  onClick={() => setPreview({ url: withBase('/imagens/Logo zenith.png'), nome: 'Logo Zenith' })}
                 >
                   <img
-                    src="/imagens/Logo da Zenith.jpg"
+                    src={withBase('/imagens/Logo zenith.png')}
                     alt="Logo Zenith"
                     className="h-40 object-contain"
                   />
@@ -577,8 +644,8 @@ export default function Midia() {
                     <p className="text-xs text-gray-400">Logotipo em alta resolução</p>
                   </div>
                   <a
-                    href="/imagens/Logo da Zenith.jpg"
-                    download="Logo Zenith.jpg"
+                    href={withBase('/imagens/Logo zenith.png')}
+                    download="Logo zenith.png"
                     className="flex items-center gap-1.5 bg-gray-700 hover:bg-gray-800 text-white
                                text-xs font-semibold px-3 py-2 rounded-lg shadow transition"
                   >

@@ -1,22 +1,92 @@
 // Contexto global de dados do sistema de estoque
 // Gerencia produtos, movimentações e auditoria no localStorage
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { apiRequest } from '../services/apiClient';
 
 const PRODUTOS_KEY = 'zkprodutos';
 const MOV_KEY = 'zkmovimentacoes';
 const AUDIT_KEY = 'zkauditoria';
 const SEED_VERSION_KEY = 'zkSeedVersion';
-const SEED_VERSION = 'v8'; // Incrementar aqui força reset do catálogo
+const SEED_VERSION = 'v10'; // Incrementar aqui força reset do catálogo
+
+const BASE_URL = import.meta.env.BASE_URL || '/';
+function withBase(url) {
+  if (!url || typeof url !== 'string') return url;
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+  if (url.startsWith(BASE_URL)) return url;
+  if (url.startsWith('/')) return `${BASE_URL}${url.slice(1)}`;
+  return `${BASE_URL}${url}`;
+}
+
+function normalizeProdutos(lista) {
+  return (lista || []).map((p) => ({ ...p, imagem: withBase(p.imagem) }));
+}
 
 const now = new Date().toISOString();
 const prod = (id, nome, codigo, categoria, estoqueAtual, estoqueMinimo, geraAlerta, imagem, modelo = '', tamanho = '', material = '', cor = '') => ({
   id, nome, codigo, categoria, estoqueAtual, estoqueMinimo, modelo, tamanho, material, cor,
-  controlaEstoque: true, geraAlerta, ativo: true, imagem, criadoEm: now,
+  controlaEstoque: true, geraAlerta, ativo: true, imagem: withBase(imagem), criadoEm: now,
   ultimaAtualizacao: '', atualizadoPor: '',
 });
 
 const produtosIniciais = [
-  // ── CADEADOS ──
+  // ── MATERIAIS NUMERADOS ESTOQUE 04/26 ──
+  // 💠 ZNAN
+  prod(1001, 'znan azul', '', 'ZNAN', 300, 0, true, ''),
+  prod(1002, 'znan verde', '', 'ZNAN', 2100, 0, true, ''),
+  prod(1003, 'znan amarelo', '', 'ZNAN', 1700, 0, true, ''),
+  prod(1004, 'znan vermelho', '', 'ZNAN', 100, 0, true, ''),
+  prod(1005, 'znan azul (rentank)', '', 'ZNAN', 0, 0, true, ''),
+  prod(1006, 'znan policarbonato (estoque escasso)', '', 'ZNAN', 0, 0, true, ''),
+  prod(1007, 'znan cerradinho verde e azul', '', 'ZNAN', 0, 0, true, ''),
+
+  // 💠 DT
+  prod(1010, 'dt 16 pp amarelo', '', 'DT', 1900, 0, true, ''),
+  prod(1011, 'dt 16 pp cinza', '', 'DT', 500, 0, true, ''),
+  prod(1012, 'dt 16 pp azul', '', 'DT', 4800, 0, true, ''),
+  prod(1013, 'dt 16 pp branco', '', 'DT', 1900, 0, true, ''),
+  prod(1014, 'dt 16 pp verde', '', 'DT', 1800, 0, true, ''),
+  prod(1015, 'dt 16 pp vermelho (pata maior)', '', 'DT', 30700, 0, true, ''),
+  prod(1016, 'dt 16 pp verde (pata maior)', '', 'DT', 9700, 0, true, ''),
+  prod(1017, 'dt 16 pp laranja (pata maior)', '', 'DT', 14200, 0, true, ''),
+  prod(1018, 'dt 16 pp preto (pata maior)', '', 'DT', 13700, 0, true, ''),
+  prod(1019, 'dt 16 pp branco (código de barras)', '', 'DT', 5300, 0, true, ''),
+  prod(1020, 'dt 23 pp verde', '', 'DT', 1900, 0, true, ''),
+  prod(1021, 'dt 23 pp vermelho', '', 'DT', 9000, 0, true, ''),
+  prod(1022, 'dt 31 pp azul', '', 'DT', 3000, 0, true, ''),
+  prod(1023, 'dt 31 pp amarelo', '', 'DT', 1000, 0, true, ''),
+  prod(1024, 'dt 41 pp azul', '', 'DT', 300, 0, true, ''),
+  prod(1025, 'dt 41 pp laranja', '', 'DT', 1900, 0, true, ''),
+  prod(1026, 'dt 41 pp verde', '', 'DT', 900, 0, true, ''),
+
+  // 💠 ES
+  prod(1030, 'es 16 ny branco', '', 'ES', 1900, 0, true, ''),
+  prod(1031, 'es 16 ny amarelo', '', 'ES', 6700, 0, true, ''),
+  prod(1032, 'es 16 ny laranja', '', 'ES', 1000, 0, true, ''),
+  prod(1033, 'es 16 ny azul', '', 'ES', 1200, 0, true, ''),
+  prod(1034, 'es 16 pp vermelho', '', 'ES', 4300, 0, true, ''),
+  prod(1035, 'es 16 pp azul', '', 'ES', 2600, 0, true, ''),
+  prod(1036, 'es 16 corte fácil azul', '', 'ES', 200, 0, true, ''),
+  prod(1037, 'es 16 corte fácil amarelo', '', 'ES', 2500, 0, true, ''),
+  prod(1038, 'es 23 ny azul', '', 'ES', 10300, 0, true, ''),
+  prod(1039, 'es 23 ny laranja', '', 'ES', 3500, 0, true, ''),
+  prod(1040, 'es 23 ny branco', '', 'ES', 1500, 0, true, ''),
+  prod(1041, 'es 23 ny preto', '', 'ES', 1800, 0, true, ''),
+  prod(1042, 'es 23 ny verde', '', 'ES', 1500, 0, true, ''),
+  prod(1043, 'es 23 ny vermelho', '', 'ES', 1500, 0, true, ''),
+  prod(1044, 'es 23 pp verde', '', 'ES', 2700, 0, true, ''),
+  prod(1045, 'es 23 pp vermelho', '', 'ES', 2200, 0, true, ''),
+  prod(1046, 'es 23 pp amarelo', '', 'ES', 500, 0, true, ''),
+  prod(1047, 'es 23 pp azul', '', 'ES', 900, 0, true, ''),
+  prod(1048, 'es 23 corte fácil amarelo', '', 'ES', 900, 0, true, ''),
+  prod(1049, 'es 23 pp (código de barras)', '', 'ES', 4800, 0, true, ''),
+  prod(1050, 'es 28 pp azul', '', 'ES', 500, 0, true, ''),
+  prod(1051, 'es 28 pp amarelo', '', 'ES', 300, 0, true, ''),
+
+  // 💠 EP
+  prod(1060, 'ep 16 pe azul', '', 'EP', 2000, 0, true, ''),
+  prod(1061, 'ep 23 pe azul', '', 'EP', 2700, 0, true, ''),
+  // ...existing code...
   // Tradicionais Latão por tamanho (qtd confirmada nas anotações)
   prod(1,  'Cadeado Tradicional Latão 20mm',   'CAD-001', 'Cadeados',    100, 20, true,  '/imagens/cadeados/Cadeado Tradicional (latão).png'),
   prod(2,  'Cadeado Tradicional Latão 25mm',   'CAD-001B','Cadeados',     73, 10, true,  '/imagens/cadeados/Cadeado Tradicional (latão).png'),
@@ -179,24 +249,158 @@ function loadData(key, fallback) {
 function initProdutos() {
   const version = localStorage.getItem(SEED_VERSION_KEY);
   if (version !== SEED_VERSION) {
-    saveData(PRODUTOS_KEY, produtosIniciais);
+    const inicial = normalizeProdutos(produtosIniciais);
+    saveData(PRODUTOS_KEY, inicial);
     localStorage.setItem(SEED_VERSION_KEY, SEED_VERSION);
-    return produtosIniciais;
+    return inicial;
   }
-  return loadData(PRODUTOS_KEY, produtosIniciais);
+  return normalizeProdutos(loadData(PRODUTOS_KEY, produtosIniciais));
 }
 
 const EstoqueContext = createContext();
+
+function toApiProduct(p) {
+  return {
+    name: p.nome || '',
+    code: p.codigo || '',
+    category: p.categoria || '',
+    model: p.modelo || '',
+    size: p.tamanho || '',
+    material: p.material || '',
+    color: p.cor || '',
+    stockCurrent: Number(p.estoqueAtual || 0),
+    stockMinimum: Number(p.estoqueMinimo || 0),
+    controlsStock: p.controlaEstoque ?? true,
+    alertEnabled: p.geraAlerta ?? true,
+    active: p.ativo ?? true,
+    image: p.imagem || '',
+  };
+}
+
+function fromApiProduct(p) {
+  return {
+    id: p.id,
+    nome: p.name,
+    codigo: p.code || '',
+    categoria: p.category || '',
+    modelo: p.model || '',
+    tamanho: p.size || '',
+    material: p.material || '',
+    cor: p.color || '',
+    estoqueAtual: Number(p.stockCurrent || 0),
+    estoqueMinimo: Number(p.stockMinimum || 0),
+    controlaEstoque: p.controlsStock ?? true,
+    geraAlerta: p.alertEnabled ?? true,
+    ativo: p.active ?? true,
+    imagem: withBase(p.image || ''),
+    criadoEm: p.createdAt || new Date().toISOString(),
+    atualizadoEm: p.updatedAt || new Date().toISOString(),
+  };
+}
+
+function fromApiMovement(m) {
+  return {
+    id: m.id,
+    produtoId: m.productId,
+    produtoNome: m.product?.name || '',
+    tipo: m.type,
+    quantidade: Number(m.quantity || 0),
+    observacao: m.note || '',
+    usuario: m.user?.name || 'Sistema',
+    usuarioPerfil: m.user?.role || '',
+    estoqueAntes: m.beforeStock ?? null,
+    estoqueDepois: m.afterStock ?? null,
+    criadoEm: m.createdAt || new Date().toISOString(),
+  };
+}
 
 export function EstoqueProvider({ children }) {
   const [produtos, setProdutosState] = useState(() => initProdutos());
   const [movimentacoes, setMovimentacoesState] = useState(() => loadData(MOV_KEY, []));
   const [auditoria, setAuditoriaState] = useState(() => loadData(AUDIT_KEY, []));
+  const [syncStatus, setSyncStatus] = useState({ ok: true, lastSync: null });
+
+  React.useEffect(() => {
+    let mounted = true;
+    let timer = null;
+    let inFlight = false;
+
+    async function syncFromApi() {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const [productsResp, movementsResp] = await Promise.all([
+          apiRequest('/api/products'),
+          apiRequest('/api/movements'),
+        ]);
+
+        if (!mounted) return;
+
+        const productsOk = productsResp.ok && productsResp.data?.ok && Array.isArray(productsResp.data.data);
+        const movementsOk = movementsResp.ok && movementsResp.data?.ok && Array.isArray(movementsResp.data.data);
+
+        if (productsOk) {
+          const mapped = normalizeProdutos(productsResp.data.data.map(fromApiProduct));
+          setProdutosState((prev) => {
+            const sameLen = prev.length === mapped.length;
+            const sameJson = sameLen && JSON.stringify(prev) === JSON.stringify(mapped);
+            if (sameJson) return prev;
+            saveData(PRODUTOS_KEY, mapped);
+            return mapped;
+          });
+        }
+
+        if (movementsOk) {
+          const mapped = movementsResp.data.data.map(fromApiMovement);
+          setMovimentacoesState((prev) => {
+            const sameLen = prev.length === mapped.length;
+            const sameJson = sameLen && JSON.stringify(prev) === JSON.stringify(mapped);
+            if (sameJson) return prev;
+            saveData(MOV_KEY, mapped);
+            return mapped;
+          });
+        }
+
+        setSyncStatus({ ok: productsOk && movementsOk, lastSync: new Date() });
+      } catch (e) {
+        if (mounted) setSyncStatus({ ok: false, lastSync: new Date(), error: String(e?.message || e) });
+      } finally {
+        inFlight = false;
+      }
+    }
+
+    // Sincronização inicial + polling a cada 5s para multi-usuário ao vivo
+    syncFromApi();
+    timer = setInterval(syncFromApi, 5000);
+
+    // Pausa o polling quando a aba está em background (economia de banda)
+    function onVisibility() {
+      if (document.hidden) {
+        if (timer) { clearInterval(timer); timer = null; }
+      } else {
+        if (!timer) {
+          syncFromApi();
+          timer = setInterval(syncFromApi, 5000);
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Permite forçar refresh manual de qualquer componente
+    window.__sizSyncNow = syncFromApi;
+
+    return () => {
+      mounted = false;
+      if (timer) clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisibility);
+      delete window.__sizSyncNow;
+    };
+  }, []);
 
   // Salva e atualiza estado
   const setProdutos = useCallback((fn) => {
     setProdutosState(prev => {
-      const next = typeof fn === 'function' ? fn(prev) : fn;
+      const next = normalizeProdutos(typeof fn === 'function' ? fn(prev) : fn);
       saveData(PRODUTOS_KEY, next);
       return next;
     });
@@ -238,6 +442,17 @@ export function EstoqueProvider({ children }) {
     const novo = { ...dados, id: Date.now(), criadoEm: new Date().toISOString(), atualizadoEm: new Date().toISOString() };
     setProdutos(prev => [...prev, novo]);
     registrarAuditoria(user, 'PRODUTO', 'CRIACAO', null, novo);
+
+    apiRequest('/api/products', {
+      method: 'POST',
+      body: JSON.stringify(toApiProduct(novo)),
+    }).then((resp) => {
+      if (resp.ok && resp.data?.ok && resp.data?.data) {
+        const apiMapped = fromApiProduct(resp.data.data);
+        setProdutos((prev) => prev.map((p) => (p.id === novo.id ? apiMapped : p)));
+      }
+    });
+
     return novo;
   }, [setProdutos, registrarAuditoria]);
 
@@ -251,6 +466,12 @@ export function EstoqueProvider({ children }) {
       return p;
     }));
     registrarAuditoria(user, 'PRODUTO', 'EDICAO', antes, { ...antes, ...dados });
+
+    const payload = { ...(antes || {}), ...dados };
+    apiRequest(`/api/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(toApiProduct(payload)),
+    });
   }, [setProdutos, registrarAuditoria]);
 
   const excluirProduto = useCallback((id, user) => {
@@ -260,6 +481,8 @@ export function EstoqueProvider({ children }) {
       return prev.filter(p => p.id !== id);
     });
     registrarAuditoria(user, 'PRODUTO', 'EXCLUSAO', antes, null);
+
+    apiRequest(`/api/products/${id}`, { method: 'DELETE' });
   }, [setProdutos, registrarAuditoria]);
 
   // Movimentações
@@ -311,6 +534,18 @@ export function EstoqueProvider({ children }) {
       );
     });
 
+    if (!erro && movNova) {
+      apiRequest('/api/movements', {
+        method: 'POST',
+        body: JSON.stringify({
+          productId: movNova.produtoId,
+          type: movNova.tipo,
+          quantity: movNova.quantidade,
+          note: movNova.observacao,
+        }),
+      });
+    }
+
     return { erro };
   }, [setProdutos, setMovimentacoes, registrarAuditoria]);
 
@@ -322,6 +557,7 @@ export function EstoqueProvider({ children }) {
       produtos, movimentacoes, auditoria, alertas,
       criarProduto, editarProduto, excluirProduto, registrarMovimentacao,
       registrarAuditoria,
+      syncStatus,
     }}>
       {children}
     </EstoqueContext.Provider>

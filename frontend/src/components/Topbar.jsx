@@ -6,7 +6,7 @@ import { useEstoque } from '../contexts/EstoqueContext';
 
 export default function Topbar() {
   const { user, logout } = useAuth();
-  const { alertas } = useEstoque();
+  const { alertas, syncStatus } = useEstoque();
   const [alertaAberto, setAlertaAberto] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -42,13 +42,29 @@ export default function Topbar() {
       {/* Logo + nome */}
       <div className="flex items-center gap-3">
         <div className="bg-white/20 rounded-xl p-1.5 backdrop-blur-sm">
-          <img src="/logo.png" alt="Logo" className="h-9 w-9 object-contain drop-shadow-md" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="h-9 w-9 object-contain drop-shadow-md" />
         </div>
         <span className="font-extrabold text-xl text-white tracking-wider hidden sm:inline drop-shadow">ZENITH</span>
       </div>
 
       {/* Ações direita */}
       <div className="flex items-center gap-3">
+        {/* Indicador "Ao vivo" — sync ativo com banco Neon */}
+        <div
+          className="hidden md:flex items-center gap-1.5 bg-white/15 hover:bg-white/25 rounded-xl px-2.5 py-1.5 backdrop-blur-sm transition cursor-default"
+          title={syncStatus?.ok
+            ? `Conectado ao banco · última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
+            : `Sem conexão com o banco. Tentando reconectar...`}
+        >
+          <span className={`relative flex h-2 w-2`}>
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${syncStatus?.ok ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${syncStatus?.ok ? 'bg-emerald-400' : 'bg-red-500'}`}></span>
+          </span>
+          <span className="text-white text-[11px] font-semibold uppercase tracking-wider">
+            {syncStatus?.ok ? 'Ao vivo' : 'Offline'}
+          </span>
+        </div>
+
         {/* Sino de alertas */}
         <div className="relative" ref={dropdownRef}>
           <button

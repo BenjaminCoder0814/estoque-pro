@@ -237,7 +237,7 @@ export default function Chat() {
                 lastMsg.tipo === 'imagem' ? '🖼️ Imagem' : '📎 Arquivo';
               const notif = new Notification(`💬 ${remetente}`, {
                 body: corpo,
-                icon: '/favicon.ico',
+                icon: `${import.meta.env.BASE_URL}favicon.ico`,
                 tag: conv.id,
               });
               // Clicar na notificação foca a aba e abre a conversa
