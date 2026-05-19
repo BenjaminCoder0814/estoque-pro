@@ -16,6 +16,8 @@ async function upsertUser({ email, name, role, password, restrictBusiness = fals
 
 async function main() {
   await upsertUser({ email: 'admin@zenith.local', name: 'Administrador', role: 'ADMIN', password: 'admin123' });
+  await upsertUser({ email: 'ti@zenith.local', name: 'TI', role: 'TI', password: 'ti2026' });
+  await upsertUser({ email: 'ti@zenith.com', name: 'TI', role: 'TI', password: 'ti2026' });
   await upsertUser({ email: 'expedicao@zenith.local', name: 'Expedição', role: 'EXPEDICAO', password: '123456' });
   await upsertUser({ email: 'compras@zenith.local', name: 'Compras', role: 'COMPRAS', password: '123456' });
   await upsertUser({ email: 'supervisao@zenith.local', name: 'Supervisão', role: 'SUPERVISAO', password: '123456', restrictBusiness: true });
