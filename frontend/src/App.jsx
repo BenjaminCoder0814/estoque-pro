@@ -23,6 +23,8 @@ import Cubagem from './pages/Cubagem';
 function PrivateRoute({ children, allowed }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
+  // TI tem acesso total a todas as rotas (espelha ADMIN)
+  if (user.perfil === 'TI' || user.perfil === 'ADMIN') return children;
   if (allowed && !allowed.includes(user.perfil)) return <Navigate to="/produtos" replace />;
   return children;
 }

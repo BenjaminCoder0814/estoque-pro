@@ -41,7 +41,7 @@ export default function Sugestoes() {
   const [filtroStatus, setFiltroStatus] = useState('');
   const [enviado, setEnviado]     = useState(false);
 
-  const isAdmin = user?.perfil === 'ADMIN';
+  const isAdmin = user?.perfil === 'ADMIN' || user?.perfil === 'TI';
 
   function salvar(e) {
     e.preventDefault();

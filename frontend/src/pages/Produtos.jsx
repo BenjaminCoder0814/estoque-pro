@@ -114,7 +114,6 @@ export default function Produtos() {
   const { produtos, alertas, criarProduto, editarProduto, excluirProduto } = useEstoque();
   const { user, can } = useAuth();
   const fileRef = useRef();
-  const cmpNome = (a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' });
 
   const [busca, setBusca] = useState('');
   const [filtroCategoria, setFiltroCategoria] = useState('');
@@ -129,27 +128,74 @@ export default function Produtos() {
   const categorias = [...new Set(produtos.map(p => p.categoria).filter(Boolean))]
     .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
-  let lista = [...produtos]
-    .filter(p =>
-      (!busca || p.nome.toLowerCase().includes(busca.toLowerCase()) || p.codigo.toLowerCase().includes(busca.toLowerCase())) &&
-      (!filtroCategoria || p.categoria === filtroCategoria) &&
-      (!filtroAlerta || (filtroAlerta === 'sim' ? alertaIds.has(p.id) : !alertaIds.has(p.id))) &&
-      (!filtroStatus || (filtroStatus === 'ativo' ? p.ativo : !p.ativo))
-    );
-  // Zeros sempre no final em qualquer situação
-  const semZero = lista.filter(p => Number(p.estoqueAtual) > 0);
-  const comZero  = lista.filter(p => !(Number(p.estoqueAtual) > 0));
+  // Normaliza string: minúsculo + sem acentos (ex.: "Âncora" → "ancora")
+  const norm = (s) => String(s ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
 
-  // Ordenação por estoque quando o filtro estiver ativo
+  // Helper que converte estoque em número de forma BLINDADA:
+  // - aceita number, string com dígitos, string "17 un", null, undefined
+  // - tudo que não resultar em número finito vira 0
+  const toEstoque = (p) => {
+    const raw = p?.estoqueAtual;
+    if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+    if (raw == null) return 0;
+    const s = String(raw).replace(/[^0-9\-.]/g, '').replace(/\.(?=.*\.)/g, '');
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  // Produto é considerado ativo se ativo !== false (default true para registros antigos sem o campo)
+  const isAtivo = (p) => p?.ativo !== false;
+
+  const buscaN = norm(busca);
+
+  let lista = [...produtos].filter(p => {
+    if (buscaN) {
+      const nomeN = norm(p?.nome);
+      const codigoN = norm(p?.codigo);
+      const categoriaN = norm(p?.categoria);
+      if (!nomeN.includes(buscaN) && !codigoN.includes(buscaN) && !categoriaN.includes(buscaN)) {
+        return false;
+      }
+    }
+    if (filtroCategoria && p?.categoria !== filtroCategoria) return false;
+    if (filtroAlerta === 'sim' && !alertaIds.has(p?.id)) return false;
+    if (filtroAlerta === 'nao' && alertaIds.has(p?.id)) return false;
+    if (filtroStatus === 'ativo' && !isAtivo(p)) return false;
+    if (filtroStatus === 'inativo' && isAtivo(p)) return false;
+    return true;
+  });
+
   if (ordemEstoque === 'asc' || ordemEstoque === 'desc') {
-    semZero.sort((a, b) => {
-      const qa = Number(a.estoqueAtual);
-      const qb = Number(b.estoqueAtual);
-      return ordemEstoque === 'desc' ? qb - qa : qa - qb;
+    // Ordenação PURAMENTE numérica por estoque — sem desempate alfabético.
+    const sign = ordemEstoque === 'desc' ? -1 : 1;
+    lista.sort((a, b) => {
+      const va = toEstoque(a);
+      const vb = toEstoque(b);
+      if (va === vb) return 0;
+      return va < vb ? -sign : sign;
     });
+    // Diagnóstico: mostra os 10 primeiros itens com seus valores numéricos reais
+    // eslint-disable-next-line no-console
+    console.log('[Produtos] ordem=' + ordemEstoque + ' → top 10:',
+      lista.slice(0, 10).map(p => `${toEstoque(p)} | ${p.nome}`));
   }
+  // ordemEstoque === '' → mantém a ordem original (sem alfabético, sem ordenação numérica)
+  // SEM ordenação alfabética em hipótese nenhuma — padrão é a ordem original
+  // do banco (que o usuário chama de "aleatória"). Só ordena quando o usuário
+  // escolhe explicitamente asc/desc pelo estoque (critério puramente numérico).
 
-  lista = [...semZero, ...comZero];
+  const filtrosAtivos = !!(busca || filtroCategoria || filtroAlerta || filtroStatus || ordemEstoque);
+  function limparFiltros() {
+    setBusca('');
+    setFiltroCategoria('');
+    setFiltroAlerta('');
+    setFiltroStatus('');
+    setOrdemEstoque('');
+  }
 
   function abrirNovo() { setForm(VAZIO); setEditandoId(null); setShowForm(true); }
   function abrirEdicao(p) { setForm({ ...p }); setEditandoId(p.id); setShowForm(true); }
@@ -201,11 +247,6 @@ export default function Produtos() {
         )}
       </div>
 
-      <div className="mb-4 bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm rounded-lg px-4 py-3 flex items-center gap-2">
-        <span className="text-base">ℹ️</span>
-        <span>Todos os produtos estão listados em ordem alfabética para qualquer login.</span>
-      </div>
-
       {/* Filtros */}
       <div className="flex gap-3 mb-5 flex-wrap bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
         <input
@@ -228,11 +269,36 @@ export default function Produtos() {
           <option value="ativo">Ativos</option>
           <option value="inativo">Inativos</option>
         </select>
-        <select className="border rounded-lg px-3 py-2 text-sm" value={ordemEstoque} onChange={e => setOrdemEstoque(e.target.value)}>
-          <option value="">Ordenação padrão</option>
-          <option value="asc">Estoque ↑ menor</option>
-          <option value="desc">Estoque ↓ maior</option>
-        </select>
+        <div className="inline-flex rounded-lg border border-gray-300 overflow-hidden text-sm shadow-sm" role="group" aria-label="Ordenar por estoque">
+          <button
+            type="button"
+            onClick={() => setOrdemEstoque('')}
+            className={`px-3 py-2 font-semibold transition ${ordemEstoque === '' ? 'bg-gray-700 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            title="Ordem padrão (original)"
+          >↕ Padrão</button>
+          <button
+            type="button"
+            onClick={() => setOrdemEstoque('desc')}
+            className={`px-3 py-2 font-semibold border-l border-gray-300 transition ${ordemEstoque === 'desc' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            title="Maior estoque primeiro"
+          >↓ Maior → Menor</button>
+          <button
+            type="button"
+            onClick={() => setOrdemEstoque('asc')}
+            className={`px-3 py-2 font-semibold border-l border-gray-300 transition ${ordemEstoque === 'asc' ? 'bg-emerald-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            title="Menor estoque primeiro"
+          >↑ Menor → Maior</button>
+        </div>
+        {filtrosAtivos && (
+          <button
+            type="button"
+            onClick={limparFiltros}
+            className="ml-auto text-sm text-gray-600 hover:text-red-600 underline px-2"
+            title="Limpar todos os filtros"
+          >
+            Limpar filtros
+          </button>
+        )}
       </div>
 
       {/* Modal */}
@@ -333,6 +399,13 @@ export default function Produtos() {
       )}
 
       {/* Tabela */}
+      {ordemEstoque && (
+        <div className={`mb-3 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${ordemEstoque === 'desc' ? 'bg-blue-50 text-blue-800 border border-blue-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
+          <span>Ordenando por estoque:</span>
+          <span className="text-base">{ordemEstoque === 'desc' ? '↓ MAIOR para o MENOR' : '↑ MENOR para o MAIOR'}</span>
+          <span className="ml-auto text-xs opacity-75">{lista.length} produtos · primeiro: {lista[0] ? `${toEstoque(lista[0])} (${lista[0].nome})` : '—'}</span>
+        </div>
+      )}
       <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100">
         <table className="w-full">
           <thead>
@@ -344,8 +417,12 @@ export default function Produtos() {
               <th className="p-3 text-left">Tamanho</th>
               <th className="p-3 text-left">Material</th>
               <th className="p-3 text-center">Cor</th>
-              <th className="p-3 text-center cursor-pointer hover:text-blue-600" onClick={() => setOrdemEstoque(o => o === 'asc' ? 'desc' : 'asc')}>
-                Estoque {ordemEstoque === 'asc' ? '↑' : ordemEstoque === 'desc' ? '↓' : '↕'}
+              <th className="p-3 text-center select-none">
+                <span className="inline-flex items-center gap-1">
+                  Estoque
+                  {ordemEstoque === 'desc' && <span className="text-blue-600 font-bold" title="Maior para o menor">↓</span>}
+                  {ordemEstoque === 'asc' && <span className="text-emerald-600 font-bold" title="Menor para o maior">↑</span>}
+                </span>
               </th>
               <th className="p-3 text-center">Mínimo</th>
               <th className="p-3 text-center">Alerta</th>
@@ -353,14 +430,14 @@ export default function Produtos() {
               {(can.editarProdutos || can.excluirProdutos) && <th className="p-3 text-center">Ações</th>}
             </tr>
           </thead>
-          <tbody>
+          <tbody key={`ord-${ordemEstoque}-${lista.length}`}>
             {lista.length === 0 && (
               <tr>
                 <td colSpan={10} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
               </tr>
             )}
-            {lista.map(p => (
-              <tr key={p.id} className={`border-t text-sm hover:bg-gray-50 transition ${alertaIds.has(p.id) ? 'bg-red-50' : ''} ${!p.ativo ? 'opacity-50' : ''}`}>
+            {lista.map((p, idx) => (
+              <tr key={`${ordemEstoque}-${p.id}-${idx}`} className={`border-t text-sm hover:bg-gray-50 transition ${alertaIds.has(p.id) ? 'bg-red-50' : ''} ${!p.ativo ? 'opacity-50' : ''}`}>
                 <td className="p-3">
                   <ImgProduto
                     src={p.imagem}

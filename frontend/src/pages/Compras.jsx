@@ -218,7 +218,7 @@ export default function Compras() {
 
   // Notificações do usuário atual
   const minhasNotifs = notifs.filter(n =>
-    (n.paraAdmins && user.perfil === 'ADMIN') ||
+    (n.paraAdmins && (user.perfil === 'ADMIN' || user.perfil === 'TI')) ||
     (n.paraCompras && user.perfil === 'COMPRAS')
   );
   const naoLidas = minhasNotifs.filter(n => !n.lida).length;
@@ -254,7 +254,7 @@ export default function Compras() {
         </div>
         <div className="flex items-center gap-3">
           {/* Sino de notificações (só para ADMIN e COMPRAS) */}
-          {(user.perfil === 'ADMIN' || user.perfil === 'COMPRAS') && naoLidas > 0 && (
+          {(user.perfil === 'ADMIN' || user.perfil === 'TI' || user.perfil === 'COMPRAS') && naoLidas > 0 && (
             <span className="relative">
               <span className="inline-flex items-center gap-1.5 bg-red-100 text-red-700 border border-red-300 px-3 py-1.5 rounded-full text-sm font-semibold">
                 <LucideAlertTriangle className="w-4 h-4" />
@@ -275,7 +275,7 @@ export default function Compras() {
       </div>
 
       {/* Notificações de divergência */}
-      {(user.perfil === 'ADMIN' || user.perfil === 'COMPRAS') && minhasNotifs.length > 0 && (
+      {(user.perfil === 'ADMIN' || user.perfil === 'TI' || user.perfil === 'COMPRAS') && minhasNotifs.length > 0 && (
         <div className="mb-6 space-y-2">
           <h3 className="text-sm font-bold text-gray-700 uppercase tracking-widest mb-2">Alertas de Recebimento</h3>
           {minhasNotifs.map(n => (

@@ -41,7 +41,7 @@ export default function Topbar() {
     >
       {/* Logo + nome */}
       <div className="flex items-center gap-3">
-        <div className="bg-white/20 rounded-xl p-1.5 backdrop-blur-sm">
+        <div className="bg-white/20 rounded-xl p-1.5 backdrop-blur-sm" title="Voltar para o painel principal do estoque Zenith" aria-label="Voltar para o painel principal do estoque Zenith">
           <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="h-9 w-9 object-contain drop-shadow-md" />
         </div>
         <span className="font-extrabold text-xl text-white tracking-wider hidden sm:inline drop-shadow">ZENITH</span>
@@ -53,8 +53,11 @@ export default function Topbar() {
         <div
           className="hidden md:flex items-center gap-1.5 bg-white/15 hover:bg-white/25 rounded-xl px-2.5 py-1.5 backdrop-blur-sm transition cursor-default"
           title={syncStatus?.ok
-            ? `Conectado ao banco · última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
-            : `Sem conexão com o banco. Tentando reconectar...`}
+            ? `Status: conectado ao banco de dados Neon. Última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
+            : `Sem conexão com o banco de dados. Tentando reconectar...`}
+          aria-label={syncStatus?.ok
+            ? `Status: conectado ao banco de dados Neon. Última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
+            : `Sem conexão com o banco de dados. Tentando reconectar...`}
         >
           <span className={`relative flex h-2 w-2`}>
             <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${syncStatus?.ok ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
@@ -70,7 +73,8 @@ export default function Topbar() {
           <button
             onClick={() => setAlertaAberto(v => !v)}
             className="relative p-2 rounded-xl bg-white/15 hover:bg-white/25 text-white backdrop-blur-sm transition-all"
-            title={alertas.length > 0 ? `${alertas.length} alerta(s) de estoque` : 'Sem alertas'}
+            title={alertas.length > 0 ? `${alertas.length} alerta(s) de estoque: produtos abaixo do mínimo ou com problemas críticos.` : 'Sem alertas de estoque no momento.'}
+            aria-label={alertas.length > 0 ? `${alertas.length} alerta(s) de estoque: produtos abaixo do mínimo ou com problemas críticos.` : 'Sem alertas de estoque no momento.'}
           >
             <LucideBell className="w-5 h-5" />
             {alertas.length > 0 && (
@@ -153,8 +157,8 @@ export default function Topbar() {
         <button
           onClick={logout}
           className="p-2 rounded-xl bg-white/15 hover:bg-red-500/80 text-white transition-all duration-200 backdrop-blur-sm group"
-          aria-label="Sair"
-          title="Sair do sistema"
+          aria-label="Sair do sistema e encerrar sessão de usuário."
+          title="Sair do sistema e encerrar sessão de usuário."
         >
           <LucideLogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" />
         </button>

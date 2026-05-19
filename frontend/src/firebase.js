@@ -1,6 +1,7 @@
 // Configuração do Firebase — Zenith Estoque
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
 // Lê configuração do Firebase a partir de variáveis de ambiente Vite (.env / Netlify UI)
 const firebaseConfig = {
@@ -26,6 +27,23 @@ if (missing.length) {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const auth = getAuth(app);
+
+// Login anônimo automático — necessário para as regras `request.auth != null`
+// (chat, histórico e sincronização em tempo real entre logins/IPs)
+let authReadyResolve;
+export const authReady = new Promise((resolve) => { authReadyResolve = resolve; });
+
+onAuthStateChanged(auth, (u) => {
+  if (u) {
+    console.log('[firebase] auth pronto uid=', u.uid);
+    authReadyResolve?.(u);
+  }
+});
+
+signInAnonymously(auth).catch((e) => {
+  console.error('[firebase] falha no login anônimo:', e);
+});
 
 // Registra uma ação no histórico de preços no Firestore
 export async function logHistoricoPrecos(usuario, perfil, acao, descricao, antes = null, depois = null) {

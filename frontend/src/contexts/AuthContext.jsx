@@ -11,14 +11,15 @@ const USUARIOS_PADRAO = [
   { id: 4, email: 'supervisao@zenith.com',  senha: 'super2026', nome: 'Supervisão',    perfil: 'SUPERVISAO',  restricaoHorario: true  },
   { id: 5, email: 'comercial@zenith.com',   senha: 'com2026',   nome: 'Comercial',     perfil: 'COMERCIAL',   restricaoHorario: true  },
   { id: 6, email: 'producao@zenith.com',    senha: 'prod2026',  nome: 'Produção',      perfil: 'PRODUCAO',    restricaoHorario: true  },
-  { id: 99, email: 'visitante@zenith.com',  senha: 'demo2026',  nome: 'Visitante',     perfil: 'VISITANTE',   restricaoHorario: false },
+  { id: 7, email: 'ti@zenith.com',          senha: 'ti2026',    nome: 'TI',            perfil: 'TI',          restricaoHorario: false },
 ];
 
-export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO', 'VISITANTE'];
+export const PERFIS = ['ADMIN', 'TI', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO'];
+
+const USUARIOS_VERSION = 'v9-ti';
 
 const SESSAO_KEY = 'zkSessaoAtiva';
 const KICK_KEY = 'zkSessaoKick';
-const USUARIOS_VERSION = 'v7';
 
 function genSessionId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -193,18 +194,20 @@ export function AuthProvider({ children }) {
   const refreshUsuariosFromApi = useCallback(async () => {
     const currentToken = getStoredToken();
     const currentUser = userRef.current;
-    if (!currentToken || !currentUser || currentUser.perfil !== 'ADMIN') return;
+    if (!currentToken || !currentUser || (currentUser.perfil !== 'ADMIN' && currentUser.perfil !== 'TI')) return;
 
     const resp = await apiRequest('/api/users');
     if (resp.ok && resp.data?.ok && Array.isArray(resp.data.data)) {
       const localList = loadUsuarios();
-      const merged = resp.data.data.map((u) => {
-        const local = localList.find((x) => x.email === u.email);
-        return {
-          ...mapApiUser(u),
-          senha: local?.senha || '',
-        };
-      });
+      const merged = resp.data.data
+        .filter((u) => (u.perfil || u.role) !== 'VISITANTE')
+        .map((u) => {
+          const local = localList.find((x) => x.email === u.email);
+          return {
+            ...mapApiUser(u),
+            senha: local?.senha || '',
+          };
+        });
       const ensured = ensureUsuariosPadrao(merged);
       saveUsuarios(ensured);
       setUsuariosState(ensured);
@@ -256,7 +259,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const interval = setInterval(() => {
       const currentUser = userRef.current;
-      if (!currentUser || currentUser.perfil === 'ADMIN') return;
+      if (!currentUser || currentUser.perfil === 'ADMIN' || currentUser.perfil === 'TI') return;
       const kick = getKickSignal();
       if (kick && kick.targetSessionId === currentUser.sessionId) {
         clearKickSignal();
@@ -271,7 +274,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (user?.perfil === 'ADMIN') {
+    if (user?.perfil === 'ADMIN' || user?.perfil === 'TI') {
       refreshUsuariosFromApi();
     }
   }, [user?.perfil, refreshUsuariosFromApi]);
@@ -329,7 +332,7 @@ export function AuthProvider({ children }) {
         enviarSinalKick(sessao.sessionId, found.nome);
         setSessaoAtiva(null);
       }
-    } else if (found.perfil !== 'VISITANTE') {
+    } else if (found.perfil !== 'VISITANTE' && found.perfil !== 'TI') {
       if (sessao && sessao.id !== found.id) {
         setSessaoBloqueadaPor(sessao.nome);
         setError(
@@ -355,7 +358,7 @@ export function AuthProvider({ children }) {
     setUser(userData);
     localStorage.setItem('zkuser', JSON.stringify(userData));
 
-    if (found.perfil !== 'ADMIN' && found.perfil !== 'VISITANTE') {
+    if (found.perfil !== 'ADMIN' && found.perfil !== 'VISITANTE' && found.perfil !== 'TI') {
       setSessaoAtiva(userData);
     }
 
@@ -442,31 +445,31 @@ export function AuthProvider({ children }) {
 
   const isVisitante = user?.perfil === 'VISITANTE';
   const can = {
-    verDashboard:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
+    verDashboard:         user && ['ADMIN', 'TI', 'VISITANTE'].includes(user.perfil),
     verProdutos:          !!user,
-    editarProdutos:       !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    excluirProdutos:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
-    fazerMovimentacoes:   !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verAuditoria:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
-    verEntrada:           user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    confirmarEntrada:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    marcarPedido:         !isVisitante && user && ['COMPRAS'].includes(user.perfil),
+    editarProdutos:       !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO'].includes(user.perfil),
+    excluirProdutos:      !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
+    fazerMovimentacoes:   !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO'].includes(user.perfil),
+    verHistorico:         user && ['ADMIN', 'TI', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'TI', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verPendentes:         user && ['ADMIN', 'TI', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verAuditoria:         user && ['ADMIN', 'TI', 'VISITANTE'].includes(user.perfil),
+    verEntrada:           user && ['ADMIN', 'TI', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    confirmarEntrada:     !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO'].includes(user.perfil),
+    marcarPedido:         !isVisitante && user && ['ADMIN', 'TI', 'COMPRAS'].includes(user.perfil),
     verSugestoes:         !!user,
-    gerenciarUsuarios:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
-    verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'].includes(user.perfil),
-    editarPrecos:         !isVisitante && user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
-    verMidia:             user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
-    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    criarSeparacao:       !isVisitante && user && ['ADMIN', 'COMERCIAL'].includes(user.perfil),
-    avancarSeparacao:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    editarSeparacao:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
-    cancelarSeparacao:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    gerenciarUsuarios:    !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
+    verPrecos:            user && ['ADMIN', 'TI', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'].includes(user.perfil),
+    editarPrecos:         !isVisitante && user && ['ADMIN', 'TI', 'SUPERVISAO'].includes(user.perfil),
+    verMidia:             user && ['ADMIN', 'TI', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
+    verSeparacoes:        user && ['ADMIN', 'TI', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    criarSeparacao:       !isVisitante && user && ['ADMIN', 'TI', 'COMERCIAL'].includes(user.perfil),
+    avancarSeparacao:     !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    editarSeparacao:      !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
+    cancelarSeparacao:    !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
     verChat:              !!user && !isVisitante,
-    verChatTotal:         user?.perfil === 'ADMIN',
-    verCubagem:           user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
+    verChatTotal:         user?.perfil === 'ADMIN' || user?.perfil === 'TI',
+    verCubagem:           user && ['ADMIN', 'TI', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
   };
 
   return (

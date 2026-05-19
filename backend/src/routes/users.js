@@ -5,7 +5,7 @@ import { requireAuth, requireRoles } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/', requireAuth, requireRoles('ADMIN'), async (_req, res) => {
+router.get('/', requireAuth, requireRoles('ADMIN', 'TI'), async (_req, res) => {
   const users = await prisma.user.findMany({
     orderBy: { name: 'asc' },
     select: {
@@ -21,7 +21,7 @@ router.get('/', requireAuth, requireRoles('ADMIN'), async (_req, res) => {
   return res.json({ ok: true, data: users });
 });
 
-router.post('/', requireAuth, requireRoles('ADMIN'), async (req, res) => {
+router.post('/', requireAuth, requireRoles('ADMIN', 'TI'), async (req, res) => {
   const { email, name, password, role, active, restrictBusiness } = req.body || {};
   const passwordHash = await bcrypt.hash(password || '123456', 10);
   const created = await prisma.user.create({
@@ -37,7 +37,7 @@ router.post('/', requireAuth, requireRoles('ADMIN'), async (req, res) => {
   return res.status(201).json({ ok: true, data: { id: created.id } });
 });
 
-router.patch('/:id', requireAuth, requireRoles('ADMIN'), async (req, res) => {
+router.patch('/:id', requireAuth, requireRoles('ADMIN', 'TI'), async (req, res) => {
   const id = Number(req.params.id);
   const { name, role, active, restrictBusiness, password } = req.body || {};
   const data = {
@@ -55,7 +55,7 @@ router.patch('/:id', requireAuth, requireRoles('ADMIN'), async (req, res) => {
   return res.json({ ok: true, data: { id: updated.id } });
 });
 
-router.delete('/:id', requireAuth, requireRoles('ADMIN'), async (req, res) => {
+router.delete('/:id', requireAuth, requireRoles('ADMIN', 'TI'), async (req, res) => {
   const id = Number(req.params.id);
 
   if (req.user?.id === id) {

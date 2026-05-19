@@ -13,32 +13,34 @@ import { useEstoque } from '../contexts/EstoqueContext';
 // Cada item tem `allowed` listando os perfis que PODEM ver
 // Se `allowed` é undefined → todos os perfis logados veem
 const menu = [
-  // ADMIN + VISITANTE: Dashboard
-  { label: 'Dashboard',  icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN', 'VISITANTE'] },
-  // Todos veem Produtos
-  { label: 'Produtos',   icon: LucideBox,              to: '/produtos'      },
-  // ADMIN + SUPERVISAO + COMERCIAL + COMPRAS + VISITANTE
-  { label: 'Preços',     icon: LucideTag,              to: '/precos',        allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'] },
-  // ADMIN + EXPEDICAO + SUPERVISAO + PRODUCAO + VISITANTE
-  { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'] },
-  // ADMIN + COMPRAS + EXPEDICAO + PRODUCAO + VISITANTE
-  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'] },
-  // ADMIN + EXPEDICAO + COMPRAS + PRODUCAO + VISITANTE
-  { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'] },
-  // ADMIN + EXPEDICAO + PRODUCAO + VISITANTE
-  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'] },
-  // ADMIN + VISITANTE
-  { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN', 'VISITANTE'] },
-  // Sugestões — TODOS os perfis
-  { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes'     },
-  { label: 'Usuários',   icon: LucideUserCog,          to: '/usuarios',      allowed: ['ADMIN'] },
-  // ADMIN + EXPEDICAO + COMERCIAL + SUPERVISAO + PRODUCAO + VISITANTE
-  { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'] },
-  // Mídia + Cubagem — VISITANTE incluso
-  { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'] },
-  { label: 'Cubagem',    icon: LucideRuler,            to: '/cubagem',       allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'] },
-  // Chat — não exibido para VISITANTE
-  { label: 'Chat',       icon: LucideMessageSquare,   to: '/chat',          allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO'] },
+  { label: 'Dashboard',  icon: LucideLayoutDashboard, to: '/',             allowed: ['ADMIN', 'VISITANTE'],
+    desc: 'Painel geral do estoque: KPIs, alertas críticos e movimentações em tempo real.' },
+  { label: 'Produtos',   icon: LucideBox,              to: '/produtos',
+    desc: 'Catálogo completo de produtos disponíveis no estoque Zenith.' },
+  { label: 'Preços',     icon: LucideTag,              to: '/precos',        allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'],
+    desc: 'Tabela de preços por categoria: atacado, varejo e unidade.' },
+  { label: 'Histórico',  icon: LucideList,             to: '/movimentacoes', allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'],
+    desc: 'Histórico completo de entradas e saídas do estoque.' },
+  { label: 'Alertas',    icon: LucideAlertTriangle,    to: '/alertas',       allowed: ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'],
+    desc: 'Produtos abaixo do estoque mínimo e alertas críticos.' },
+  { label: 'Pendentes',  icon: LucideClipboard,        to: '/pendentes',     allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'],
+    desc: 'Pedidos de compra aguardando aprovação ou entrega.' },
+  { label: 'Entrada',    icon: LucidePackageCheck,     to: '/entrada',       allowed: ['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'],
+    desc: 'Registrar novas entradas de produtos no estoque.' },
+  { label: 'Auditoria',  icon: LucideClipboardList,    to: '/auditoria',     allowed: ['ADMIN', 'VISITANTE'],
+    desc: 'Logs completos de ações e histórico de preços.' },
+  { label: 'Sugestões',  icon: LucideLightbulb,        to: '/sugestoes',
+    desc: 'Canal para sugestões internas entre equipes.' },
+  { label: 'Usuários',   icon: LucideUserCog,          to: '/usuarios',      allowed: ['ADMIN'],
+    desc: 'Gestão de usuários e permissões de acesso.' },
+  { label: 'Separações', icon: LucideTruck,             to: '/separacoes',    allowed: ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'],
+    desc: 'Gestão de pedidos e separação de mercadorias (Kanban).' },
+  { label: 'Mídia',      icon: LucideImage,            to: '/midia',         allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'],
+    desc: 'Galeria de fotos dos produtos organizados por categoria.' },
+  { label: 'Cubagem',    icon: LucideRuler,            to: '/cubagem',       allowed: ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'],
+    desc: 'Calculadora de cubagem para otimizar espaço em fretes.' },
+  { label: 'Chat',       icon: LucideMessageSquare,   to: '/chat',          allowed: ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO'],
+    desc: 'Canal de comunicação interna entre equipes.' },
 ];
 
 export default function Sidebar() {
@@ -98,7 +100,7 @@ export default function Sidebar() {
       {/* Menu */}
       <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
         {menu
-          .filter(item => !item.allowed || item.allowed.includes(user?.perfil))
+          .filter(item => !item.allowed || item.allowed.includes(user?.perfil) || user?.perfil === 'TI' || user?.perfil === 'ADMIN')
           .map(item => {
             const Icon = item.icon;
             const active = location.pathname === item.to;
@@ -106,7 +108,8 @@ export default function Sidebar() {
               <Link
                 key={item.to}
                 to={item.to}
-                title={collapsed ? item.label : undefined}
+                title={item.desc}
+                aria-label={item.desc}
                 className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group font-medium text-sm
                   ${active
                     ? 'bg-gradient-to-r from-indigo-500/30 to-purple-500/20 text-white border border-indigo-500/40 shadow-glow'
