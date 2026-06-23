@@ -1,9 +1,11 @@
-// Contexto de autenticação com API + fallback local
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { apiRequest, setStoredToken, getStoredToken } from '../services/apiClient';
+// Contexto de autenticação com controle de horário comercial e sessão única
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const AuthContext = createContext();
 
+// ──────────────────────────────────────────────
+// USUÁRIOS DO SISTEMA
+// ──────────────────────────────────────────────
 const USUARIOS_PADRAO = [
   { id: 1, email: 'admin@zenith.com',       senha: '123456',    nome: 'Administrador', perfil: 'ADMIN',       restricaoHorario: false },
   { id: 2, email: 'expedicao@zenith.com',   senha: 'exped2026', nome: 'Expedição',     perfil: 'EXPEDICAO',   restricaoHorario: true  },
@@ -11,15 +13,24 @@ const USUARIOS_PADRAO = [
   { id: 4, email: 'supervisao@zenith.com',  senha: 'super2026', nome: 'Supervisão',    perfil: 'SUPERVISAO',  restricaoHorario: true  },
   { id: 5, email: 'comercial@zenith.com',   senha: 'com2026',   nome: 'Comercial',     perfil: 'COMERCIAL',   restricaoHorario: true  },
   { id: 6, email: 'producao@zenith.com',    senha: 'prod2026',  nome: 'Produção',      perfil: 'PRODUCAO',    restricaoHorario: true  },
-  { id: 7, email: 'ti@zenith.com',          senha: 'ti2026',    nome: 'TI',            perfil: 'TI',          restricaoHorario: false },
+  { id: 7, email: 'centralatendimento@zenith.com', senha: 'atendimento2026', nome: 'Central Atendimento', perfil: 'ADMIN', restricaoHorario: false },
+  // Equipe de vendas — perfil COMERCIAL, com restrição de horário comercial
+  { id: 8,  email: 'vendas1@zenith.com',  senha: 'vendas12026',  nome: 'Vendas 1',  perfil: 'COMERCIAL', restricaoHorario: true },
+  { id: 9,  email: 'vendas5@zenith.com',  senha: 'vendas52026',  nome: 'Vendas 5',  perfil: 'COMERCIAL', restricaoHorario: true },
+  { id: 10, email: 'vendas10@zenith.com', senha: 'vendas102026', nome: 'Vendas 10', perfil: 'COMERCIAL', restricaoHorario: true },
+  { id: 11, email: 'vendas12@zenith.com', senha: 'vendas122026', nome: 'Vendas 12', perfil: 'COMERCIAL', restricaoHorario: true },
+  { id: 12, email: 'vendas3@zenith.com',  senha: 'vendas32026',  nome: 'Vendas 3',  perfil: 'COMERCIAL', restricaoHorario: true },
+  // Visitante de portfólio — somente visualização, sem restrição de horário
+  { id: 99, email: 'visitante@zenith.com',  senha: 'demo2026',  nome: 'Visitante',     perfil: 'VISITANTE',   restricaoHorario: false },
 ];
 
-export const PERFIS = ['ADMIN', 'TI', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO'];
+export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO', 'VISITANTE'];
 
-const USUARIOS_VERSION = 'v9-ti';
-
-const SESSAO_KEY = 'zkSessaoAtiva';
-const KICK_KEY = 'zkSessaoKick';
+// ──────────────────────────────────────────────
+// SESSÃO ATIVA (controle de acesso único não-admin)
+// ──────────────────────────────────────────────
+const SESSAO_KEY   = 'zkSessaoAtiva';
+const KICK_KEY     = 'zkSessaoKick';
 
 function genSessionId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -29,19 +40,14 @@ function getSessaoAtiva() {
   try {
     const raw = localStorage.getItem(SESSAO_KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function setSessaoAtiva(userData) {
   if (userData) {
     localStorage.setItem(SESSAO_KEY, JSON.stringify({
-      id: userData.id,
-      nome: userData.nome,
-      email: userData.email,
-      perfil: userData.perfil,
-      inicio: new Date().toISOString(),
+      id: userData.id, nome: userData.nome, email: userData.email,
+      perfil: userData.perfil, inicio: new Date().toISOString(),
       sessionId: userData.sessionId,
     }));
   } else {
@@ -49,6 +55,7 @@ function setSessaoAtiva(userData) {
   }
 }
 
+// Sinaliza que uma sessão específica deve ser derrubada
 function enviarSinalKick(targetSessionId, byNome) {
   localStorage.setItem(KICK_KEY, JSON.stringify({
     targetSessionId,
@@ -58,40 +65,44 @@ function enviarSinalKick(targetSessionId, byNome) {
 }
 
 function getKickSignal() {
-  try {
-    return JSON.parse(localStorage.getItem(KICK_KEY) || 'null');
-  } catch {
-    return null;
-  }
+  try { return JSON.parse(localStorage.getItem(KICK_KEY) || 'null'); } catch { return null; }
 }
 
-function clearKickSignal() {
-  localStorage.removeItem(KICK_KEY);
-}
+function clearKickSignal() { localStorage.removeItem(KICK_KEY); }
 
+// ──────────────────────────────────────────────
+// VERIFICAÇÃO DE HORÁRIO COMERCIAL
+// Seg–Qui: 07:00–18:00 | Sex: 07:00–16:00
+// Sáb/Dom: sem acesso
+// ──────────────────────────────────────────────
 export function verificarHorarioComercial() {
   const agora = new Date();
-  const dia = agora.getDay();
+  const dia = agora.getDay(); // 0=Dom … 6=Sáb
   const totalMin = agora.getHours() * 60 + agora.getMinutes();
-  const inicio = 7 * 60;
-  const fimSex = 16 * 60;
-  const fimNorm = 18 * 60;
+  const inicio   = 7  * 60; // 07:00
+  const fimSex   = 16 * 60; // 16:00 sexta
+  const fimNorm  = 18 * 60; // 18:00 seg-qui
 
-  if (dia === 0 || dia === 6) {
+  if (dia === 0 || dia === 6)
     return { ok: false, motivo: 'Acesso permitido apenas de segunda a sexta-feira.' };
-  }
   if (dia === 5) {
-    if (totalMin < inicio || totalMin >= fimSex) {
+    if (totalMin < inicio || totalMin >= fimSex)
       return { ok: false, motivo: 'Na sexta-feira o acesso é das 07:00 às 16:00.' };
-    }
-  } else if (totalMin < inicio || totalMin >= fimNorm) {
-    return { ok: false, motivo: 'De segunda a quinta o acesso é das 07:00 às 18:00.' };
+  } else {
+    if (totalMin < inicio || totalMin >= fimNorm)
+      return { ok: false, motivo: 'De segunda a quinta o acesso é das 07:00 às 18:00.' };
   }
   return { ok: true };
 }
 
+// ──────────────────────────────────────────────
+// HELPERS localStorage
+// ──────────────────────────────────────────────
+const USUARIOS_VERSION = 'v9'; // Incremente para forçar reset dos usuários padrão
+
 function loadUsuarios() {
   try {
+    // Se a versão mudou, reseta para os novos padrões
     const versao = localStorage.getItem('zkUsuariosVersion');
     if (versao !== USUARIOS_VERSION) {
       saveUsuarios(USUARIOS_PADRAO);
@@ -99,11 +110,7 @@ function loadUsuarios() {
       return USUARIOS_PADRAO;
     }
     const raw = localStorage.getItem('zkUsuarios');
-    if (raw) {
-      const ensured = ensureUsuariosPadrao(JSON.parse(raw));
-      saveUsuarios(ensured);
-      return ensured;
-    }
+    if (raw) return JSON.parse(raw);
   } catch {}
   saveUsuarios(USUARIOS_PADRAO);
   localStorage.setItem('zkUsuariosVersion', USUARIOS_VERSION);
@@ -114,137 +121,63 @@ function saveUsuarios(lista) {
   localStorage.setItem('zkUsuarios', JSON.stringify(lista));
 }
 
-function ensureUsuariosPadrao(lista) {
-  const atuais = Array.isArray(lista) ? [...lista] : [];
-
-  for (const padrao of USUARIOS_PADRAO) {
-    const idx = atuais.findIndex((u) => u.email === padrao.email);
-    if (idx === -1) {
-      atuais.push({ ...padrao });
-      continue;
-    }
-
-    const atual = atuais[idx] || {};
-    atuais[idx] = {
-      ...padrao,
-      ...atual,
-      senha: atual.senha || padrao.senha,
-    };
-  }
-
-  return atuais;
-}
-
-function mapApiUser(user) {
-  return {
-    id: user.id,
-    email: user.email,
-    nome: user.nome || user.name,
-    perfil: user.perfil || user.role,
-    restricaoHorario: user.restricaoHorario ?? user.restrictBusiness ?? false,
-    senha: '',
-    ativo: user.active ?? true,
-  };
-}
-
-async function loginViaApi(email, senha) {
-  const tryEmails = [email];
-  if (email.endsWith('@zenith.com')) {
-    tryEmails.push(email.replace('@zenith.com', '@zenith.local'));
-  }
-
-  for (const tryEmail of tryEmails) {
-    const resp = await apiRequest('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email: tryEmail, password: senha }),
-    });
-
-    if (resp.ok && resp.data?.ok && resp.data?.token && resp.data?.user) {
-      return {
-        ok: true,
-        token: resp.data.token,
-        user: mapApiUser(resp.data.user),
-      };
-    }
-  }
-
-  return { ok: false };
-}
-
+// ──────────────────────────────────────────────
+// PROVIDER
+// ──────────────────────────────────────────────
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
       const raw = localStorage.getItem('zkuser');
       return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   });
 
-  const [error, setError] = useState(null);
+  const [error, setError]                           = useState(null);
   const [sessaoBloqueadaPor, setSessaoBloqueadaPor] = useState(null);
-  const [kickedMessage, setKickedMessage] = useState(null);
-  const [usuarios, setUsuariosState] = useState(loadUsuarios);
+  const [kickedMessage, setKickedMessage]           = useState(null);
+  const [usuarios, setUsuariosState]                = useState(loadUsuarios);
   const userRef = useRef(user);
   useEffect(() => { userRef.current = user; }, [user]);
 
-  const INATIVIDADE_LIMIT = 20 * 60 * 1000;
+  // ── INATIVIDADE: LOGOUT AUTOMÁTICO APÓS 20 min ─────────────────
+  const INATIVIDADE_LIMIT = 20 * 60 * 1000; // 20 minutos
   const ATIVIDADE_KEY = 'zkLastActivity';
-
-  const refreshUsuariosFromApi = useCallback(async () => {
-    const currentToken = getStoredToken();
-    const currentUser = userRef.current;
-    if (!currentToken || !currentUser || (currentUser.perfil !== 'ADMIN' && currentUser.perfil !== 'TI')) return;
-
-    const resp = await apiRequest('/api/users');
-    if (resp.ok && resp.data?.ok && Array.isArray(resp.data.data)) {
-      const localList = loadUsuarios();
-      const merged = resp.data.data
-        .filter((u) => (u.perfil || u.role) !== 'VISITANTE')
-        .map((u) => {
-          const local = localList.find((x) => x.email === u.email);
-          return {
-            ...mapApiUser(u),
-            senha: local?.senha || '',
-          };
-        });
-      const ensured = ensureUsuariosPadrao(merged);
-      saveUsuarios(ensured);
-      setUsuariosState(ensured);
-    }
-  }, []);
 
   function registrarAtividade() {
     localStorage.setItem(ATIVIDADE_KEY, Date.now().toString());
   }
 
+  // Ouve eventos de atividade do usuário
   useEffect(() => {
     const eventos = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
     const handler = () => registrarAtividade();
-    eventos.forEach((e) => window.addEventListener(e, handler, { passive: true }));
+    eventos.forEach(e => window.addEventListener(e, handler, { passive: true }));
+    // Inicializa
     registrarAtividade();
-    return () => eventos.forEach((e) => window.removeEventListener(e, handler));
+    return () => eventos.forEach(e => window.removeEventListener(e, handler));
   }, []);
 
+  // Verifica inatividade a cada 30s
   useEffect(() => {
     const interval = setInterval(() => {
       const currentUser = userRef.current;
       if (!currentUser) return;
       const last = Number(localStorage.getItem(ATIVIDADE_KEY) || Date.now());
       if (Date.now() - last > INATIVIDADE_LIMIT) {
+        // Limpa sessão por inatividade
         if (currentUser.perfil !== 'ADMIN') {
           const sessao = getSessaoAtiva();
           if (sessao && sessao.id === currentUser.id) setSessaoAtiva(null);
         }
-        setStoredToken('');
         setUser(null);
         localStorage.removeItem('zkuser');
         setKickedMessage('⏰ Você foi desconectado por inatividade (20 minutos sem atividade).');
       }
-    }, 30000);
+    }, 30_000);
     return () => clearInterval(interval);
   }, []);
 
+  // Limpa sessão ao fechar a aba (não-admin)
   useEffect(() => {
     const handle = () => {
       const currentUser = userRef.current;
@@ -256,39 +189,45 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('beforeunload', handle);
   }, []);
 
+  // ── POLLING: DETECTA SE ESTA SESSÃO FOI DERRUBADA ─────────────────────────
   useEffect(() => {
     const interval = setInterval(() => {
       const currentUser = userRef.current;
-      if (!currentUser || currentUser.perfil === 'ADMIN' || currentUser.perfil === 'TI') return;
+      if (!currentUser || currentUser.perfil === 'ADMIN') return;
       const kick = getKickSignal();
-      if (kick && kick.targetSessionId === currentUser.sessionId) {
+      if (kick && kick.targetSessionId && kick.targetSessionId === currentUser.sessionId) {
         clearKickSignal();
+        // Limpa sessão local
         setSessaoAtiva(null);
-        setStoredToken('');
         setUser(null);
         localStorage.removeItem('zkuser');
-        setKickedMessage(`⚠️ Sua sessão foi encerrada pelo Administrador (${kick.by}). Você foi desconectado.`);
+        setKickedMessage(
+          `⚠️ Sua sessão foi encerrada pelo Administrador (${kick.by}). Você foi desconectado.`
+        );
       }
     }, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (user?.perfil === 'ADMIN' || user?.perfil === 'TI') {
-      refreshUsuariosFromApi();
-    }
-  }, [user?.perfil, refreshUsuariosFromApi]);
-
-  async function login(email, senha) {
+  // ── LOGIN ──────────────────────────────────
+  function login(email, senha) {
     setError(null);
     setSessaoBloqueadaPor(null);
     setKickedMessage(null);
-
     const lista = loadUsuarios();
-    const localFound = lista.find((u) => u.email === email && u.senha === senha);
-    const localLike = lista.find((u) => u.email === email);
+    // Normaliza e-mail: tira espaços, minúsculas e trata @zenithlacres.com(.br)
+    // como equivalente a @zenith.com (evita falha por digitação do domínio).
+    const canon = (e) => String(e || '').trim().toLowerCase().replace(/@zenithlacres\.com(\.br)?$/, '@zenith.com');
+    const emailNorm = canon(email);
+    const found = lista.find(u => canon(u.email) === emailNorm && u.senha === senha);
 
-    if (localLike?.restricaoHorario) {
+    if (!found) {
+      setError('E-mail ou senha inválidos.');
+      return false;
+    }
+
+    // Verifica horário comercial para não-admin
+    if (found.restricaoHorario) {
       const h = verificarHorarioComercial();
       if (!h.ok) {
         setError(`Fora do horário comercial. ${h.motivo}`);
@@ -298,41 +237,16 @@ export function AuthProvider({ children }) {
 
     const sessao = getSessaoAtiva();
 
-    const apiLogin = await loginViaApi(email, senha);
-    let found = null;
-    let token = '';
-
-    if (apiLogin.ok) {
-      found = apiLogin.user;
-      token = apiLogin.token;
-
-      const saved = loadUsuarios();
-      if (!saved.some((u) => u.email === found.email)) {
-        const merge = [...saved, { ...found, senha: '' }];
-        saveUsuarios(merge);
-        setUsuariosState(merge);
-      }
-    } else if (localFound) {
-      found = {
-        id: localFound.id,
-        email: localFound.email,
-        nome: localFound.nome,
-        perfil: localFound.perfil,
-        restricaoHorario: localFound.restricaoHorario ?? false,
-      };
-    }
-
-    if (!found) {
-      setError('E-mail ou senha inválidos.');
-      return false;
-    }
-
     if (found.perfil === 'ADMIN') {
+      // ADMIN: derruba qualquer sessão ativa existente
       if (sessao) {
         enviarSinalKick(sessao.sessionId, found.nome);
         setSessaoAtiva(null);
       }
-    } else if (found.perfil !== 'VISITANTE' && found.perfil !== 'TI') {
+    } else if (found.perfil === 'VISITANTE') {
+      // VISITANTE: sempre permitido, sem bloquear outros
+    } else {
+      // Não-admin: bloqueia se outro usuário diferente já está ativo
       if (sessao && sessao.id !== found.id) {
         setSessaoBloqueadaPor(sessao.nome);
         setError(
@@ -345,148 +259,107 @@ export function AuthProvider({ children }) {
 
     const sessionId = genSessionId();
     const userData = {
-      id: found.id,
-      email: found.email,
-      nome: found.nome,
-      perfil: found.perfil,
-      restricaoHorario: found.restricaoHorario ?? false,
+      id: found.id, email: found.email, nome: found.nome,
+      perfil: found.perfil, restricaoHorario: found.restricaoHorario ?? false,
       sessionId,
     };
-
-    if (token) setStoredToken(token);
 
     setUser(userData);
     localStorage.setItem('zkuser', JSON.stringify(userData));
 
-    if (found.perfil !== 'ADMIN' && found.perfil !== 'VISITANTE' && found.perfil !== 'TI') {
-      setSessaoAtiva(userData);
-    }
+    // Registra sessão ativa apenas para não-admin e não-visitante
+    if (found.perfil !== 'ADMIN' && found.perfil !== 'VISITANTE') setSessaoAtiva(userData);
 
     return true;
   }
 
+  // ── LOGOUT ─────────────────────────────────
   function logout() {
     const currentUser = userRef.current;
     if (currentUser && currentUser.perfil !== 'ADMIN') {
       const sessao = getSessaoAtiva();
       if (sessao && sessao.id === currentUser.id) setSessaoAtiva(null);
     }
-    setStoredToken('');
     setUser(null);
     localStorage.removeItem('zkuser');
   }
 
+  // ── CRUD USUÁRIOS ──────────────────────────
   function criarUsuario(dados) {
     const lista = loadUsuarios();
-    const nextId = Math.max(0, ...lista.map((u) => u.id)) + 1;
+    const nextId = Math.max(0, ...lista.map(u => u.id)) + 1;
     const novo = { ...dados, id: nextId };
     const nova = [...lista, novo];
     saveUsuarios(nova);
     setUsuariosState(nova);
-
-    apiRequest('/api/users', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: dados.email,
-        name: dados.nome,
-        password: dados.senha,
-        role: dados.perfil,
-        active: true,
-        restrictBusiness: dados.restricaoHorario ?? false,
-      }),
-    }).then(() => refreshUsuariosFromApi());
   }
 
   function editarUsuario(id, dados) {
     const lista = loadUsuarios();
-    const nova = lista.map((u) => (u.id === id ? { ...u, ...dados } : u));
+    const nova = lista.map(u => u.id === id ? { ...u, ...dados } : u);
     saveUsuarios(nova);
     setUsuariosState(nova);
-
     if (user?.id === id) {
-      const at = nova.find((u) => u.id === id);
+      const at = nova.find(u => u.id === id);
       if (at) {
-        const sess = {
-          id: at.id,
-          email: at.email,
-          nome: at.nome,
-          perfil: at.perfil,
-          restricaoHorario: at.restricaoHorario,
-          sessionId: user.sessionId,
-        };
+        const sess = { id: at.id, email: at.email, nome: at.nome, perfil: at.perfil, restricaoHorario: at.restricaoHorario };
         setUser(sess);
         localStorage.setItem('zkuser', JSON.stringify(sess));
       }
     }
-
-    const body = {
-      name: dados.nome,
-      role: dados.perfil,
-      active: dados.ativo ?? true,
-      restrictBusiness: dados.restricaoHorario ?? false,
-    };
-    if (dados.senha) body.password = dados.senha;
-
-    apiRequest(`/api/users/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(body),
-    }).then(() => refreshUsuariosFromApi());
   }
 
   function excluirUsuario(id) {
     if (user?.id === id) return;
     const lista = loadUsuarios();
-    const nova = lista.filter((u) => u.id !== id);
+    const nova = lista.filter(u => u.id !== id);
     saveUsuarios(nova);
     setUsuariosState(nova);
-
-    apiRequest(`/api/users/${id}`, { method: 'DELETE' }).then(() => refreshUsuariosFromApi());
   }
 
+  // ── PERMISSÕES POR PERFIL ──────────────────
+  // ADMIN:      tudo, sem restrição
+  // EXPEDICAO:  Produtos, Histórico, Pendentes, Entrada (confirmar)
+  // COMPRAS:    Produtos (vis.), Alertas, Pendentes (criar pedido)
+  // SUPERVISAO: Produtos (vis.), Histórico
+  // COMERCIAL:  Somente Produtos (visualização)
   const isVisitante = user?.perfil === 'VISITANTE';
   const can = {
-    verDashboard:         user && ['ADMIN', 'TI', 'VISITANTE'].includes(user.perfil),
+    verDashboard:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
     verProdutos:          !!user,
-    editarProdutos:       !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO'].includes(user.perfil),
-    excluirProdutos:      !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
-    fazerMovimentacoes:   !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO'].includes(user.perfil),
-    verHistorico:         user && ['ADMIN', 'TI', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'TI', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verPendentes:         user && ['ADMIN', 'TI', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verAuditoria:         user && ['ADMIN', 'TI', 'VISITANTE'].includes(user.perfil),
-    verEntrada:           user && ['ADMIN', 'TI', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    confirmarEntrada:     !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO'].includes(user.perfil),
-    marcarPedido:         !isVisitante && user && ['ADMIN', 'TI', 'COMPRAS'].includes(user.perfil),
+    editarProdutos:       !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    excluirProdutos:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    fazerMovimentacoes:   !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    verAuditoria:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
+    verEntrada:           user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    confirmarEntrada:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    marcarPedido:         !isVisitante && user && ['COMPRAS'].includes(user.perfil),
     verSugestoes:         !!user,
-    gerenciarUsuarios:    !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
-    verPrecos:            user && ['ADMIN', 'TI', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'].includes(user.perfil),
-    editarPrecos:         !isVisitante && user && ['ADMIN', 'TI', 'SUPERVISAO'].includes(user.perfil),
-    verMidia:             user && ['ADMIN', 'TI', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
-    verSeparacoes:        user && ['ADMIN', 'TI', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    criarSeparacao:       !isVisitante && user && ['ADMIN', 'TI', 'COMERCIAL'].includes(user.perfil),
-    avancarSeparacao:     !isVisitante && user && ['ADMIN', 'TI', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    editarSeparacao:      !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
-    cancelarSeparacao:    !isVisitante && user && ['ADMIN', 'TI'].includes(user.perfil),
+    gerenciarUsuarios:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'].includes(user.perfil),
+    editarPrecos:         !isVisitante && user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
+    verMidia:             user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
+    // Separações
+    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
+    criarSeparacao:       !isVisitante && user && ['ADMIN', 'COMERCIAL'].includes(user.perfil),
+    avancarSeparacao:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    editarSeparacao:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    cancelarSeparacao:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    // Chat — visitante não participa do chat interno
     verChat:              !!user && !isVisitante,
-    verChatTotal:         user?.perfil === 'ADMIN' || user?.perfil === 'TI',
-    verCubagem:           user && ['ADMIN', 'TI', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
+    verChatTotal:         user?.perfil === 'ADMIN',
+    verCubagem:           user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
   };
 
   return (
     <AuthContext.Provider value={{
-      user,
-      login,
-      logout,
-      error,
-      can,
-      sessaoBloqueadaPor,
-      kickedMessage,
-      setKickedMessage,
-      usuarios,
-      PERFIS,
-      criarUsuario,
-      editarUsuario,
-      excluirUsuario,
+      user, login, logout, error, can,
+      sessaoBloqueadaPor, kickedMessage, setKickedMessage,
+      usuarios, PERFIS,
+      criarUsuario, editarUsuario, excluirUsuario,
     }}>
       {children}
     </AuthContext.Provider>
