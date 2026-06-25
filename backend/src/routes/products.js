@@ -1,15 +1,18 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
-import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/', requireAuth, async (req, res) => {
+// NOTA: a autenticação do SIZ é feita no cliente (lista de usuários no frontend).
+// As rotas de dados ficam abertas para que o sync ao vivo (polling Neon) funcione
+// para todos os logins. Ver routes/movements.js para a mesma decisão.
+
+router.get('/', async (req, res) => {
   const products = await prisma.product.findMany({ orderBy: [{ name: 'asc' }] });
   return res.json({ ok: true, data: products });
 });
 
-router.get('/alerts', requireAuth, async (_req, res) => {
+router.get('/alerts', async (_req, res) => {
   const products = await prisma.product.findMany({
     where: {
       active: true,
@@ -21,7 +24,7 @@ router.get('/alerts', requireAuth, async (_req, res) => {
   return res.json({ ok: true, data: alerts });
 });
 
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', async (req, res) => {
   const body = req.body || {};
   const created = await prisma.product.create({
     data: {
@@ -43,7 +46,7 @@ router.post('/', requireAuth, async (req, res) => {
   return res.status(201).json({ ok: true, data: created });
 });
 
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', async (req, res) => {
   const id = Number(req.params.id);
   const body = req.body || {};
   const updated = await prisma.product.update({
@@ -67,7 +70,7 @@ router.put('/:id', requireAuth, async (req, res) => {
   return res.json({ ok: true, data: updated });
 });
 
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
   await prisma.product.delete({ where: { id } });
   return res.json({ ok: true });

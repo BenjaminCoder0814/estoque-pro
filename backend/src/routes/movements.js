@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
-import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/', requireAuth, async (_req, res) => {
+// Autenticação é client-side no SIZ; rotas abertas para o sync ao vivo (ver products.js).
+
+router.get('/', async (_req, res) => {
   const rows = await prisma.movement.findMany({
     include: { product: true, user: true },
     orderBy: { createdAt: 'desc' },
@@ -13,7 +14,7 @@ router.get('/', requireAuth, async (_req, res) => {
   return res.json({ ok: true, data: rows });
 });
 
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', async (req, res) => {
   const { productId, type, quantity, note } = req.body || {};
   const q = Number(quantity || 0);
   if (!productId || !type || q <= 0) return res.status(400).json({ ok: false, error: 'Dados inválidos' });
@@ -32,7 +33,7 @@ router.post('/', requireAuth, async (req, res) => {
     prisma.movement.create({
       data: {
         productId: product.id,
-        userId: req.user.id,
+        userId: req.user?.id ?? null,
         type,
         quantity: q,
         note: note || '',
