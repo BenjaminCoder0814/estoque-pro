@@ -44,3 +44,8 @@ Thumbs.db
 # Dumps do banco: dados, nao codigo-fonte
 db-dump.json
 db-dump.txt
+
+# Scripts de checagem descartaveis e logs de migration
+_check-*.js
+_check-*.mjs
+migration-output.txt
