@@ -32,9 +32,25 @@ app.use('/api/pending-orders', pendingRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/users', usersRoutes);
 
-app.use((err, _req, res, _next) => {
-  console.error(err);
+app.use((err, req, res, _next) => {
+  console.error(`[erro] ${req.method} ${req.originalUrl}`, err);
+
+  // Erros esperados do Prisma viram status HTTP; o resto é 500.
+  if (err?.code === 'P2025') return res.status(404).json({ ok: false, error: 'Registro não encontrado' });
+  if (err?.code === 'P2002') return res.status(409).json({ ok: false, error: 'Registro duplicado' });
+  if (err?.code === 'P2003') return res.status(409).json({ ok: false, error: 'Registro em uso por outro cadastro' });
+
   return res.status(500).json({ ok: false, error: 'Erro interno' });
+});
+
+// Rede de segurança: uma promise rejeitada fora das rotas não pode derrubar a API,
+// senão todos os usuários perdem o sync ao mesmo tempo.
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException]', err);
 });
 
 const port = Number(process.env.PORT || 3001);

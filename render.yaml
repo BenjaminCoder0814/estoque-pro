@@ -2,7 +2,11 @@ services:
   - type: web
     name: zenith-siz-backend
     runtime: node
-    plan: free
+    # Instance type (não confundir com o plano do workspace, que também se chama "Pro").
+    # O serviço é Blueprint managed: o valor daqui sobrescreve o painel a cada sync.
+    # Free hiberna após 15 min e essa hibernação era o gatilho das edições perdidas
+    # entre expedição e comercial. Nunca voltar para free.
+    plan: pro
     region: oregon
     rootDir: backend
     buildCommand: npm ci && npm run build

@@ -1,20 +1,21 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
+import { ah } from '../lib/asyncHandler.js';
 
 const router = Router();
 
 // Autenticação é client-side no SIZ; rotas abertas para o sync ao vivo (ver products.js).
 
-router.get('/', async (_req, res) => {
+router.get('/', ah(async (_req, res) => {
   const rows = await prisma.movement.findMany({
     include: { product: true, user: true },
     orderBy: { createdAt: 'desc' },
     take: 500,
   });
   return res.json({ ok: true, data: rows });
-});
+}));
 
-router.post('/', async (req, res) => {
+router.post('/', ah(async (req, res) => {
   const { productId, type, quantity, note } = req.body || {};
   const q = Number(quantity || 0);
   if (!productId || !type || q <= 0) return res.status(400).json({ ok: false, error: 'Dados inválidos' });
@@ -43,6 +44,6 @@ router.post('/', async (req, res) => {
   ]);
 
   return res.status(201).json({ ok: true, data: movement });
-});
+}));
 
 export default router;
