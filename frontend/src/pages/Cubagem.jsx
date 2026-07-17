@@ -6,7 +6,7 @@ import React, { useState, useMemo } from 'react';
 import {
   LucidePackage, LucideBox, LucideCalculator, LucideChevronDown,
   LucideChevronUp, LucideAlertTriangle, LucideInfo, LucideCheckCircle2,
-  LucideSearch,
+  LucideSearch, LucidePlus, LucideTrash2,
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -25,6 +25,7 @@ const MODELOS_METALICO = [
   { id: 'ZAJUSTE', label: 'ZAJUSTE (ZAJUSTE)', tamanhos: [15, 20, 25, 30, 40] },
   { id: 'NYLON_ZLOCK',   label: 'ZLOCK — Fio de Nylon',   tamanhos: [30] },
   { id: 'NYLON_ZAJUSTE', label: 'ZAJUSTE — Fio de Nylon', tamanhos: [30] },
+  { id: 'LACRE_PINO',    label: 'Lacre Pino',              tamanhos: [15, 20, 25, 30, 40] },
 ];
 
 // ── PACOTES ───────────────────────────────────────────────────────────────────
@@ -45,7 +46,7 @@ const DADOS_PACOTES = [
       {
         material: 'plastico',
         modelos: ['EP', 'ES', 'DT'],
-        tamanhos: [16, 23, 28],   // excecao DT31,41,50,55
+        tamanhos: [16, 23, 28, 36],   // excecao DT31,41,50,55
         maxPecas: 100,
         obs: 'Qualquer tamanho, exceto DT 31, 41, 50 e 55',
       },
@@ -76,6 +77,7 @@ const DADOS_PACOTES = [
       { material: 'metalico', modelos: ['ZAJUSTE'], tamanhos: [40], maxPecas: 1000, pesoKg: 22 },
       { material: 'metalico', modelos: ['NYLON_ZLOCK'],   tamanhos: [30], maxPecas: 1000, pesoKg: 14 },
       { material: 'metalico', modelos: ['NYLON_ZAJUSTE'], tamanhos: [30], maxPecas: 1000, pesoKg: 16 },
+      { material: 'metalico', modelos: ['LACRE_PINO'],    tamanhos: [15, 20, 25, 30, 40], maxPecas: 100,  pesoKg: 14, obs: '100 unidades por pacote' },
       { material: 'plastico', modelos: ['EP','ES','DT'], tamanhos: [16, 23], maxPecas: 2000, pesoKg: 4 },
     ],
   },
@@ -100,7 +102,7 @@ const DADOS_PACOTES = [
     dimensoes: '120 × 66 × 0,25 cm',
     cor: 'emerald',
     regras: [
-      { material: 'plastico', modelos: ['ES'],       tamanhos: [23], maxPecas: 10000, pesoKg: 16 },
+      { material: 'plastico', modelos: ['ES'],       tamanhos: [23], maxPecas: 10000, pesoKg: 18 },
       { material: 'plastico', modelos: ['DT'],       tamanhos: [23], maxPecas: 10000, pesoKg: 18 },
       { material: 'plastico', modelos: ['ES','DT'],  tamanhos: [16], maxPecas: 10000, pesoKg: 16 },
       { material: 'plastico', modelos: ['EP'],       tamanhos: [23], maxPecas: 10000, pesoKg: 16 },
@@ -154,7 +156,7 @@ const DADOS_CAIXAS = [
       {
         material: 'plastico',
         modelos: ['EP','ES','DT'],
-        tamanhos: [16, 23, 28],
+        tamanhos: [16, 23, 28, 36],
         maxPecas: 100,
         obs: 'Qualquer tamanho, exceto DT 31, 41, 50 e 55',
       },
@@ -176,7 +178,7 @@ const DADOS_CAIXAS = [
       {
         material: 'plastico',
         modelos: ['EP','ES','DT'],
-        tamanhos: [16, 23, 28],
+        tamanhos: [16, 23, 28, 36],
         maxPecas: 1000,
         obs: 'Qualquer tamanho, exceto DT 31, 41, 50 e 55',
       },
@@ -242,7 +244,7 @@ const DADOS_CAIXAS = [
     cor: 'rose',
     regras: [
       { material: 'plastico', modelos: ['DT'],      tamanhos: [31], maxPecas: 5000,  pesoKg: 20 },
-      { material: 'plastico', modelos: ['DT'],      tamanhos: [36], maxPecas: 4500,  pesoKg: 20 },
+      { material: 'plastico', modelos: ['DT'],      tamanhos: [36], maxPecas: 4500,  pesoKg: 19.8 },
       { material: 'plastico', modelos: ['DT'],      tamanhos: [41], maxPecas: 4000,  pesoKg: 25 },
       { material: 'plastico', modelos: ['DT'],      tamanhos: [50], maxPecas: 3500,  pesoKg: 18 },
       { material: 'plastico', modelos: ['DT'],      tamanhos: [55], maxPecas: 3000,  pesoKg: 18 },
@@ -266,9 +268,27 @@ const COR = {
 };
 
 // ── FUNÇÃO DE CÁLCULO ─────────────────────────────────────────────────────────
+function parseQuantidade(valor) {
+  const s = String(valor ?? '').trim();
+  if (!s) return NaN;
+  const digits = s.replace(/\D/g, '');
+  if (!digits) return NaN;
+  return Number.parseInt(digits, 10);
+}
+
+function dimensoesParaM3(dimensoes) {
+  const nums = String(dimensoes || '')
+    .replace(/,/g, '.')
+    .match(/\d+(?:\.\d+)?/g)
+    ?.map(Number) || [];
+  if (nums.length < 3 || nums.some((n) => Number.isNaN(n) || n <= 0)) return 0;
+  const [c, l, a] = nums;
+  return (c * l * a) / 1_000_000;
+}
+
 function calcularEmbalagens(material, modelo, tamanho, quantidade, fonte) {
   if (!material || !modelo || !tamanho || !quantidade) return [];
-  const qtd = parseInt(quantidade, 10);
+  const qtd = parseQuantidade(quantidade);
   if (isNaN(qtd) || qtd <= 0) return [];
   const resultados = [];
   for (const emb of fonte) {
@@ -291,7 +311,38 @@ function calcularEmbalagens(material, modelo, tamanho, quantidade, fonte) {
       break; // apenas primeira regra compatível por embalagem
     }
   }
+  // Ordena recomendando MENOS pacotes.
+  // Empate em qtdEmbalagens → preferir o de MENOR capacidade unitária (melhor ajuste à quantidade,
+  // evita sobra de espaço numa embalagem maior do que o necessário).
+  resultados.sort((a, b) => {
+    if (a.qtdEmbalagens !== b.qtdEmbalagens) return a.qtdEmbalagens - b.qtdEmbalagens;
+    return a.maxPecas - b.maxPecas;
+  });
   return resultados;
+}
+
+function calcularPedidoMultiplosItens(itens, fonte) {
+  const detalhes = itens.map((item) => {
+    const opcoes = calcularEmbalagens(item.material, item.modelo, item.tamanho, item.quantidade, fonte);
+    if (opcoes.length === 0) {
+      return { item, erro: true, opcoes: [], escolhido: null, volumeM3Total: 0 };
+    }
+    const escolhido = opcoes[0];
+    const volumeUnitM3 = dimensoesParaM3(escolhido.embalagemDim);
+    return {
+      item,
+      erro: false,
+      opcoes,
+      escolhido,
+      volumeM3Unit: volumeUnitM3,
+      volumeM3Total: volumeUnitM3 * escolhido.qtdEmbalagens,
+    };
+  });
+
+  const totalEmbalagens = detalhes.reduce((acc, d) => acc + (d.escolhido?.qtdEmbalagens || 0), 0);
+  const totalM3 = detalhes.reduce((acc, d) => acc + (d.volumeM3Total || 0), 0);
+
+  return { detalhes, totalEmbalagens, totalM3 };
 }
 
 // Sugestão de transportadora por região/UF
@@ -309,15 +360,36 @@ const TRANSP = {
   DF:   ['Sonic Transporte'],
 };
 
+// Exceções por UF: transportadoras a remover da lista regional (não atendem aquele estado).
+// A correspondência ignora caixa/acentos e ignora telefone entre parênteses.
+const TRANSP_EXCLUIR_POR_UF = {
+  RS: ['Gamper'],
+};
+
+function _normTransp(nome) {
+  return String(nome || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s*\(.*?\)\s*/g, '')
+    .trim().toLowerCase();
+}
+
 function sugerirTransportadora(uf) {
   if (!uf) return null;
-  if (uf === 'SP') return { regiao: 'São Paulo', lista: TRANSP.SP };
-  if (uf === 'DF') return { regiao: 'Distrito Federal', lista: TRANSP.DF };
-  const reg = UF_REGIAO[uf];
-  if (reg === 'N' || reg === 'NE') return { regiao: 'Norte / Nordeste', lista: TRANSP.N_NE };
-  if (reg === 'S' || reg === 'SE') return { regiao: 'Sul / Sudeste', lista: TRANSP.S_SE };
-  if (reg === 'CO') return { regiao: 'Centro-Oeste', lista: TRANSP.CO };
-  return null;
+  let base = null;
+  if (uf === 'SP') base = { regiao: 'São Paulo', lista: TRANSP.SP };
+  else if (uf === 'DF') base = { regiao: 'Distrito Federal', lista: TRANSP.DF };
+  else {
+    const reg = UF_REGIAO[uf];
+    if (reg === 'N' || reg === 'NE') base = { regiao: 'Norte / Nordeste', lista: TRANSP.N_NE };
+    else if (reg === 'S' || reg === 'SE') base = { regiao: 'Sul / Sudeste', lista: TRANSP.S_SE };
+    else if (reg === 'CO') base = { regiao: 'Centro-Oeste', lista: TRANSP.CO };
+  }
+  if (!base) return null;
+  const excluir = (TRANSP_EXCLUIR_POR_UF[uf] || []).map(_normTransp);
+  if (excluir.length) {
+    base = { ...base, lista: base.lista.filter((t) => !excluir.includes(_normTransp(t))) };
+  }
+  return base;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -441,8 +513,10 @@ function Calculadora({ fonteLabel, fonte }) {
   const [tamanho,  setTamanho]  = useState('');
   const [qtd,      setQtd]      = useState('');
   const [uf,       setUf]       = useState('');
+  const [itens, setItens] = useState([]);
   const [resultado, setResultado] = useState(null);
   const [sugestao, setSugestao] = useState(null);
+  const [erroItens, setErroItens] = useState('');
 
   const modelos = material === 'plastico' ? MODELOS_PLASTICO : material === 'metalico' ? MODELOS_METALICO : [];
   const tamanhos = useMemo(() => {
@@ -451,14 +525,53 @@ function Calculadora({ fonteLabel, fonte }) {
     return m ? m.tamanhos : [];
   }, [modelo, modelos]);
 
+  function adicionarItem() {
+    setErroItens('');
+    const qtdNum = parseQuantidade(qtd);
+    if (!material || !modelo || !tamanho || !qtdNum || qtdNum <= 0) {
+      setErroItens('Preencha material, modelo, tamanho e quantidade válida para adicionar o item.');
+      return;
+    }
+    setItens((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${prev.length}`,
+        material,
+        modelo,
+        tamanho: Number(tamanho),
+        quantidade: qtdNum,
+      },
+    ]);
+    setQtd('');
+    setResultado(null);
+  }
+
+  function removerItem(id) {
+    setItens((prev) => prev.filter((i) => i.id !== id));
+    setResultado(null);
+  }
+
   function calcular() {
-    const res = calcularEmbalagens(material, modelo, tamanho, qtd, fonte);
+    setErroItens('');
+    if (itens.length === 0) {
+      setErroItens('Adicione pelo menos 1 item no pedido para calcular.');
+      return;
+    }
+    const res = calcularPedidoMultiplosItens(itens, fonte);
     setResultado(res);
     setSugestao(sugerirTransportadora(uf));
   }
 
   function limpar() {
-    setMaterial(''); setModelo(''); setTamanho(''); setQtd(''); setUf(''); setResultado(null); setSugestao(null);
+    setMaterial('');
+    setModelo('');
+    setTamanho('');
+    setQtd('');
+    setUf('');
+    setItens([]);
+    setResultado(null);
+    setSugestao(null);
+    setErroItens('');
   }
 
   return (
@@ -520,8 +633,7 @@ function Calculadora({ fonteLabel, fonte }) {
         <div>
           <label className="text-xs font-semibold text-gray-600 mb-1 block">Quantidade</label>
           <input
-            type="number"
-            min="1"
+            type="text"
             placeholder="Ex: 5000"
             className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
             value={qtd}
@@ -545,14 +657,22 @@ function Calculadora({ fonteLabel, fonte }) {
         </div>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button
+          onClick={adicionarItem}
+          disabled={!material || !modelo || !tamanho || !qtd}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition shadow"
+        >
+          <LucidePlus className="w-4 h-4" />
+          Adicionar item
+        </button>
         <button
           onClick={calcular}
-          disabled={!material || !modelo || !tamanho || !qtd}
+          disabled={itens.length === 0}
           className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition shadow"
         >
           <LucideCalculator className="w-4 h-4" />
-          Calcular
+          Calcular pedido
         </button>
         <button
           onClick={limpar}
@@ -562,33 +682,80 @@ function Calculadora({ fonteLabel, fonte }) {
         </button>
       </div>
 
+      {erroItens && <div className="text-xs text-red-600 mb-3">{erroItens}</div>}
+
+      <div className="mb-4 rounded-xl border border-gray-200 bg-white p-3">
+        <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Itens do pedido ({itens.length})</div>
+        {itens.length === 0 ? (
+          <div className="text-sm text-gray-400">Nenhum item adicionado ainda.</div>
+        ) : (
+          <div className="space-y-2">
+            {itens.map((it, idx) => (
+              <div key={it.id} className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 px-3 py-2">
+                <div className="text-xs text-gray-700">
+                  <span className="font-semibold">#{idx + 1}</span> · {it.material === 'plastico' ? 'Plástico' : 'Metálico'} · {it.modelo} {it.tamanho}cm · {it.quantidade.toLocaleString('pt-BR')} pcs
+                </div>
+                <button onClick={() => removerItem(it.id)} className="p-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50">
+                  <LucideTrash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Resultado */}
       {resultado !== null && (
         <div className="border-t border-indigo-200 pt-4">
-          {resultado.length === 0 ? (
+          {resultado.detalhes.length === 0 || resultado.detalhes.every((d) => d.erro) ? (
             <div className="flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
               <LucideAlertTriangle className="w-4 h-4 flex-shrink-0" />
               <span className="text-sm">
-                Nenhuma embalagem comporta <strong>{parseInt(qtd).toLocaleString('pt-BR')}</strong> peças de {' '}
-                {modelo} {tamanho}cm. Verifique se é necessário dimensionar manualmente.
+                Nenhuma combinação compatível foi encontrada para os itens do pedido. Verifique os modelos/tamanhos ou dimensione manualmente.
               </span>
             </div>
           ) : (
             <div>
               <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
-                {resultado.length} embalagem(ns) compatível(is) — ordenado do menor para o maior
+                Resultado consolidado do pedido
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {resultado.map((r, i) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3">
+                  <div className="text-xs text-indigo-700 font-semibold">Total de embalagens</div>
+                  <div className="text-2xl font-extrabold text-indigo-700">{resultado.totalEmbalagens}</div>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="text-xs text-emerald-700 font-semibold">Cubagem total estimada</div>
+                  <div className="text-2xl font-extrabold text-emerald-700">{resultado.totalM3.toFixed(4)} m3</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {resultado.detalhes.map((d, i) => {
+                  if (d.erro) {
+                    return (
+                      <div key={i} className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                        <div className="text-sm font-bold text-amber-700">Item #{i + 1} sem regra de cubagem</div>
+                        <div className="text-xs text-amber-700 mt-1">
+                          {d.item.modelo} {d.item.tamanho}cm · {d.item.quantidade.toLocaleString('pt-BR')} pcs
+                        </div>
+                      </div>
+                    );
+                  }
+                  const r = d.escolhido;
                   const c = COR[r.embalagemCor];
                   return (
-                    <div key={i} className={`rounded-xl border p-3 ${c.bg} ${c.border} ${i === 0 ? 'ring-2 ring-indigo-400' : ''}`}>
-                      {i === 0 && (
+                    <div key={i} className={`rounded-xl border p-3 ${c.bg} ${c.border}`}>
+                      <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Item #{i + 1}</div>
+                      {i === 0 && !resultado.detalhes.some((x) => x.erro) && (
                         <div className="flex items-center gap-1 mb-1">
                           <LucideCheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
-                          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Recomendado</span>
+                          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Recomendado por item</span>
                         </div>
                       )}
+                      <div className="text-xs text-gray-700 mb-1">
+                        {d.item.material === 'plastico' ? 'Plástico' : 'Metálico'} · {d.item.modelo} {d.item.tamanho}cm · {d.item.quantidade.toLocaleString('pt-BR')} pcs
+                      </div>
                       <div className={`font-bold text-base ${c.text}`}>{r.embalagemNome}</div>
                       <div className="text-xs text-gray-500 mb-2">{r.embalagemDim}</div>
                       <div className="space-y-1">
@@ -607,6 +774,10 @@ function Calculadora({ fonteLabel, fonte }) {
                           <span className="text-xs font-bold text-indigo-600">
                             {r.qtdEmbalagens} {r.qtdEmbalagens === 1 ? 'embalagem' : 'embalagens'}
                           </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-600">Cubagem item</span>
+                          <span className="text-xs font-bold text-emerald-700">{d.volumeM3Total.toFixed(4)} m3</span>
                         </div>
                       </div>
                     </div>

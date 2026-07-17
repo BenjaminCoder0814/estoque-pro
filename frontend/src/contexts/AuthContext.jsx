@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const AuthContext = createContext();
+const PERFIS_SEM_RESTRICAO = ['ADMIN', 'TI', 'DIRETORIA'];
 
 // ──────────────────────────────────────────────
 // USUÁRIOS DO SISTEMA
@@ -14,6 +15,7 @@ const USUARIOS_PADRAO = [
   { id: 5, email: 'comercial@zenith.com',   senha: 'com2026',   nome: 'Comercial',     perfil: 'COMERCIAL',   restricaoHorario: true  },
   { id: 6, email: 'producao@zenith.com',    senha: 'prod2026',  nome: 'Produção',      perfil: 'PRODUCAO',    restricaoHorario: true  },
   { id: 7, email: 'centralatendimento@zenith.com', senha: 'atendimento2026', nome: 'Central Atendimento', perfil: 'ADMIN', restricaoHorario: false },
+  { id: 13, email: 'ti@zenith.com',          senha: 'ti2026',    nome: 'TI',            perfil: 'TI',          restricaoHorario: false },
   // Equipe de vendas — perfil COMERCIAL, com restrição de horário comercial
   { id: 8,  email: 'vendas1@zenith.com',  senha: 'vendas12026',  nome: 'Vendas 1',  perfil: 'COMERCIAL', restricaoHorario: true },
   { id: 9,  email: 'vendas5@zenith.com',  senha: 'vendas52026',  nome: 'Vendas 5',  perfil: 'COMERCIAL', restricaoHorario: true },
@@ -24,7 +26,7 @@ const USUARIOS_PADRAO = [
   { id: 99, email: 'visitante@zenith.com',  senha: 'demo2026',  nome: 'Visitante',     perfil: 'VISITANTE',   restricaoHorario: false },
 ];
 
-export const PERFIS = ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO', 'VISITANTE'];
+export const PERFIS = ['ADMIN', 'TI', 'EXPEDICAO', 'COMPRAS', 'SUPERVISAO', 'COMERCIAL', 'PRODUCAO', 'VISITANTE'];
 
 // ──────────────────────────────────────────────
 // SESSÃO ATIVA (controle de acesso único não-admin)
@@ -98,7 +100,7 @@ export function verificarHorarioComercial() {
 // ──────────────────────────────────────────────
 // HELPERS localStorage
 // ──────────────────────────────────────────────
-const USUARIOS_VERSION = 'v9'; // Incremente para forçar reset dos usuários padrão
+const USUARIOS_VERSION = 'v10'; // Incremente para forçar reset dos usuários padrão
 
 function loadUsuarios() {
   try {
@@ -139,43 +141,8 @@ export function AuthProvider({ children }) {
   const userRef = useRef(user);
   useEffect(() => { userRef.current = user; }, [user]);
 
-  // ── INATIVIDADE: LOGOUT AUTOMÁTICO APÓS 20 min ─────────────────
-  const INATIVIDADE_LIMIT = 20 * 60 * 1000; // 20 minutos
-  const ATIVIDADE_KEY = 'zkLastActivity';
-
-  function registrarAtividade() {
-    localStorage.setItem(ATIVIDADE_KEY, Date.now().toString());
-  }
-
-  // Ouve eventos de atividade do usuário
-  useEffect(() => {
-    const eventos = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
-    const handler = () => registrarAtividade();
-    eventos.forEach(e => window.addEventListener(e, handler, { passive: true }));
-    // Inicializa
-    registrarAtividade();
-    return () => eventos.forEach(e => window.removeEventListener(e, handler));
-  }, []);
-
-  // Verifica inatividade a cada 30s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const currentUser = userRef.current;
-      if (!currentUser) return;
-      const last = Number(localStorage.getItem(ATIVIDADE_KEY) || Date.now());
-      if (Date.now() - last > INATIVIDADE_LIMIT) {
-        // Limpa sessão por inatividade
-        if (currentUser.perfil !== 'ADMIN') {
-          const sessao = getSessaoAtiva();
-          if (sessao && sessao.id === currentUser.id) setSessaoAtiva(null);
-        }
-        setUser(null);
-        localStorage.removeItem('zkuser');
-        setKickedMessage('⏰ Você foi desconectado por inatividade (20 minutos sem atividade).');
-      }
-    }, 30_000);
-    return () => clearInterval(interval);
-  }, []);
+  // Sem timeout por inatividade: sessao permanece ativa
+  // enquanto estiver dentro das regras de horario e sessao unica.
 
   // Limpa sessão ao fechar a aba (não-admin)
   useEffect(() => {
@@ -237,7 +204,7 @@ export function AuthProvider({ children }) {
 
     const sessao = getSessaoAtiva();
 
-    if (found.perfil === 'ADMIN') {
+    if (PERFIS_SEM_RESTRICAO.includes(found.perfil)) {
       // ADMIN: derruba qualquer sessão ativa existente
       if (sessao) {
         enviarSinalKick(sessao.sessionId, found.nome);
@@ -268,7 +235,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('zkuser', JSON.stringify(userData));
 
     // Registra sessão ativa apenas para não-admin e não-visitante
-    if (found.perfil !== 'ADMIN' && found.perfil !== 'VISITANTE') setSessaoAtiva(userData);
+    if (!PERFIS_SEM_RESTRICAO.includes(found.perfil) && found.perfil !== 'VISITANTE') setSessaoAtiva(userData);
 
     return true;
   }
@@ -276,7 +243,7 @@ export function AuthProvider({ children }) {
   // ── LOGOUT ─────────────────────────────────
   function logout() {
     const currentUser = userRef.current;
-    if (currentUser && currentUser.perfil !== 'ADMIN') {
+    if (currentUser && !PERFIS_SEM_RESTRICAO.includes(currentUser.perfil)) {
       const sessao = getSessaoAtiva();
       if (sessao && sessao.id === currentUser.id) setSessaoAtiva(null);
     }
@@ -324,34 +291,37 @@ export function AuthProvider({ children }) {
   // SUPERVISAO: Produtos (vis.), Histórico
   // COMERCIAL:  Somente Produtos (visualização)
   const isVisitante = user?.perfil === 'VISITANTE';
+  const isAdminLike = PERFIS_SEM_RESTRICAO.includes(user?.perfil);
   const can = {
-    verDashboard:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
+    verDashboard:         !!user && (isAdminLike || user.perfil === 'VISITANTE'),
     verProdutos:          !!user,
-    editarProdutos:       !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    excluirProdutos:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
-    fazerMovimentacoes:   !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    verHistorico:         user && ['ADMIN', 'EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verAlertas:           user && ['ADMIN', 'COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verPendentes:         user && ['ADMIN', 'EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    verAuditoria:         user && ['ADMIN', 'VISITANTE'].includes(user.perfil),
-    verEntrada:           user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    confirmarEntrada:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
+    editarProdutos:       !isVisitante && !!user && (isAdminLike || ['EXPEDICAO', 'PRODUCAO'].includes(user.perfil)),
+    excluirProdutos:      !isVisitante && !!user && isAdminLike,
+    fazerMovimentacoes:   !isVisitante && !!user && (isAdminLike || ['EXPEDICAO', 'PRODUCAO'].includes(user.perfil)),
+    verHistorico:         !!user && (isAdminLike || ['EXPEDICAO', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil)),
+    verAlertas:           !!user && (isAdminLike || ['COMPRAS', 'EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil)),
+    verPendentes:         !!user && (isAdminLike || ['EXPEDICAO', 'COMPRAS', 'PRODUCAO', 'VISITANTE'].includes(user.perfil)),
+    verAuditoria:         !!user && (isAdminLike || user.perfil === 'VISITANTE'),
+    verEntrada:           !!user && (isAdminLike || ['EXPEDICAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil)),
+    confirmarEntrada:     !isVisitante && !!user && (isAdminLike || ['EXPEDICAO', 'PRODUCAO'].includes(user.perfil)),
     marcarPedido:         !isVisitante && user && ['COMPRAS'].includes(user.perfil),
     verSugestoes:         !!user,
-    gerenciarUsuarios:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
-    verPrecos:            user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'].includes(user.perfil),
-    editarPrecos:         !isVisitante && user && ['ADMIN', 'SUPERVISAO'].includes(user.perfil),
-    verMidia:             user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
+    gerenciarUsuarios:    !isVisitante && !!user && isAdminLike,
+    verPrecos:            !!user && (isAdminLike || ['SUPERVISAO', 'COMERCIAL', 'COMPRAS', 'VISITANTE'].includes(user.perfil)),
+    editarPrecos:         !isVisitante && !!user && (isAdminLike || user.perfil === 'SUPERVISAO'),
+    verMidia:             !!user && (isAdminLike || ['SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil)),
     // Separações
-    verSeparacoes:        user && ['ADMIN', 'EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil),
-    criarSeparacao:       !isVisitante && user && ['ADMIN', 'COMERCIAL'].includes(user.perfil),
-    avancarSeparacao:     !isVisitante && user && ['ADMIN', 'EXPEDICAO', 'PRODUCAO'].includes(user.perfil),
-    editarSeparacao:      !isVisitante && user && ['ADMIN'].includes(user.perfil),
-    cancelarSeparacao:    !isVisitante && user && ['ADMIN'].includes(user.perfil),
+    verSeparacoes:        !!user && (isAdminLike || ['EXPEDICAO', 'COMERCIAL', 'SUPERVISAO', 'PRODUCAO', 'VISITANTE'].includes(user.perfil)),
+    criarSeparacao:       !isVisitante && !!user && (isAdminLike || user.perfil === 'COMERCIAL'),
+    avancarSeparacao:     !isVisitante && !!user && (isAdminLike || ['EXPEDICAO', 'PRODUCAO'].includes(user.perfil)),
+    editarSeparacao:      !isVisitante && !!user && isAdminLike,
+    cancelarSeparacao:    !isVisitante && !!user && isAdminLike,
     // Chat — visitante não participa do chat interno
     verChat:              !!user && !isVisitante,
-    verChatTotal:         user?.perfil === 'ADMIN',
-    verCubagem:           user && ['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil),
+    verChatTotal:         isAdminLike,
+    verCubagem:           !!user && (isAdminLike || ['SUPERVISAO', 'COMERCIAL', 'VISITANTE'].includes(user.perfil)),
+    verPortaria:          !!user && (isAdminLike || ['EXPEDICAO', 'SUPERVISAO'].includes(user.perfil)),
+    gerirPortaria:        !isVisitante && !!user && (isAdminLike || ['EXPEDICAO'].includes(user.perfil)),
   };
 
   return (

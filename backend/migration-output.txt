@@ -1,0 +1,150 @@
+﻿[#11]
+  - DT | DT 16 PP Amarelo
+  + Liso | Lacres DT PP 16 Amarelo
+[#12]
+  - DT | DT 16 PP Cinza
+  + Liso | Lacres DT PP 16 Cinza
+[#13]
+  - DT | DT 16 PP Azul
+  + Liso | Lacres DT PP 16 Azul
+[#14]
+  - DT | DT 16 PP Branco
+  + Liso | Lacres DT PP 16 Branco
+[#15]
+  - DT | DT 16 PP Verde
+  + Liso | Lacres DT PP 16 Verde
+[#16]
+  - DT | DT 16 PP Vermelho (pata maior)
+  + Liso | Lacres DT PP 16 Vermelho (pata maior)
+[#17]
+  - DT | DT 16 PP Verde (pata maior)
+  + Liso | Lacres DT PP 16 Verde (pata maior)
+[#18]
+  - DT | DT 16 PP Laranja (pata maior)
+  + Liso | Lacres DT PP 16 Laranja (pata maior)
+[#19]
+  - DT | DT 16 PP Preto (pata maior)
+  + Liso | Lacres DT PP 16 Preto (pata maior)
+[#20]
+  - DT | DT 16 PP Branco (c├│digo de barras)
+  + Liso | Lacres DT PP 16 Branco (c├│digo de barras)
+[#21]
+  - DT | DT 23 PP Verde
+  + Liso | Lacres DT PP 23 Verde
+[#22]
+  - DT | DT 23 PP Vermelho
+  + Liso | Lacres DT PP 23 Vermelho
+[#23]
+  - DT | DT 31 PP Azul
+  + Liso | Lacres DT PP 31 Azul
+[#24]
+  - DT | DT 31 PP Amarelo
+  + Liso | Lacres DT PP 31 Amarelo
+[#25]
+  - DT | DT 41 PP Azul
+  + Liso | Lacres DT PP 41 Azul
+[#26]
+  - DT | DT 41 PP Laranja
+  + Liso | Lacres DT PP 41 Laranja
+[#27]
+  - DT | DT 41 PP Verde
+  + Liso | Lacres DT PP 41 Verde
+[#28]
+  - ES | ES 16 NY Branco
+  + Liso | Lacres ES NY 16 Branco
+[#29]
+  - ES | ES 16 NY Amarelo
+  + Liso | Lacres ES NY 16 Amarelo
+[#30]
+  - ES | ES 16 NY Laranja
+  + Liso | Lacres ES NY 16 Laranja
+[#31]
+  - ES | ES 16 NY Azul
+  + Liso | Lacres ES NY 16 Azul
+[#32]
+  - ES | ES 16 PP Vermelho
+  + Liso | Lacres ES PP 16 Vermelho
+[#33]
+  - ES | ES 16 PP Azul
+  + Liso | Lacres ES PP 16 Azul
+[#34]
+  - ES | ES 16 Corte F├ícil Azul
+  + Liso | Lacres ES PP CF 16 Azul
+[#35]
+  - ES | ES 16 Corte F├ícil Amarelo
+  + Liso | Lacres ES PP CF 16 Amarelo
+[#36]
+  - ES | ES 23 NY Azul
+  + Liso | Lacres ES NY 23 Azul
+[#37]
+  - ES | ES 23 NY Laranja
+  + Liso | Lacres ES NY 23 Laranja
+[#38]
+  - ES | ES 23 NY Branco
+  + Liso | Lacres ES NY 23 Branco
+[#39]
+  - ES | ES 23 NY Preto
+  + Liso | Lacres ES NY 23 Preto
+[#40]
+  - ES | ES 23 NY Verde
+  + Liso | Lacres ES NY 23 Verde
+[#41]
+  - ES | ES 23 NY Vermelho
+  + Liso | Lacres ES NY 23 Vermelho
+[#42]
+  - ES | ES 23 PP Verde
+  + Liso | Lacres ES PP 23 Verde
+[#43]
+  - ES | ES 23 PP Vermelho
+  + Liso | Lacres ES PP 23 Vermelho
+[#44]
+  - ES | ES 23 PP Amarelo
+  + Liso | Lacres ES PP 23 Amarelo
+[#45]
+  - ES | ES 23 PP Azul
+  + Liso | Lacres ES PP 23 Azul
+[#46]
+  - ES | ES 23 Corte F├ícil Amarelo
+  + Liso | Lacres ES PP CF 23 Amarelo
+[#47]
+  - ES | ES 23 PP (c├│digo de barras)
+  + Liso | Lacres ES PP 23 (c├│digo de barras)
+[#48]
+  - ES | ES 28 PP Azul
+  + Liso | Lacres ES PP 28 Azul
+[#49]
+  - ES | ES 28 PP Amarelo
+  + Liso | Lacres ES PP 28 Amarelo
+[#50]
+  - EP | EP 16 PE Azul
+  + Liso | Lacres EP 16 Azul
+[#51]
+  - EP | EP 23 PE Azul
+  + Liso | Lacres EP 23 Azul
+[#52]
+  - FITA MET├üLICA CORTADA | Fita Met├ílica 40cm (CORTADA)
+  + Liso | Lacres Met├ílico 40cm
+[#53]
+  - FITA MET├üLICA CORTADA | Fita Met├ílica 30cm (CORTADA)
+  + Liso | Lacres Met├ílico 30cm
+[#54]
+  - FITA MET├üLICA CORTADA | Fita Met├ílica 25cm (CORTADA)
+  + Liso | Lacres Met├ílico 25cm
+[#55]
+  - FITA MET├üLICA CORTADA | Fita Met├ílica 20cm (CORTADA)
+  + Liso | Lacres Met├ílico 20cm
+[#56]
+  - FITA MET├üLICA CORTADA | Fita Met├ílica 15cm (CORTADA)
+  + Liso | Lacres Met├ílico 15cm
+
+Ô£ö Atualizados: 46 de 46 analisados.
+
+Totais por categoria:
+  ARAME CORTADO                8
+  ARAME ROLO (KG)              3
+  Etiquetas                    1
+  Lacres                       1
+  Liso                         46
+  Malotes                      1
+  PERSONALIZADOS               45
+  ZNAN                         7

@@ -1,8 +1,22 @@
 import React, { useState, useRef } from 'react';
 import { useEstoque } from '../contexts/EstoqueContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { getColorFromName, getLabelFromHex, normalizeColorName } from '../utils/productColor';
 
-const VAZIO = { nome: '', codigo: '', categoria: '', modelo: '', tamanho: '', material: '', cor: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '' };
+const VAZIO = { nome: '', codigo: '', categoria: '', modelo: '', tamanho: '', material: '', cor: '', estoqueAtual: 0, estoqueMinimo: 0, controlaEstoque: true, geraAlerta: true, ativo: true, imagem: '', observacao: '' };
+
+// Opções fixas da classificação de produtos (definido pela Diretoria – 2026)
+const CATEGORIA_OPCOES = ['Numerado', 'Liso', 'Personalizado'];
+const MODELO_OPCOES = ['DT', 'ES', 'EP'];
+const NOME_OPCOES = [
+  'Lacres DT PP',
+  'Lacres DT PP CF',
+  'Lacres ES PP ou NY',
+  'Lacres ES PP CF',
+  'Lacres EP',
+];
+const TAMANHO_OPCOES = ['16', '23', '27', '28'];
 
 function withBase(url) {
   if (!url || typeof url !== 'string') return url;
@@ -11,36 +25,6 @@ function withBase(url) {
   if (url.startsWith(base)) return url;
   if (url.startsWith('/')) return `${base}${url.slice(1)}`;
   return `${base}${url}`;
-}
-
-// Mapa de nomes de cores em português → hex
-const COR_MAP = {
-  'preto': '#1a1a1a', 'branco': '#f5f5f5', 'vermelho': '#ef4444',
-  'azul': '#3b82f6', 'verde': '#22c55e', 'amarelo': '#eab308',
-  'laranja': '#f97316', 'roxo': '#a855f7', 'rosa': '#ec4899',
-  'cinza': '#9ca3af', 'marrom': '#92400e', 'dourado': '#ca8a04',
-  'prata': '#cbd5e1', 'bege': '#d4b896', 'ciano': '#06b6d4',
-  'azul claro': '#60a5fa', 'azul escuro': '#1e40af',
-  'verde claro': '#86efac', 'verde escuro': '#15803d',
-  'transparente': 'rgba(0,0,0,0.08)',
-};
-
-function resolverCor(cor) {
-  if (!cor) return null;
-  const lower = cor.toLowerCase().trim();
-  return COR_MAP[lower] || cor;
-}
-
-// Detecta cor pelo nome do produto (ex: "Lacre Metálico Amarelo" → #eab308)
-function corPeloNome(nome) {
-  if (!nome) return null;
-  const lower = nome.toLowerCase();
-  // testa as chaves do mapa do maior para o menor (evita 'azul' sobrescrever 'azul claro')
-  const chaves = Object.keys(COR_MAP).sort((a, b) => b.length - a.length);
-  for (const chave of chaves) {
-    if (lower.includes(chave)) return COR_MAP[chave];
-  }
-  return null;
 }
 
 // Mapeamento automático de imagens por palavras-chave no nome do produto
@@ -81,6 +65,11 @@ function autoImagem(nome) {
   return '';
 }
 
+function normalizeFormColor(formColor) {
+  const normalized = normalizeColorName(formColor);
+  return normalized;
+}
+
 // Componente de imagem com fallback automático quando falha a carregar
 function ImgProduto({ src, alt, className, fallback }) {
   const [erro, setErro] = React.useState(false);
@@ -111,8 +100,9 @@ function ImgProduto({ src, alt, className, fallback }) {
 }
 
 export default function Produtos() {
-  const { produtos, alertas, criarProduto, editarProduto, excluirProduto } = useEstoque();
+  const { produtos, alertas, criarProduto, editarProduto, excluirProduto, syncStatus, carregando } = useEstoque();
   const { user, can } = useAuth();
+  const navigate = useNavigate();
   const fileRef = useRef();
 
   const [busca, setBusca] = useState('');
@@ -123,9 +113,18 @@ export default function Produtos() {
   const [form, setForm] = useState(VAZIO);
   const [editandoId, setEditandoId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [obsProduto, setObsProduto] = useState(null);
 
   const alertaIds = new Set(alertas.map(p => p.id));
   const categorias = [...new Set(produtos.map(p => p.categoria).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+  const nomesSugestoes = [...new Set([...NOME_OPCOES, ...produtos.map(p => p.nome).filter(Boolean)])]
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+  const categoriasSugestoes = [...new Set([...CATEGORIA_OPCOES, ...categorias])]
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+  const modelosSugestoes = [...new Set([...MODELO_OPCOES, ...produtos.map(p => p.modelo).filter(Boolean)])]
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+  const tamanhosSugestoes = [...new Set([...TAMANHO_OPCOES, ...produtos.map(p => String(p.tamanho || '')).filter(Boolean)])]
     .sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
 
   // Normaliza string: minúsculo + sem acentos (ex.: "Âncora" → "ancora")
@@ -218,7 +217,19 @@ export default function Produtos() {
 
   function salvar(e) {
     e.preventDefault();
-    const dados = { ...form, estoqueAtual: Number(form.estoqueAtual), estoqueMinimo: Number(form.estoqueMinimo) };
+    const estoqueAtual = Number.parseInt(String(form.estoqueAtual ?? '').replace(/\D/g, ''), 10);
+    const estoqueMinimo = Number.parseInt(String(form.estoqueMinimo ?? '').replace(/\D/g, ''), 10);
+    const dados = {
+      ...form,
+      nome: String(form.nome || '').trim(),
+      categoria: String(form.categoria || '').trim(),
+      modelo: String(form.modelo || '').trim(),
+      tamanho: String(form.tamanho || '').trim(),
+      material: String(form.material || '').trim(),
+      cor: normalizeFormColor(form.cor),
+      estoqueAtual: Number.isFinite(estoqueAtual) ? estoqueAtual : 0,
+      estoqueMinimo: Number.isFinite(estoqueMinimo) ? estoqueMinimo : 0,
+    };
     if (editandoId) editarProduto(editandoId, dados, user);
     else criarProduto(dados, user);
     setShowForm(false);
@@ -240,11 +251,41 @@ export default function Produtos() {
         <h1 className="text-2xl font-bold text-gray-800">
           Produtos <span className="text-base font-normal text-gray-400">({lista.length})</span>
         </h1>
-        {can.editarProdutos && (
-          <button onClick={abrirNovo} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition">
-            + Novo Produto
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {can.criarSeparacao && (
+            <button
+              onClick={() => navigate('/separacoes')}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition"
+            >
+              Reservar Produto
+            </button>
+          )}
+          {can.editarProdutos && (
+            <button onClick={abrirNovo} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition">
+              + Novo Produto
+            </button>
+          )}
+        </div>
+      </div>
+
+      {carregando && (
+        <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
+          Carregando o catálogo do banco de dados…
+        </div>
+      )}
+
+      {syncStatus?.error && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          {syncStatus.error}
+        </div>
+      )}
+
+      <div className={`mb-4 rounded-lg border px-4 py-2 text-sm ${syncStatus?.ok ? (syncStatus?.degraded ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700') : 'bg-red-50 border-red-200 text-red-700'}`}>
+        {!syncStatus?.ok
+          ? 'Atenção: sem sincronização com API. Alterações podem não aparecer para todos até reconectar.'
+          : syncStatus?.degraded
+            ? `Sincronização parcial${syncStatus?.pendingEdits ? `: ${syncStatus.pendingEdits} alteração(ões) pendente(s) de envio` : ': produtos ao vivo e histórico com oscilação momentânea'}${syncStatus?.lastSync ? ` (${new Date(syncStatus.lastSync).toLocaleTimeString('pt-BR')})` : ''}`
+            : `Sincronizado para todos os perfis${syncStatus?.lastSync ? ` (${new Date(syncStatus.lastSync).toLocaleTimeString('pt-BR')})` : ''}`}
       </div>
 
       {/* Filtros */}
@@ -257,7 +298,7 @@ export default function Produtos() {
         />
         <select className="border rounded-lg px-3 py-2 text-sm" value={filtroCategoria} onChange={e => setFiltroCategoria(e.target.value)}>
           <option value="">Todas categorias</option>
-          {categorias.map(c => <option key={c} value={c}>{c}</option>)}
+          {[...new Set([...CATEGORIA_OPCOES, ...categorias])].map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <select className="border rounded-lg px-3 py-2 text-sm" value={filtroAlerta} onChange={e => setFiltroAlerta(e.target.value)}>
           <option value="">Todos (alerta)</option>
@@ -309,20 +350,56 @@ export default function Produtos() {
             <form onSubmit={salvar} className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className="text-sm font-medium">Nome *</label>
-                <input required className="border rounded-lg px-3 py-2 w-full mt-1" value={form.nome} onChange={handleNome} />
+                <input
+                  required
+                  list="produtos-nome-sugestoes"
+                  className="border rounded-lg px-3 py-2 w-full mt-1"
+                  value={form.nome}
+                  onChange={handleNome}
+                  placeholder="Digite o nome do produto"
+                />
+                <datalist id="produtos-nome-sugestoes">
+                  {nomesSugestoes.map(n => <option key={n} value={n} />)}
+                </datalist>
               </div>
               <div>
                 <label className="text-sm font-medium">Categoria</label>
-                <input className="border rounded-lg px-3 py-2 w-full mt-1" value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))} list="cats-list" />
-                <datalist id="cats-list">{categorias.map(c => <option key={c} value={c} />)}</datalist>
+                <input
+                  list="produtos-categoria-sugestoes"
+                  className="border rounded-lg px-3 py-2 w-full mt-1"
+                  value={form.categoria}
+                  onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))}
+                  placeholder="Digite a categoria"
+                />
+                <datalist id="produtos-categoria-sugestoes">
+                  {categoriasSugestoes.map(c => <option key={c} value={c} />)}
+                </datalist>
               </div>
               <div>
                 <label className="text-sm font-medium">Modelo</label>
-                <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="Ex: Dupla Trava, Tradicional..." value={form.modelo} onChange={e => setForm(f => ({ ...f, modelo: e.target.value }))} />
+                <input
+                  list="produtos-modelo-sugestoes"
+                  className="border rounded-lg px-3 py-2 w-full mt-1"
+                  value={form.modelo}
+                  onChange={e => setForm(f => ({ ...f, modelo: e.target.value }))}
+                  placeholder="Digite o modelo"
+                />
+                <datalist id="produtos-modelo-sugestoes">
+                  {modelosSugestoes.map(m => <option key={m} value={m} />)}
+                </datalist>
               </div>
               <div>
-                <label className="text-sm font-medium">Tamanho / Variação</label>
-                <input className="border rounded-lg px-3 py-2 w-full mt-1" placeholder="Ex: 30mm, 150mm, 30x40..." value={form.tamanho} onChange={e => setForm(f => ({ ...f, tamanho: e.target.value }))} />
+                <label className="text-sm font-medium">Tamanho</label>
+                <input
+                  list="produtos-tamanho-sugestoes"
+                  className="border rounded-lg px-3 py-2 w-full mt-1"
+                  value={form.tamanho}
+                  onChange={e => setForm(f => ({ ...f, tamanho: e.target.value }))}
+                  placeholder="Digite o tamanho"
+                />
+                <datalist id="produtos-tamanho-sugestoes">
+                  {tamanhosSugestoes.map(t => <option key={t} value={t} />)}
+                </datalist>
               </div>
               <div className="col-span-2">
                 <label className="text-sm font-medium">Material</label>
@@ -331,20 +408,37 @@ export default function Produtos() {
               <div className="col-span-2">
                 <label className="text-sm font-medium">Cor</label>
                 <div className="flex items-center gap-2 mt-1">
+                  {(() => {
+                    const colorInfo = getColorFromName(form.cor);
+                    return (
+                      <span
+                        className="w-6 h-6 rounded-full inline-block"
+                        style={{
+                          backgroundColor: colorInfo.hex,
+                          border: colorInfo.needsBorder ? '1px solid #D1D5DB' : '1px solid transparent',
+                        }}
+                        title={normalizeColorName(form.cor) || 'Sem cor padronizada'}
+                      />
+                    );
+                  })()}
                   <input
                     type="color"
                     className="h-9 w-12 cursor-pointer rounded border p-0.5"
-                    value={resolverCor(form.cor) && resolverCor(form.cor).startsWith('#') ? resolverCor(form.cor) : '#6b7280'}
-                    onChange={e => setForm(f => ({ ...f, cor: e.target.value }))}
+                    value={getColorFromName(form.cor).hex}
+                    onChange={e => {
+                      const canonical = getLabelFromHex(e.target.value);
+                      if (!canonical) return;
+                      setForm(f => ({ ...f, cor: canonical }));
+                    }}
                   />
                   <input
                     className="border rounded-lg px-3 py-2 flex-1"
-                    placeholder="ex: Preto, Vermelho, #3b82f6..."
+                    placeholder="ex: Preta, Vermelha, Lilás, Natural, Inox..."
                     value={form.cor}
                     onChange={e => setForm(f => ({ ...f, cor: e.target.value }))}
                   />
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Use o seletor ou digite o nome (Preto, Azul...) ou um código hex</p>
+                <p className="text-xs text-gray-400 mt-1">A bolinha segue exatamente o texto da cor com padronização automática.</p>
               </div>
               <div>
                 <label className="text-sm font-medium">Estoque Atual</label>
@@ -398,6 +492,38 @@ export default function Produtos() {
         </div>
       )}
 
+      {obsProduto && (
+        <div className="fixed inset-0 z-50 bg-black/45 flex items-center justify-center px-4">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+            <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-gray-100">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">OBS</div>
+                <h2 className="text-lg font-bold text-gray-900 mt-1 leading-snug">{obsProduto.nome}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setObsProduto(null)}
+                className="text-gray-400 hover:text-gray-700 text-sm font-semibold"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm leading-6 text-gray-700 whitespace-pre-line">{obsProduto.observacao}</p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setObsProduto(null)}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
+              >
+                Entendi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tabela */}
       {ordemEstoque && (
         <div className={`mb-3 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${ordemEstoque === 'desc' ? 'bg-blue-50 text-blue-800 border border-blue-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
@@ -433,11 +559,11 @@ export default function Produtos() {
           <tbody key={`ord-${ordemEstoque}-${lista.length}`}>
             {lista.length === 0 && (
               <tr>
-                <td colSpan={10} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
+                <td colSpan={(can.editarProdutos || can.excluirProdutos) ? 12 : 11} className="text-center p-8 text-gray-400">Nenhum produto encontrado.</td>
               </tr>
             )}
             {lista.map((p, idx) => (
-              <tr key={`${ordemEstoque}-${p.id}-${idx}`} className={`border-t text-sm hover:bg-gray-50 transition ${alertaIds.has(p.id) ? 'bg-red-50' : ''} ${!p.ativo ? 'opacity-50' : ''}`}>
+              <tr key={`${ordemEstoque}-${p.id}-${idx}`} className={`border-t text-sm hover:bg-gray-50 transition ${alertaIds.has(p.id) ? 'bg-red-50' : ''} ${p.categoria === 'Personalizado' ? 'bg-amber-50/60' : ''} ${!p.ativo ? 'opacity-50' : ''}`}>
                 <td className="p-3">
                   <ImgProduto
                     src={p.imagem}
@@ -448,27 +574,52 @@ export default function Produtos() {
                 <td className="p-3 font-medium max-w-[220px]">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="leading-snug">{p.nome}</span>
+                    {p.categoria === 'Personalizado' && (
+                      <span
+                        className="inline-flex items-center gap-1 bg-amber-500 text-white rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide whitespace-nowrap flex-shrink-0"
+                        title={`Material exclusivo do cliente ${p.material || ''} — não vender para outros clientes`}
+                      >
+                        🔒 Cliente: {p.material || '—'}
+                      </span>
+                    )}
                     {alertaIds.has(p.id) && (
                       <span className="inline-flex items-center gap-1 bg-red-500 text-white rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap flex-shrink-0">⚠ ALERTA</span>
                     )}
+                    {p.observacao?.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => setObsProduto({ nome: p.nome, observacao: p.observacao })}
+                        className="inline-flex items-center bg-sky-100 text-sky-700 rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide hover:bg-sky-200 transition"
+                        title="Ver observações do produto"
+                      >
+                        OBS
+                      </button>
+                    )}
                   </div>
                 </td>
-                <td className="p-3 text-gray-500">{p.categoria}</td>
+                <td className="p-3 text-gray-500">
+                  {p.categoria === 'Personalizado'
+                    ? <span className="inline-flex items-center bg-amber-100 text-amber-800 rounded px-2 py-0.5 text-xs font-semibold">Personalizado</span>
+                    : p.categoria}
+                </td>
                 <td className="p-3 text-gray-500 text-xs">{p.modelo || <span className="text-gray-300">—</span>}</td>
                 <td className="p-3 text-gray-500 text-xs whitespace-nowrap">{p.tamanho || <span className="text-gray-300">—</span>}</td>
                 <td className="p-3 text-gray-500 text-xs">{p.material || <span className="text-gray-300">—</span>}</td>
                 <td className="p-3">
                   <div className="flex items-center justify-center">
                     {(() => {
-                      const hex = resolverCor(p.cor) || corPeloNome(p.nome);
-                      const label = p.cor || '';
-                      return hex
-                        ? <span
-                            className="w-5 h-5 rounded-full border border-gray-300 shadow-sm inline-block flex-shrink-0"
-                            style={{ background: hex }}
-                            title={label || 'cor detectada pelo nome'}
-                          />
-                        : <span className="text-gray-300">—</span>;
+                      const colorInfo = getColorFromName(p.cor);
+                      const label = normalizeColorName(p.cor) || p.cor || 'Sem cor';
+                      return (
+                        <span
+                          className="w-5 h-5 rounded-full shadow-sm inline-block flex-shrink-0"
+                          style={{
+                            backgroundColor: colorInfo.hex,
+                            border: colorInfo.needsBorder ? '1px solid #D1D5DB' : '1px solid transparent',
+                          }}
+                          title={label}
+                        />
+                      );
                     })()}
                   </div>
                 </td>

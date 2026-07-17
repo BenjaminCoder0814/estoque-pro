@@ -1,13 +1,17 @@
 // Topbar com gradiente profissional
-import React, { useState, useRef, useEffect } from 'react';
-import { LucideLogOut, LucideBell, LucideAlertTriangle, LucideX } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { LucideLogOut, LucideBell, LucideAlertTriangle, LucideX, LucidePencil } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useEstoque } from '../contexts/EstoqueContext';
+import EditDisplayNameModal from './EditDisplayNameModal';
+import { aplicarOverrideDisplay } from '../pages/chat/chatHelpers';
 
 export default function Topbar() {
-  const { user, logout } = useAuth();
+  const { user: userReal, logout } = useAuth();
+  const user = useMemo(() => aplicarOverrideDisplay(userReal), [userReal]);
   const { alertas, syncStatus } = useEstoque();
   const [alertaAberto, setAlertaAberto] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Fecha ao clicar fora
@@ -52,19 +56,23 @@ export default function Topbar() {
         {/* Indicador "Ao vivo" — sync ativo com banco Neon */}
         <div
           className="hidden md:flex items-center gap-1.5 bg-white/15 hover:bg-white/25 rounded-xl px-2.5 py-1.5 backdrop-blur-sm transition cursor-default"
-          title={syncStatus?.ok
-            ? `Status: conectado ao banco de dados Neon. Última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
-            : `Sem conexão com o banco de dados. Tentando reconectar...`}
-          aria-label={syncStatus?.ok
-            ? `Status: conectado ao banco de dados Neon. Última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
-            : `Sem conexão com o banco de dados. Tentando reconectar...`}
+          title={!syncStatus?.ok
+            ? 'Sem conexão com a API de estoque. Tentando reconectar...'
+            : syncStatus?.degraded
+              ? `Sincronização parcial: produtos em tempo real e histórico oscilando. Última verificação: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
+              : `Status: conectado ao banco de dados. Última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`}
+          aria-label={!syncStatus?.ok
+            ? 'Sem conexão com a API de estoque. Tentando reconectar...'
+            : syncStatus?.degraded
+              ? `Sincronização parcial: produtos em tempo real e histórico oscilando. Última verificação: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`
+              : `Status: conectado ao banco de dados. Última sincronização: ${syncStatus?.lastSync ? new Date(syncStatus.lastSync).toLocaleTimeString() : '—'}`}
         >
           <span className={`relative flex h-2 w-2`}>
-            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${syncStatus?.ok ? 'bg-emerald-400' : 'bg-red-400'}`}></span>
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${syncStatus?.ok ? 'bg-emerald-400' : 'bg-red-500'}`}></span>
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${!syncStatus?.ok ? 'bg-red-400' : syncStatus?.degraded ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${!syncStatus?.ok ? 'bg-red-500' : syncStatus?.degraded ? 'bg-amber-500' : 'bg-emerald-400'}`}></span>
           </span>
           <span className="text-white text-[11px] font-semibold uppercase tracking-wider">
-            {syncStatus?.ok ? 'Ao vivo' : 'Offline'}
+            {!syncStatus?.ok ? 'Offline' : syncStatus?.degraded ? 'Parcial' : 'Ao vivo'}
           </span>
         </div>
 
@@ -143,15 +151,27 @@ export default function Topbar() {
         </div>
 
         {/* Usuário */}
-        <div className="flex items-center gap-2 bg-white/15 rounded-xl px-3 py-1.5 backdrop-blur-sm">
-          <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${gradiente} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
-            {user?.nome?.charAt(0)?.toUpperCase()}
+        <button
+          type="button"
+          onClick={() => setEditProfileOpen(true)}
+          className="flex items-center gap-2 bg-white/15 hover:bg-white/25 rounded-xl px-3 py-1.5 backdrop-blur-sm transition group"
+          title="Editar meu nome e foto de perfil"
+        >
+          <div className={`relative w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br ${gradiente} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            ) : (
+              <span>{user?.nome?.charAt(0)?.toUpperCase()}</span>
+            )}
           </div>
           <div className="text-right hidden sm:block">
-            <div className="font-semibold text-white text-sm leading-tight">{user?.nome}</div>
+            <div className="font-semibold text-white text-sm leading-tight flex items-center gap-1 justify-end">
+              {user?.nome}
+              <LucidePencil className="w-3 h-3 opacity-70 group-hover:opacity-100" />
+            </div>
             <div className="text-[10px] text-white/70 uppercase tracking-widest">{user?.perfil}</div>
           </div>
-        </div>
+        </button>
 
         {/* Logout */}
         <button
@@ -163,6 +183,8 @@ export default function Topbar() {
           <LucideLogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" />
         </button>
       </div>
+
+      <EditDisplayNameModal open={editProfileOpen} onClose={() => setEditProfileOpen(false)} />
     </header>
   );
 }

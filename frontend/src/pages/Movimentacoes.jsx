@@ -143,6 +143,7 @@ export default function Movimentacoes() {
           <option value="">Todos os tipos</option>
           <option value="ENTRADA">⬆ Entradas</option>
           <option value="SAIDA">⬇ Saídas</option>
+          <option value="AUDIT">📝 Alterações de Produto</option>
         </select>
         <select className="border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none" value={filtroUsuario} onChange={e => setFiltroUsuario(e.target.value)}>
           <option value="">Todos os usuários</option>
@@ -182,18 +183,22 @@ export default function Movimentacoes() {
                     <span className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
                       ⬆ CHEGOU
                     </span>
-                  ) : (
+                  ) : m.tipo === 'SAIDA' ? (
                     <span className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-bold bg-red-100 text-red-700 border border-red-200">
                       ⬇ SAIU
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                      📝 PRODUTO
                     </span>
                   )}
                 </td>
                 <td className="p-3 font-semibold text-slate-700">{m.produtoNome}</td>
-                <td className="p-3 text-center font-bold text-slate-700">{m.quantidade}</td>
+                <td className="p-3 text-center font-bold text-slate-700">{m.tipo === 'AUDIT' ? '—' : m.quantidade}</td>
                 <td className="p-3 text-center text-slate-500">
                   <span className="font-mono">{m.estoqueAntes ?? '-'}</span>
                   <span className="text-slate-400 mx-1">→</span>
-                  <span className={`font-mono font-semibold ${m.tipo === 'ENTRADA' ? 'text-emerald-600' : 'text-red-600'}`}>{m.estoqueDepois ?? '-'}</span>
+                  <span className={`font-mono font-semibold ${m.tipo === 'ENTRADA' ? 'text-emerald-600' : m.tipo === 'SAIDA' ? 'text-red-600' : 'text-indigo-600'}`}>{m.estoqueDepois ?? '-'}</span>
                 </td>
                 <td className="p-3 text-slate-500">{m.usuario} <span className="text-[10px] text-slate-400 bg-slate-100 rounded px-1">({m.usuarioPerfil})</span></td>
                 <td className="p-3 text-slate-400 italic">{m.observacao || '—'}</td>

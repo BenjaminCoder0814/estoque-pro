@@ -6,13 +6,32 @@ import { requireAuth, requireRoles } from '../middleware/auth.js';
 
 const router = Router();
 
-router.get('/', requireAuth, requireRoles('ADMIN', 'TI'), ah(async (_req, res) => {
+// Lista mínima de contatos (todos autenticados podem ver) — usada pelo chat.
+router.get('/contacts', requireAuth, ah(async (_req, res) => {
+  const users = await prisma.user.findMany({
+    where: { active: true, role: { not: 'VISITANTE' } },
+    orderBy: { name: 'asc' },
+    select: { id: true, email: true, name: true, displayName: true, displayNameSet: true, avatarUrl: true, role: true },
+  });
+  const data = users.map((u) => ({
+    id: u.id,
+    email: u.email,
+    nome: u.displayNameSet && u.displayName ? u.displayName : u.name,
+    avatarUrl: u.avatarUrl || '',
+    perfil: u.role,
+  }));
+  return res.json({ ok: true, data });
+}));
+
+router.get('/', requireAuth, requireRoles('ADMIN', 'TI', 'DIRETORIA'), ah(async (_req, res) => {
   const users = await prisma.user.findMany({
     orderBy: { name: 'asc' },
     select: {
       id: true,
       email: true,
       name: true,
+      displayName: true,
+      displayNameSet: true,
       role: true,
       active: true,
       restrictBusiness: true,
@@ -22,7 +41,7 @@ router.get('/', requireAuth, requireRoles('ADMIN', 'TI'), ah(async (_req, res) =
   return res.json({ ok: true, data: users });
 }));
 
-router.post('/', requireAuth, requireRoles('ADMIN', 'TI'), ah(async (req, res) => {
+router.post('/', requireAuth, requireRoles('ADMIN', 'TI', 'DIRETORIA'), ah(async (req, res) => {
   const { email, name, password, role, active, restrictBusiness } = req.body || {};
   const passwordHash = await bcrypt.hash(password || '123456', 10);
   const created = await prisma.user.create({
@@ -38,7 +57,7 @@ router.post('/', requireAuth, requireRoles('ADMIN', 'TI'), ah(async (req, res) =
   return res.status(201).json({ ok: true, data: { id: created.id } });
 }));
 
-router.patch('/:id', requireAuth, requireRoles('ADMIN', 'TI'), ah(async (req, res) => {
+router.patch('/:id', requireAuth, requireRoles('ADMIN', 'TI', 'DIRETORIA'), ah(async (req, res) => {
   const id = Number(req.params.id);
   const { name, role, active, restrictBusiness, password } = req.body || {};
   const data = {
@@ -56,7 +75,7 @@ router.patch('/:id', requireAuth, requireRoles('ADMIN', 'TI'), ah(async (req, re
   return res.json({ ok: true, data: { id: updated.id } });
 }));
 
-router.delete('/:id', requireAuth, requireRoles('ADMIN', 'TI'), ah(async (req, res) => {
+router.delete('/:id', requireAuth, requireRoles('ADMIN', 'TI', 'DIRETORIA'), ah(async (req, res) => {
   const id = Number(req.params.id);
 
   if (req.user?.id === id) {

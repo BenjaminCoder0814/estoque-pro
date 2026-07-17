@@ -208,7 +208,7 @@ function GateModal({ onAcesso }) {
         </button>
 
         <p className="text-[10px] text-slate-500 text-center mt-5 leading-relaxed">
-          Todas as tentativas de acesso são registradas e notificadas à equipe de vendas.
+          Clientes e visitantes devem validar os dados da empresa para liberar o acesso ao login.
         </p>
       </form>
     </div>
@@ -255,12 +255,11 @@ export default function Login() {
   const cabecalho = (
     <>
       <div className="flex justify-center mb-6">
-        <div
-          className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-glow animate-bounce-slow"
-          style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}
-        >
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="w-14 h-14 object-contain drop-shadow-lg" />
-        </div>
+        <img
+          src={`${import.meta.env.BASE_URL}logo.png`}
+          alt="Logo Zenith"
+          className="w-40 h-40 md:w-48 md:h-48 object-contain drop-shadow-2xl animate-bounce-slow"
+        />
       </div>
       <div className="text-center mb-8">
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Bem-vindo</h1>

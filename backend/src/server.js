@@ -12,7 +12,37 @@ import usersRoutes from './routes/users.js';
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*' }));
+const defaultCorsOrigins = [
+  'https://lacres.com.br',
+  'https://www.lacres.com.br',
+  'http://localhost:8080',
+  'http://localhost:5173'
+];
+
+function normalizeOrigin(origin) {
+  return String(origin || '').trim().replace(/\/+$/, '');
+}
+
+const envCorsOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((s) => normalizeOrigin(s))
+  .filter(Boolean);
+
+// Mescla defaults + env para evitar lockout acidental em producao.
+const allowedOrigins = Array.from(new Set([
+  ...defaultCorsOrigins.map(normalizeOrigin),
+  ...envCorsOrigins,
+]));
+
+app.use(cors({
+  origin(origin, callback) {
+    // Permite requests server-to-server e health checks sem Origin.
+    if (!origin) return callback(null, true);
+    const normalized = normalizeOrigin(origin);
+    if (allowedOrigins.includes(normalized)) return callback(null, true);
+    return callback(new Error(`CORS bloqueado para origin: ${origin}`));
+  },
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 
@@ -39,6 +69,7 @@ app.use((err, req, res, _next) => {
   if (err?.code === 'P2025') return res.status(404).json({ ok: false, error: 'Registro não encontrado' });
   if (err?.code === 'P2002') return res.status(409).json({ ok: false, error: 'Registro duplicado' });
   if (err?.code === 'P2003') return res.status(409).json({ ok: false, error: 'Registro em uso por outro cadastro' });
+  if (/^CORS bloqueado/.test(err?.message || '')) return res.status(403).json({ ok: false, error: err.message });
 
   return res.status(500).json({ ok: false, error: 'Erro interno' });
 });

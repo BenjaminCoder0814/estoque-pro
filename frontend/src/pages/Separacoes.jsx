@@ -3,7 +3,7 @@
 // EXPEDICAO + ADMIN : avançar status (separando → separado → expedido)
 // ADMIN             : cancelar, editar qualquer campo, ver tudo
 // SUPERVISAO        : somente visualização completa + histórico
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   LucideTruck, LucidePlus, LucideX, LucideSearch, LucideFilter,
   LucideChevronDown, LucideChevronUp, LucideClock, LucideUser,
@@ -13,23 +13,25 @@ import {
   LucideSortAsc, LucideSortDesc, LucideInfo, LucideAlertTriangle,
   LucideChevronRight, LucideBox,
 } from 'lucide-react';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STORAGE
 // ─────────────────────────────────────────────────────────────────────────────
-const SEP_KEY = 'zkSeparacoes';
-const SEP_CTR = 'zkSepCounter';
+const SEP_DOC = 'config/separacoes';
+const SEP_CACHE_KEY = 'zkSeparacoes';
 
-function loadSeps() {
-  try { const r = localStorage.getItem(SEP_KEY); return r ? JSON.parse(r) : []; }
-  catch { return []; }
+function loadSepsCache() {
+  try {
+    return JSON.parse(localStorage.getItem(SEP_CACHE_KEY) || 'null');
+  } catch {
+    return null;
+  }
 }
-function saveSeps(arr) { localStorage.setItem(SEP_KEY, JSON.stringify(arr)); }
-function nextNumero() {
-  const n = Number(localStorage.getItem(SEP_CTR) || 0) + 1;
-  localStorage.setItem(SEP_CTR, String(n));
-  return `SEP-${String(n).padStart(4, '0')}`;
+function saveSepsCache(data) {
+  try { localStorage.setItem(SEP_CACHE_KEY, JSON.stringify(data)); } catch {}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -162,9 +164,35 @@ export default function Separacoes() {
   const podeAvancar = can.avancarSeparacao;
   const podeEditar  = can.editarSeparacao;
   const podeVer     = can.verSeparacoes;
+  // verSeparacoesAll: central atendimento + admin/ti/diretoria veem todas; outros só as próprias
+  const verTodas    = can.verSeparacoesAll;
 
   // ── dados ──────────────────────────────────────────────────────────────────
-  const [seps, setSeps] = useState(loadSeps);
+  const [sepData, setSepData] = useState(() =>
+    loadSepsCache() || { separacoes: [], counter: 0, updatedAt: 0 }
+  );
+  const seps = sepData.separacoes || [];
+  const skipNextRef = useRef(false);
+  const lastSyncedAtRef = useRef(0);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, ...SEP_DOC.split('/')), (snap) => {
+      if (!snap.exists()) return;
+      const remote = snap.data() || {};
+      if (skipNextRef.current && remote.updatedAt === lastSyncedAtRef.current) {
+        skipNextRef.current = false;
+        return;
+      }
+      const payload = {
+        separacoes: Array.isArray(remote.separacoes) ? remote.separacoes : [],
+        counter: Number(remote.counter || 0),
+        updatedAt: Number(remote.updatedAt || Date.now()),
+      };
+      setSepData(payload);
+      saveSepsCache(payload);
+    }, (err) => console.warn('Separacoes onSnapshot:', err?.message));
+    return () => unsub();
+  }, []);
 
   // ── filtros ────────────────────────────────────────────────────────────────
   const [busca,      setBusca]      = useState('');
@@ -190,16 +218,29 @@ export default function Separacoes() {
   const [formEdit, setFormEdit] = useState(VAZIO_FORM);
 
   // ── persist ────────────────────────────────────────────────────────────────
-  function persist(arr) { setSeps(arr); saveSeps(arr); }
+  const persist = useCallback((arr, nextCounter = sepData.counter) => {
+    const payload = {
+      separacoes: arr,
+      counter: Number(nextCounter || 0),
+      updatedAt: Date.now(),
+    };
+    setSepData(payload);
+    saveSepsCache(payload);
+    skipNextRef.current = true;
+    lastSyncedAtRef.current = payload.updatedAt;
+    setDoc(doc(db, ...SEP_DOC.split('/')), payload)
+      .catch((e) => console.warn('Separacoes setDoc:', e?.message));
+  }, [sepData.counter]);
 
   // ── criar ──────────────────────────────────────────────────────────────────
   function handleCriar(e) {
     e.preventDefault();
     if (!form.produto.trim() || !form.quantidade) return;
     const agora = new Date().toISOString();
+    const nextCounter = Number(sepData.counter || 0) + 1;
     const nova = {
       id: Date.now(),
-      numero: nextNumero(),
+      numero: `SEP-${String(nextCounter).padStart(4, '0')}`,
       produto: form.produto.trim(),
       quantidade: Number(form.quantidade),
       cor: form.cor.trim(),
@@ -216,7 +257,7 @@ export default function Separacoes() {
         obs: form.observacao.trim() || null,
       }],
     };
-    persist([nova, ...seps]);
+    persist([nova, ...seps], nextCounter);
     setForm(VAZIO_FORM);
     setModalForm(false);
   }
@@ -296,6 +337,8 @@ export default function Separacoes() {
   const lista = useMemo(() => {
     const q = busca.trim().toLowerCase();
     let arr = seps.filter(s => {
+      // Se não pode ver todas, filtra só as criadas pelo usuário logado
+      if (!verTodas && s.criadoPor !== user?.nome) return false;
       if (filtroStatus !== 'todos' && s.status !== filtroStatus) return false;
       if (filtroForma && s.formaSaida !== filtroForma) return false;
       if (filtroPor && !s.criadoPor.toLowerCase().includes(filtroPor.toLowerCase())) return false;
@@ -318,7 +361,7 @@ export default function Separacoes() {
       return ordemAsc ? cmp : -cmp;
     });
     return arr;
-  }, [seps, busca, filtroStatus, filtroForma, filtroPor, filtroDia, filtroDe, filtroAte, ordemCampo, ordemAsc]);
+  }, [seps, busca, filtroStatus, filtroForma, filtroPor, filtroDia, filtroDe, filtroAte, ordemCampo, ordemAsc, verTodas, user?.nome]);
 
   // ── stats ──────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
@@ -622,7 +665,7 @@ export default function Separacoes() {
                         </button>
                       )}
 
-                      {/* Cancelar (admin) */}
+                      {/* Cancelar/Excluir — central atendimento + admin/ti/diretoria */}
                       {can.cancelarSeparacao && !finalizado && (
                         <button onClick={() => setModalConfirm({ tipo: 'cancelar', id: sep.id, sep })}
                           className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 transition">

@@ -2,7 +2,7 @@ services:
   - type: web
     name: zenith-siz-backend
     runtime: node
-    # Instance type (não confundir com o plano do workspace, que também se chama "Pro").
+    # Instance type (NÃO confundir com o plano do workspace, que também se chama "Pro").
     # O serviço é Blueprint managed: o valor daqui sobrescreve o painel a cada sync.
     # Free hiberna após 15 min e essa hibernação era o gatilho das edições perdidas
     # entre expedição e comercial. Nunca voltar para free.
@@ -23,4 +23,4 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: CORS_ORIGIN
-        sync: false
+        value: https://lacres.com.br,https://www.lacres.com.br,https://zenithlacres.com.br,https://www.zenithlacres.com.br,http://localhost:5173,http://localhost:8080

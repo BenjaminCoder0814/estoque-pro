@@ -1,5 +1,5 @@
-// Precos.jsx — Catálogo comercial completo · Tabela 12/2025
-// ADMIN + SUPERVISAO: editam tudo | COMERCIAL: somente visualização
+﻿// Precos.jsx — Catálogo comercial completo · Tabela 12/2025
+// ADMIN + TI + DIRETORIA: editam tudo | demais: somente visualização
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   ChevronDown, ChevronRight, Plus, Pencil, Trash2, X,
@@ -14,7 +14,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 const FIRESTORE_DOC = () => doc(db, 'catalogo', 'precos');
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v22';
+const CAT_VERSION = 'v34';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -37,45 +37,45 @@ const CATALOGO_SEED = [
     obs: 'Varejo: +30% sobre materiais de estoque. Priorizar venda de estoque para saída mais rápida.',
     produtos: [
       { id: 101, nome: 'DT — Dupla Trava', variacoes: [
-        v(10101,'16mm','PP','', null, null, 108.00, null, '20–30 dias', ''),
-        v(10106,'23mm','PP','', 139.00, null, null,  null, '20–30 dias', ''),
-        v(10107,'25mm','PP','', 238.00, null, null,  null, '10–15 dias', ''),
-        v(10108,'31mm','PP','', 204.00, null, 27.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
-        v(10109,'36mm','PP','', 239.00, null, 32.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
-        v(10110,'41mm','PP','', 279.00, null, 38.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
-        v(10111,'45mm','PP','', 339.00, null, 41.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
-        v(10112,'50mm','PP','', 379.00, null, 44.00, null, '10–15 dias', 'Somente se tiver em estoque'),
-        v(10113,'55mm','PP','', 419.00, null, 49.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
+        v(10101,'16mm','PP','', null, null, 156.00, null, '20–30 dias', ''),
+        v(10106,'23mm','PP','', 139.00, null, 201.00, null, '20–30 dias', ''),
+        v(10107,'25mm','PP','', 238.00, null, 375.00, null, '10–15 dias', ''),
+        v(10108,'31mm','PP','', 215.10, null, 346.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
+        v(10109,'36mm','PP','', 225.00, null, 295.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
+        v(10110,'41mm','PP','', 251.10, null, 404.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
+        v(10111,'45mm','PP','', 305.10, null, 491.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
+        v(10112,'50mm','PP','', 341.10, null, 549.00, null, '10–15 dias', 'Somente se tiver em estoque'),
+        v(10113,'55mm','PP','', 495.00, null, 607.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
       ]},
       { id: 102, nome: 'DT — Dupla Trava Corte Fácil', variacoes: [
-        v(10201,'23mm','PP','', 179.00, null, null, null, '15–20 dias', 'Sem varejo em pacote'),
-        v(10202,'27mm','PP','', 259.00, null, null, null, '15–20 dias', 'Sem varejo em pacote'),
-        v(10203,'32mm','PP','', 259.00, null, null, null, '15–20 dias', ''),
-        v(10204,'35mm','PP','', 269.00, null, null, null, '15–20 dias', ''),
-        v(10205,'37mm','PP','', 519.00, null, null, null, '15–20 dias', ''),
+        v(10201,'23mm','PP','', 179.00, null, 332.00, null, '15–20 dias', 'Sem varejo em pacote'),
+        v(10202,'27mm','PP','', 259.00, null, 375.00, null, '15–20 dias', 'Sem varejo em pacote'),
+        v(10203,'32mm','PP','', 259.00, null, 375.00, null, '15–20 dias', ''),
+        v(10204,'35mm','PP','', 269.00, null, 390.00, null, '15–20 dias', ''),
+        v(10205,'37mm','PP','', 519.00, null, 752.00, null, '15–20 dias', ''),
       ]},
       { id: 103, nome: 'ES — Escada Alta', variacoes: [
-        v(10307,'16mm Normal','PP','',  89.00, null, null,  null, '10–15 dias', ''),
-        v(10308,'16mm Corte Fácil','PP','',  85.00, null, null,  null, '10–15 dias', ''),
-        v(10301,'23mm Corte Fácil','PP','', 115.00, null, 15.00, null, '10–15 dias', 'Acima de 11 pcts atacado / Varejo até 10 pcts'),
-        v(10302,'23mm','PP','', 119.00, null, null,  null, '10–15 dias', 'Normal — Sem varejo em pacote'),
-        v(10303,'28mm','PP','', 259.00, null, null,  null, '10–15 dias', 'Escada Dupla ou Corte Fácil'),
-        v(10304,'30mm ES Protocolo','PP','', 374.00, null, null,  null, '20–30 dias', 'Mínimo 1.000 pçs'),
-        v(10305,'35mm Escada Dupla','PP','', 349.00, null, null,  null, '20–30 dias', ''),
-        v(10306,'45mm Escada Dupla','PP','', 449.00, null, null,  null, '20–30 dias', ''),
+        v(10307,'16mm Normal','PP','',  80.10, null, 129.00, null, '10–15 dias', ''),
+        v(10308,'16mm Corte Fácil','PP','',  85.00, null, 123.00, null, '10–15 dias', ''),
+        v(10301,'23mm Corte Fácil','PP','', 115.00, null, null,   null, '10–15 dias', 'NÃO TEMOS'),
+        v(10302,'23mm','PP','', 107.10, null, 172.00, null, '10–15 dias', 'Normal — Sem varejo em pacote'),
+        v(10303,'28mm','PP','', 259.00, null, 375.00, null, '10–15 dias', 'Escada Dupla ou Corte Fácil'),
+        v(10304,'30mm ES Protocolo','PP','', 374.00, null, 542.00, null, '20–30 dias', 'Mínimo 1.000 pçs'),
+        v(10305,'35mm Escada Dupla','PP','', 349.00, null, 506.00, null, '20–30 dias', ''),
+        v(10306,'45mm Escada Dupla','PP','', 449.00, null, 651.00, null, '20–30 dias', ''),
       ]},
       { id: 104, nome: 'EP — Espinha de Peixe', variacoes: [
-        v(10404,'16mm Normal','PP','',  95.00, null, null, null, '10–15 dias', ''),
-        v(10405,'16mm Corte Fácil','PP','', 119.00, null, null, null, '10–20 dias', ''),
-        v(10401,'23mm Normal','PP','', 125.00, null, null, null, '10–15 dias', 'Acima de 11 pcts'),
-        v(10402,'23mm Corte Fácil','PP','', 189.00, null, null, null, '10–20 dias', ''),
-        v(10403,'42mm','PP','', 309.00, null, null, null, '10–15 dias', 'Sem varejo em pacote'),
+        v(10404,'16mm Normal','PP','',  85.50, null, 129.00, null, '10–15 dias', ''),
+        v(10405,'16mm Corte Fácil','PP','', 119.00, null, 275.00, null, '10–20 dias', ''),
+        v(10401,'23mm Normal','PP','', 112.50, null, 142.00, null, '10–15 dias', 'Acima de 11 pcts'),
+        v(10402,'23mm Corte Fácil','PP','', 189.00, null, 330.00, null, '10–20 dias', ''),
+        v(10403,'42mm','PP','', 309.00, null, 448.00, null, '10–15 dias', 'Sem varejo em pacote'),
       ]},
       { id: 105, nome: 'TU — Trava Única', variacoes: [
-        v(10501,'31mm','PP','', 350.00, null, null, null, '15–20 dias', 'Sem varejo em pacote'),
+        v(10501,'31mm','PP','', 350.00, null, 507.00, null, '15–20 dias', 'Sem varejo em pacote'),
       ]},
       { id: 106, nome: 'TM — Trava Metálica', variacoes: [
-        v(10601,'45mm','PP','', 986.00, null, null, null, '20–30 dias', ''),
+        v(10601,'45mm','PP','', 986.00, null, 1429.00, null, '20–30 dias', ''),
       ]},
     ],
   },
@@ -105,16 +105,22 @@ const CATALOGO_SEED = [
     obs: 'Prazo 7–10 dias',
     produtos: [
       { id: 301, nome: 'Lacre de Sacola', variacoes: [
-        v(30101,'Rígido',   'PP','', null, null,  45.00, null, '7–10 dias', ''),
-        v(30102,'Flexível', 'PP','', null, null,  49.00, null, '7–10 dias', ''),
+        v(30101,'Rígido',   'PP','', null, null,  40.50, null, '7–10 dias', ''),
+        v(30102,'Flexível', 'PP','', null, null,  44.10, null, '7–10 dias', ''),
         v(30103,'GG',       'PP','', null, null, 136.00, null, '7–10 dias', ''),
-      ]},
-      { id: 302, nome: 'Lacre Anel / Ampola', variacoes: [
-        v(30201,'M30 / M22 / CO2', 'PP','', null, null, 187.00, null, '7–10 dias', ''),
-        v(30202,'Ampola',          'PP','', null, null, 221.00, null, '7–10 dias', ''),
       ]},
       { id: 303, nome: 'Aplicador de Lacre de Sacola', variacoes: [
         v(30301,'Único','','', null, null, null, 25.00, '15–20 dias', 'Prazo gravado: 30–45 dias'),
+      ]},
+    ],
+  },
+  {
+    id: 31, categoria: 'Lacre Anel / Ampola', icon: 'tag', color: 'rose',
+    obs: 'Prazo 7–10 dias',
+    produtos: [
+      { id: 302, nome: 'Lacre Anel / Ampola', variacoes: [
+        v(30201,'M30 / M22 / CO2', 'PP','', null, null, 187.00, null, '7–10 dias', ''),
+        v(30202,'Ampola',          'PP','', null, null, 221.00, null, '7–10 dias', ''),
       ]},
     ],
   },
@@ -178,7 +184,7 @@ const CATALOGO_SEED = [
     obs: 'Prazo 3–7 dias. Cortes especiais: pedido mínimo 25kg.',
     produtos: [
       { id: 601, nome: 'Amarrilho / Fecho Lacre de Arame', variacoes: [
-        v(60101,'8cm / 10cm (1.340 pçs/kg)','Papel+Arame','Preto/Branco',  36.00, null, null, null, '5–10 dias', 'Por kg — demais cores sob consulta. Cortes especiais: mín. 25kg'),
+        v(60101,'8cm / 10cm (1.34 pçs/kg)','Papel+Arame','Preto/Branco',  36.00, null, null, null, '5–10 dias', 'Por kg — demais cores sob consulta. Cortes especiais: mín. 25kg'),
         v(60102,'15cm (890 pçs/kg)','Papel+Arame','Preto/Branco',           36.00, null, null, null, '5–10 dias', 'Por kg. Cortes especiais: mín. 25kg'),
         v(60103,'60cm','Papel+Arame','Preto/Branco',                           36.00, null, null, null, '5–10 dias', 'Por kg — outras medidas sob consulta. Cortes especiais: mín. 25kg'),
       ]},
@@ -198,10 +204,10 @@ const CATALOGO_SEED = [
     obs: 'Preços Varejo conforme quantidade mínima.',
     produtos: [
       { id: 701, nome: 'Tag Lacre Autenticidade Personalizado', variacoes: [
-        v(70101,'5.000 pçs', 'PP','Personalizável', null, null,  945.00, null, '15–20 dias', 'Preço Varejo'),
-        v(70102,'10.000 pçs','PP','Personalizável', null, null,  522.00, null, '15–20 dias', ''),
-        v(70103,'15.000 pçs','PP','Personalizável', null, null,  374.00, null, '15–20 dias', ''),
-        v(70104,'20.000 pçs','PP','Personalizável', null, null,  306.00, null, '15–20 dias', ''),
+        v(70101,'5.00 pçs', 'PP','Personalizável', null, null,  945.00, null, '15–20 dias', 'Preço Varejo'),
+        v(70102,'10.00 pçs','PP','Personalizável', null, null,  522.00, null, '15–20 dias', ''),
+        v(70103,'15.00 pçs','PP','Personalizável', null, null,  374.00, null, '15–20 dias', ''),
+        v(70104,'20.00 pçs','PP','Personalizável', null, null,  306.00, null, '15–20 dias', ''),
       ]},
       { id: 702, nome: 'Genérico 1 Perna', variacoes: [
         v(70201,'Único','PP','Consultar cores', null, null,  34.00, null, '—', ''),
@@ -213,7 +219,7 @@ const CATALOGO_SEED = [
         v(70401,'Único','PP','Consultar cores', null, null, 187.00, null, '—', ''),
       ]},
       { id: 705, nome: 'Genérico Rústico Sisal (Lançamento)', variacoes: [
-        v(70501,'Único','Sisal','', null, null, 187.00, null, '—', 'Mínimo 5.000 peças'),
+        v(70501,'Único','Sisal','', null, null, 187.00, null, '—', 'Mínimo 5.00 peças'),
       ]},
     ],
   },
@@ -224,7 +230,7 @@ const CATALOGO_SEED = [
     id: 8, categoria: 'Lacres Metálicos', icon: 'shield', color: 'slate',
     obs: '',
     produtos: [
-      { id: 801, nome: 'Lacre Zpino (Pino Bolt)', variacoes: [
+      { id: 801, nome: 'Lacre para Container', variacoes: [
         v(80101,'Único','Aço','Amarelo (pronta entrega)', null, null, null, 3.75, '—', 'Somente amarelo em pronta entrega'),
       ]},
       { id: 802, nome: 'Lacre Blindado Ajustável', variacoes: [
@@ -395,15 +401,15 @@ const CATALOGO_SEED = [
         v(110302,'7,6mm x 250mm Branca','Nylon','Branca', null, null, 849.00, null, '—', ''),
       ]},
       { id: 1104, nome: 'Zpin', variacoes: [
-        v(110401,'25mm · CX c/ 5.000 uni','PP','', null, null, null, 17.00, '—', ''),
-        v(110402,'40mm · CX c/ 5.000 uni','PP','', null, null, null, 17.00, '—', ''),
+        v(110401,'25mm · CX c/ 5.00 uni','PP','', null, null, null, 17.00, '—', ''),
+        v(110402,'40mm · CX c/ 5.00 uni','PP','', null, null, null, 17.00, '—', ''),
       ]},
       { id: 1105, nome: 'Fixador Autoadesivo para Fios', variacoes: [
         v(110501,'19x19mm','PP','Branca/Preta', null, null, 354.00, null, '—', 'Varejo'),
         v(110502,'30x30mm','PP','Branca/Preta', null, null, 544.00, null, '—', 'Varejo'),
       ]},
       { id: 1106, nome: 'Trava Anel', variacoes: [
-        v(110601,'CX c/ 5.000 uni','Nylon','', null, null, null, 33.00, '5–7 dias', ''),
+        v(110601,'CX c/ 5.00 uni','Nylon','', null, null, null, 33.00, '5–7 dias', ''),
       ]},
 
     ],
@@ -435,6 +441,14 @@ const CATALOGO_SEED = [
       ]},
       { id: 1210, nome: 'Cadeado Tradicional STAM', variacoes: [
         v(121001,'45mm','Latão','', 44.90, null, null, null, '15–20 dias', 'Mínimo 5 unidades'),
+      ]},
+      { id: 1215, nome: 'Cadeado Latão (Lançamento do Mês)', variacoes: [
+        v(121501,'20mm','Latão maciço','', null, null, null, 10.50, 'Pronta entrega', 'Preço promocional por unidade (cada)'),
+        v(121502,'25mm','Latão maciço','', null, null, null, 10.90, 'Pronta entrega', 'Preço promocional por unidade (cada)'),
+        v(121503,'50mm','Latão maciço','', null, null, null, 23.50, 'Pronta entrega', 'Preço promocional por unidade (cada)'),
+      ]},
+      { id: 1216, nome: 'Cadeado Segredo Numérico (Lançamento do Mês)', variacoes: [
+        v(121601,'27mm','Combinação numérica','', null, null, null, 19.50, 'Pronta entrega', 'Preço promocional por unidade (cada)'),
       ]},
       { id: 1203, nome: 'Cadeado Colorido PAPAIZ', variacoes: [
         v(120301,'23mm','Liga','Cinza / Preto', 52.50, null, null, null, '—', ''),
@@ -622,8 +636,8 @@ const CATALOGO_SEED = [
     obs: '',
     produtos: [
       { id: 1701, nome: 'Etiqueta Adesiva Couche 34x23mm', variacoes: [
-        v(170101,'1.900 etiq./rolo · mín. 5 rolos', 'Papel couche','', 135.00, null, null, null, '—', 'Rolo 34x23x1mm'),
-        v(170102,'1.900 etiq./rolo · mín. 10 rolos','Papel couche','', 109.00, null, null, null, '—', 'Rolo 34x23x1mm'),
+        v(170101,'1.90 etiq./rolo · mín. 5 rolos', 'Papel couche','', 135.00, null, null, null, '—', 'Rolo 34x23x1mm'),
+        v(170102,'1.90 etiq./rolo · mín. 10 rolos','Papel couche','', 109.00, null, null, null, '—', 'Rolo 34x23x1mm'),
       ]},
       { id: 1702, nome: 'Dispenser de Senha', variacoes: [
         v(170201,'Único','','', 82.00, null, null, null, '—', 'Cor sob consulta'),
@@ -717,7 +731,18 @@ export default function Precos() {
     const unsub = onSnapshot(ref, (snap) => {
       if (skipSnap.current) { skipSnap.current = false; return; }
       if (snap.exists()) {
-        const remoto = snap.data().data;
+        const snapData = snap.data();
+        if (snapData.version !== CAT_VERSION) {
+          // Versão desatualizada — re-seed Firestore com catálogo novo
+          const local = sortCatalogoData(initCatalogo());
+          skipSnap.current = true;
+          setDoc(ref, { data: local, updatedAt: new Date().toISOString(), version: CAT_VERSION })
+            .catch(e => console.error('Re-seed Firestore error:', e));
+          setCatalogo(local);
+          saveCatalogo(local);
+          return;
+        }
+        const remoto = snapData.data;
         if (remoto) {
           const ordenado = sortCatalogoData(remoto);
           setCatalogo(ordenado);
@@ -727,7 +752,7 @@ export default function Precos() {
         // Firestore ainda vazio — faz upload do catálogo local atual
         const local = sortCatalogoData(initCatalogo());
         skipSnap.current = true;
-        setDoc(ref, { data: local, updatedAt: new Date().toISOString() })
+        setDoc(ref, { data: local, updatedAt: new Date().toISOString(), version: CAT_VERSION })
           .catch(e => console.error('Seed Firestore error:', e));
       }
     });
@@ -755,7 +780,7 @@ export default function Precos() {
     setCatalogo(ordenado);
     saveCatalogo(ordenado);
     skipSnap.current = true;
-    setDoc(FIRESTORE_DOC(), { data: ordenado, updatedAt: new Date().toISOString() })
+    setDoc(FIRESTORE_DOC(), { data: ordenado, updatedAt: new Date().toISOString(), version: CAT_VERSION })
       .catch(e => console.error('Firestore write error:', e));
   }, []);
 
@@ -920,6 +945,7 @@ export default function Precos() {
             <li>• <b>Varejo:</b> acrescentar 30% sobre materiais de estoque</li>
             <li>• Priorizar venda de material de estoque para saída rápida</li>
             <li>• <b>Laser:</b> priorizar cores claras</li>
+            <li>• <b>Laser em metálico:</b> acrescentar 20% sobre o preço</li>
             <li>• Gravação código de barras: somente <b>Amarelo</b> e <b>Branco</b></li>
             <li>• Trocas: até 30 dias (defeito fab.) · acima 90 dias sem troca</li>
           </ul>
@@ -959,7 +985,7 @@ export default function Precos() {
           {!can.editarPrecos && (
             <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5 mb-4 text-blue-700 text-sm">
               <Info className="w-4 h-4 flex-shrink-0" />
-              Modo <b>somente visualização</b>. Apenas Admin e Supervisão podem editar o catálogo.
+              Modo <b>somente visualização</b>. Apenas Admin, TI e Diretoria podem editar o catálogo.
             </div>
           )}
 

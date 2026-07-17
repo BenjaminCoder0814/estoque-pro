@@ -6,6 +6,7 @@ import {
   LucidePlus, LucideTrash2, LucideExternalLink, LucideDownload,
   LucideSearch, LucideX, LucideUpload, LucideBookOpen, LucideEye,
   LucideChevronRight, LucideGrid3x3, LucideZoomIn,
+  LucideEyeOff, LucideKey, LucideBuilding2, LucideClipboard,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiRequest } from '../services/apiClient';
@@ -131,10 +132,10 @@ const FOTO_CATS = [
       { nome: 'Lacre Vermelho 2',         url: '/imagens/lacres-metalicos/Vermelho 2.png' },
       { nome: 'Lacre Vermelho 3',         url: '/imagens/lacres-metalicos/Vermelho 3.png' },
       { nome: 'Lacre Vermelho 4',         url: '/imagens/lacres-metalicos/Vermelho 4.png' },
-      { nome: 'ZAJUST Caixa Ajustável',   url: '/imagens/lacres-metalicos/zajuste-caixa-ajustavel.png' },
+      { nome: 'Lacre Blindado Ajustável', url: '/imagens/lacres-metalicos/zajuste-caixa-ajustavel.png' },
       { nome: 'ZLOCK 3 Folha Flandres',   url: '/imagens/lacres-metalicos/zlock-3-folha-flandres.png' },
       { nome: 'ZLOCK Manivela',           url: '/imagens/lacres-metalicos/zlock-manivela.png' },
-      { nome: 'ZPINO Bolt Seal',          url: '/imagens/lacres-metalicos/zpino-bolt-seal.png' },
+      { nome: 'Lacre para Container',     url: '/imagens/lacres-metalicos/zpino-bolt-seal.png' },
     ],
   },
   {
@@ -189,14 +190,26 @@ const TIPOS = [
   { id: 'banner', label: 'Banner',          icon: LucideLayout,     cor: 'purple'  },
   { id: 'outro',  label: 'Outros',          icon: LucideFolderOpen, cor: 'gray'    },
 ];
-const TIPO_MAP = Object.fromEntries(TIPOS.map(t => [t.id, t]));
+const TIPO_MAP = {
+  ...Object.fromEntries(TIPOS.map(t => [t.id, t])),
+  doc_empresa:  { id: 'doc_empresa',  label: 'Documento',   icon: LucideFileText, cor: 'teal' },
+  senha_portal: { id: 'senha_portal', label: 'Portal',      icon: LucideKey,      cor: 'sky'  },
+};
 const COR_CLASSES = {
   indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', badge: 'bg-indigo-100 text-indigo-700', icon: 'text-indigo-400' },
   red:    { bg: 'bg-red-50',    border: 'border-red-200',    text: 'text-red-700',    badge: 'bg-red-100 text-red-700',       icon: 'text-red-400'    },
   purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', icon: 'text-purple-400' },
   gray:   { bg: 'bg-gray-50',   border: 'border-gray-200',   text: 'text-gray-600',   badge: 'bg-gray-100 text-gray-600',     icon: 'text-gray-400'   },
+  teal:   { bg: 'bg-teal-50',   border: 'border-teal-200',   text: 'text-teal-700',   badge: 'bg-teal-100 text-teal-700',     icon: 'text-teal-400'   },
+  sky:    { bg: 'bg-sky-50',    border: 'border-sky-200',    text: 'text-sky-700',    badge: 'bg-sky-100 text-sky-700',       icon: 'text-sky-400'    },
 };
-const VAZIO_FORM = { nome: '', descricao: '', tipo: 'foto', url: '' };
+const VAZIO_FORM  = { nome: '', descricao: '', tipo: 'foto', url: '' };
+const VAZIO_DOC   = { nome: '', descricao: '', url: '' };
+const VAZIO_SENHA = { portal: '', url: '', login: '', senha: '', obs: '' };
+
+function decodeSenha(desc) {
+  try { return JSON.parse(desc); } catch { return { login: desc || '', senha: '', obs: '' }; }
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function isImage(url) {
@@ -263,10 +276,12 @@ function FotoGrid({ fotos, onPreview }) {
 
 // ── Tabs de navegação ──────────────────────────────────────────────────────
 const MAIN_TABS = [
-  { id: 'catalogo',  label: 'Catálogo',        emoji: '📖' },
-  { id: 'fotos',     label: 'Fotos de Produtos', emoji: '🖼️' },
-  { id: 'banners',   label: 'Banners & Design', emoji: '🎨' },
-  { id: 'salvos',    label: 'Mídias Salvas',    emoji: '🗂️' },
+  { id: 'catalogo',  label: 'Catálogo',          emoji: '📖' },
+  { id: 'fotos',     label: 'Fotos de Produtos',  emoji: '🖼️' },
+  { id: 'banners',   label: 'Banners & Design',   emoji: '🎨' },
+  { id: 'salvos',    label: 'Mídias Salvas',       emoji: '🗂️' },
+  { id: 'docs',      label: 'Docs das Empresas',  emoji: '🏢' },
+  { id: 'senhas',    label: 'Senhas de Portais',  emoji: '🔑' },
 ];
 
 // ── Componente principal ───────────────────────────────────────────────────
@@ -280,6 +295,12 @@ export default function Midia() {
   const [form, setForm] = useState(VAZIO_FORM);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [preview, setPreview] = useState(null); // { url, nome }
+
+  const [showDocsForm, setShowDocsForm]     = useState(false);
+  const [docsForm, setDocsForm]             = useState(VAZIO_DOC);
+  const [showSenhasForm, setShowSenhasForm] = useState(false);
+  const [senhasForm, setSenhasForm]         = useState(VAZIO_SENHA);
+  const [revealMap, setRevealMap]           = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -297,6 +318,10 @@ export default function Midia() {
     syncMidia();
     return () => { mounted = false; };
   }, []);
+
+  const itensSalvos = useMemo(() => itens.filter(i => i.tipo !== 'doc_empresa' && i.tipo !== 'senha_portal'), [itens]);
+  const itensDocs   = useMemo(() => itens.filter(i => i.tipo === 'doc_empresa'), [itens]);
+  const itensSenhas = useMemo(() => itens.filter(i => i.tipo === 'senha_portal'), [itens]);
 
   function handleAdicionar(e) {
     e.preventDefault();
@@ -335,6 +360,58 @@ export default function Midia() {
     setConfirmDelete(null);
   }
 
+  function handleAdicionarDoc(e) {
+    e.preventDefault();
+    if (!docsForm.nome.trim() || !docsForm.url.trim()) return;
+    const novo = {
+      id: Date.now(),
+      nome: docsForm.nome.trim(),
+      descricao: docsForm.descricao.trim(),
+      tipo: 'doc_empresa',
+      url: docsForm.url.trim(),
+      addedBy: user?.nome || 'Usuário',
+      addedAt: new Date().toISOString(),
+    };
+    const arr = [novo, ...itens];
+    setItens(arr); saveMidia(arr);
+    apiRequest('/api/media', {
+      method: 'POST',
+      body: JSON.stringify(toApiMidia(novo)),
+    }).then(resp => {
+      if (resp.ok && resp.data?.ok && resp.data?.data) {
+        const apiItem = fromApiMidia(resp.data.data);
+        setItens(prev => prev.map(i => i.id === novo.id ? apiItem : i));
+      }
+    });
+    setDocsForm(VAZIO_DOC); setShowDocsForm(false);
+  }
+
+  function handleAdicionarSenha(e) {
+    e.preventDefault();
+    if (!senhasForm.portal.trim()) return;
+    const novo = {
+      id: Date.now(),
+      nome: senhasForm.portal.trim(),
+      descricao: JSON.stringify({ login: senhasForm.login.trim(), senha: senhasForm.senha, obs: senhasForm.obs.trim() }),
+      tipo: 'senha_portal',
+      url: senhasForm.url.trim(),
+      addedBy: user?.nome || 'Usuário',
+      addedAt: new Date().toISOString(),
+    };
+    const arr = [novo, ...itens];
+    setItens(arr); saveMidia(arr);
+    apiRequest('/api/media', {
+      method: 'POST',
+      body: JSON.stringify(toApiMidia(novo)),
+    }).then(resp => {
+      if (resp.ok && resp.data?.ok && resp.data?.data) {
+        const apiItem = fromApiMidia(resp.data.data);
+        setItens(prev => prev.map(i => i.id === novo.id ? apiItem : i));
+      }
+    });
+    setSenhasForm(VAZIO_SENHA); setShowSenhasForm(false);
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Cabeçalho ────────────────────────────────────────────────────── */}
@@ -357,6 +434,24 @@ export default function Midia() {
               Adicionar mídia
             </button>
           )}
+          {tab === 'docs' && (
+            <button
+              onClick={() => setShowDocsForm(true)}
+              className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition"
+            >
+              <LucidePlus className="w-4 h-4" />
+              Adicionar documento
+            </button>
+          )}
+          {tab === 'senhas' && (
+            <button
+              onClick={() => setShowSenhasForm(true)}
+              className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition"
+            >
+              <LucidePlus className="w-4 h-4" />
+              Adicionar portal
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
@@ -373,9 +468,19 @@ export default function Midia() {
             >
               <span>{t.emoji}</span>
               {t.label}
-              {t.id === 'salvos' && itens.length > 0 && (
+              {t.id === 'salvos' && itensSalvos.length > 0 && (
                 <span className="ml-1 bg-indigo-100 text-indigo-600 text-[10px] font-bold rounded-full px-1.5 py-0.5">
-                  {itens.length}
+                  {itensSalvos.length}
+                </span>
+              )}
+              {t.id === 'docs' && itensDocs.length > 0 && (
+                <span className="ml-1 bg-teal-100 text-teal-600 text-[10px] font-bold rounded-full px-1.5 py-0.5">
+                  {itensDocs.length}
+                </span>
+              )}
+              {t.id === 'senhas' && itensSenhas.length > 0 && (
+                <span className="ml-1 bg-sky-100 text-sky-600 text-[10px] font-bold rounded-full px-1.5 py-0.5">
+                  {itensSenhas.length}
                 </span>
               )}
             </button>
@@ -663,7 +768,7 @@ export default function Midia() {
         ──────────────────────────────────────────────────────────────────── */}
         {tab === 'salvos' && (
           <div className="space-y-5">
-            {itens.length === 0 ? (
+            {itensSalvos.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
                 <div className="text-4xl mb-3">🗂️</div>
                 <p className="text-gray-500 font-semibold">Nenhuma mídia salva ainda</p>
@@ -677,7 +782,7 @@ export default function Midia() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {itens.map(item => {
+                {itensSalvos.map(item => {
                   const tipo = TIPO_MAP[item.tipo] || TIPO_MAP['outro'];
                   const cor = COR_CLASSES[tipo.cor];
                   const Icon = tipo.icon;
@@ -733,6 +838,145 @@ export default function Midia() {
                             </a>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─────────────────────────────────────────────────────────────────
+            TAB: DOCS DAS EMPRESAS
+        ──────────────────────────────────────────────────────────────────── */}
+        {tab === 'docs' && (
+          <div className="space-y-5">
+            {itensDocs.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-teal-200">
+                <div className="text-4xl mb-3">🏢</div>
+                <p className="text-gray-500 font-semibold">Nenhum documento cadastrado</p>
+                <p className="text-sm text-gray-400 mt-1">Clique em <strong>Adicionar documento</strong> para incluir contratos, apresentações ou documentos das empresas.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {itensDocs.map(item => (
+                  <div key={item.id} className="bg-white rounded-2xl border border-teal-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
+                    <div className="bg-teal-50 flex items-center justify-center h-28 relative">
+                      <LucideBuilding2 className="w-12 h-12 text-teal-300" />
+                      <span className="absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-700">Documento</span>
+                      <button
+                        onClick={() => setConfirmDelete(item.id)}
+                        className="absolute top-2 right-2 bg-white/80 hover:bg-red-100 text-red-500 rounded-full p-1 transition shadow"
+                      >
+                        <LucideTrash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="p-4 flex flex-col gap-2 flex-1">
+                      <h3 className="font-semibold text-gray-800 text-sm leading-tight">{item.nome}</h3>
+                      {item.descricao && <p className="text-xs text-gray-500 line-clamp-3">{item.descricao}</p>}
+                      <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
+                        <span className="text-[10px] text-gray-400">{humanDate(item.addedAt)} · {item.addedBy}</span>
+                        <div className="flex gap-1">
+                          <a href={item.url} target="_blank" rel="noopener noreferrer"
+                            className="text-teal-500 hover:text-teal-700 p-1 rounded transition">
+                            <LucideExternalLink className="w-4 h-4" />
+                          </a>
+                          <a href={item.url} download={item.nome}
+                            className="text-gray-400 hover:text-gray-600 p-1 rounded transition">
+                            <LucideDownload className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─────────────────────────────────────────────────────────────────
+            TAB: SENHAS DE PORTAIS
+        ──────────────────────────────────────────────────────────────────── */}
+        {tab === 'senhas' && (
+          <div className="space-y-3">
+            {itensSenhas.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-sky-200">
+                <div className="text-4xl mb-3">🔑</div>
+                <p className="text-gray-500 font-semibold">Nenhum portal cadastrado</p>
+                <p className="text-sm text-gray-400 mt-1">Clique em <strong>Adicionar portal</strong> para guardar logins e senhas de portais e sistemas.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {itensSenhas.map(item => {
+                  const creds = decodeSenha(item.descricao);
+                  const revealed = !!revealMap[item.id];
+                  return (
+                    <div key={item.id} className="bg-white rounded-2xl border border-sky-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                      <div className="bg-gradient-to-r from-sky-600 to-sky-700 px-4 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <LucideKey className="w-4 h-4 text-white/80" />
+                          <span className="font-bold text-white text-sm">{item.nome}</span>
+                        </div>
+                        <button
+                          onClick={() => setConfirmDelete(item.id)}
+                          className="bg-white/20 hover:bg-white/40 text-white rounded-full p-1 transition"
+                        >
+                          <LucideTrash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="p-4 space-y-2.5">
+                        {item.url && (
+                          <a href={item.url} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-xs text-sky-600 hover:text-sky-800 truncate font-medium">
+                            <LucideExternalLink className="w-3.5 h-3.5 flex-shrink-0" />
+                            {item.url}
+                          </a>
+                        )}
+                        {creds.login && (
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-gray-400 w-14 flex-shrink-0">Login</span>
+                            <span className="text-xs text-gray-800 font-mono bg-gray-50 rounded px-2 py-0.5 flex-1 truncate">{creds.login}</span>
+                            <button
+                              onClick={() => navigator.clipboard?.writeText(creds.login)}
+                              className="text-gray-300 hover:text-gray-600 flex-shrink-0"
+                              title="Copiar login"
+                            >
+                              <LucideClipboard className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                        {creds.senha && (
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-gray-400 w-14 flex-shrink-0">Senha</span>
+                            <span className="text-xs text-gray-800 font-mono bg-gray-50 rounded px-2 py-0.5 flex-1 truncate">
+                              {revealed ? creds.senha : '••••••••'}
+                            </span>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => setRevealMap(m => ({ ...m, [item.id]: !m[item.id] }))}
+                                className="text-gray-300 hover:text-gray-600"
+                                title={revealed ? 'Ocultar' : 'Mostrar'}
+                              >
+                                {revealed ? <LucideEyeOff className="w-3.5 h-3.5" /> : <LucideEye className="w-3.5 h-3.5" />}
+                              </button>
+                              {revealed && (
+                                <button
+                                  onClick={() => navigator.clipboard?.writeText(creds.senha)}
+                                  className="text-gray-300 hover:text-gray-600"
+                                  title="Copiar senha"
+                                >
+                                  <LucideClipboard className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {creds.obs && (
+                          <p className="text-xs text-gray-500 bg-yellow-50 rounded px-2 py-1 border border-yellow-100">{creds.obs}</p>
+                        )}
+                        <p className="text-[10px] text-gray-300 pt-1">{humanDate(item.addedAt)} · {item.addedBy}</p>
                       </div>
                     </div>
                   );
@@ -838,6 +1082,121 @@ export default function Midia() {
                 </button>
                 <button type="submit"
                   className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 text-sm shadow">
+                  Adicionar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Adicionar documento ────────────────────────────────────── */}
+      {showDocsForm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <LucideBuilding2 className="w-5 h-5 text-teal-500" />
+                Adicionar documento da empresa
+              </h2>
+              <button onClick={() => setShowDocsForm(false)} className="text-gray-400 hover:text-gray-600">
+                <LucideX className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleAdicionarDoc} className="flex flex-col gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nome do documento *</label>
+                <input required
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-teal-300 focus:outline-none"
+                  placeholder="Ex: Contrato Fornecedor XPTO"
+                  value={docsForm.nome} onChange={e => setDocsForm(f => ({ ...f, nome: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">URL / Link *</label>
+                <input required
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-teal-300 focus:outline-none"
+                  placeholder="https://drive.google.com/..."
+                  value={docsForm.url} onChange={e => setDocsForm(f => ({ ...f, url: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Descrição / Observação</label>
+                <textarea rows={2}
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-teal-300 focus:outline-none resize-none"
+                  placeholder="Observação opcional..."
+                  value={docsForm.descricao} onChange={e => setDocsForm(f => ({ ...f, descricao: e.target.value }))} />
+              </div>
+              <div className="flex gap-3 justify-end mt-1">
+                <button type="button" onClick={() => setShowDocsForm(false)}
+                  className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50 text-sm">
+                  Cancelar
+                </button>
+                <button type="submit"
+                  className="px-4 py-2 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-700 text-sm shadow">
+                  Adicionar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Adicionar portal/senha ─────────────────────────────────── */}
+      {showSenhasForm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <LucideKey className="w-5 h-5 text-sky-500" />
+                Adicionar portal / acesso
+              </h2>
+              <button onClick={() => setShowSenhasForm(false)} className="text-gray-400 hover:text-gray-600">
+                <LucideX className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleAdicionarSenha} className="flex flex-col gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Nome do portal *</label>
+                <input required
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-sky-300 focus:outline-none"
+                  placeholder="Ex: Receita Federal, Banco Bradesco, DETRAN..."
+                  value={senhasForm.portal} onChange={e => setSenhasForm(f => ({ ...f, portal: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">URL do portal</label>
+                <input
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-sky-300 focus:outline-none"
+                  placeholder="https://..."
+                  value={senhasForm.url} onChange={e => setSenhasForm(f => ({ ...f, url: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Login / Usuário</label>
+                <input
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-sky-300 focus:outline-none"
+                  placeholder="usuário ou e-mail"
+                  value={senhasForm.login} onChange={e => setSenhasForm(f => ({ ...f, login: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Senha</label>
+                <input
+                  type="text"
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm font-mono focus:ring-2 focus:ring-sky-300 focus:outline-none"
+                  placeholder="senha de acesso"
+                  value={senhasForm.senha} onChange={e => setSenhasForm(f => ({ ...f, senha: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Observação</label>
+                <textarea rows={2}
+                  className="mt-1 border rounded-lg px-3 py-2 w-full text-sm focus:ring-2 focus:ring-sky-300 focus:outline-none resize-none"
+                  placeholder="Ex: 2º fator: celular da diretoria"
+                  value={senhasForm.obs} onChange={e => setSenhasForm(f => ({ ...f, obs: e.target.value }))} />
+              </div>
+              <div className="flex gap-3 justify-end mt-1">
+                <button type="button" onClick={() => setShowSenhasForm(false)}
+                  className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-50 text-sm">
+                  Cancelar
+                </button>
+                <button type="submit"
+                  className="px-4 py-2 rounded-lg bg-sky-600 text-white font-semibold hover:bg-sky-700 text-sm shadow">
                   Adicionar
                 </button>
               </div>

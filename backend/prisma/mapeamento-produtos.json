@@ -1,0 +1,614 @@
+[
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 01",
+    "slug": "cadeado-01",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 01.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 02",
+    "slug": "cadeado-02",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 02.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 03",
+    "slug": "cadeado-03",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 03.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 04",
+    "slug": "cadeado-04",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 04.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 05",
+    "slug": "cadeado-05",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 05.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 06",
+    "slug": "cadeado-06",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 06.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 07",
+    "slug": "cadeado-07",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 07.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 08",
+    "slug": "cadeado-08",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 08.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 09",
+    "slug": "cadeado-09",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 09.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 10",
+    "slug": "cadeado-10",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 10.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 11",
+    "slug": "cadeado-11",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 11.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 12",
+    "slug": "cadeado-12",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 12.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 13",
+    "slug": "cadeado-13",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 13.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 14",
+    "slug": "cadeado-14",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 14.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 15",
+    "slug": "cadeado-15",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 15.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 16",
+    "slug": "cadeado-16",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 16.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 17",
+    "slug": "cadeado-17",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 17.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 18",
+    "slug": "cadeado-18",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 18.png"
+  },
+  {
+    "categoria": "cadeados",
+    "nome": "Cadeado 19",
+    "slug": "cadeado-19",
+    "url_imagem": "/Imagens/Cadeados/Cadeado 19.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 01",
+    "slug": "fita-industrial-01",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 01.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 02",
+    "slug": "fita-industrial-02",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 02.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 03",
+    "slug": "fita-industrial-03",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 03.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 04",
+    "slug": "fita-industrial-04",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 04.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 05",
+    "slug": "fita-industrial-05",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 05.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 06",
+    "slug": "fita-industrial-06",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 06.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 07",
+    "slug": "fita-industrial-07",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 07.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 08",
+    "slug": "fita-industrial-08",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 08.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 09",
+    "slug": "fita-industrial-09",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 09.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 10",
+    "slug": "fita-industrial-10",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 10.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 11",
+    "slug": "fita-industrial-11",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 11.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 12",
+    "slug": "fita-industrial-12",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 12.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 13",
+    "slug": "fita-industrial-13",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 13.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 14",
+    "slug": "fita-industrial-14",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 14.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 15",
+    "slug": "fita-industrial-15",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 15.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 16",
+    "slug": "fita-industrial-16",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 16.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 17",
+    "slug": "fita-industrial-17",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 17.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 18",
+    "slug": "fita-industrial-18",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 18.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 19",
+    "slug": "fita-industrial-19",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 19.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 20",
+    "slug": "fita-industrial-20",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 20.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 21",
+    "slug": "fita-industrial-21",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 21.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 22",
+    "slug": "fita-industrial-22",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 22.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 23",
+    "slug": "fita-industrial-23",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 23.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 24",
+    "slug": "fita-industrial-24",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 24.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 25",
+    "slug": "fita-industrial-25",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 25.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 26",
+    "slug": "fita-industrial-26",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 26.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 27",
+    "slug": "fita-industrial-27",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 27.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 28",
+    "slug": "fita-industrial-28",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 28.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 29",
+    "slug": "fita-industrial-29",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 29.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 30",
+    "slug": "fita-industrial-30",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 30.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 31",
+    "slug": "fita-industrial-31",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 31.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 32",
+    "slug": "fita-industrial-32",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 32.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 33",
+    "slug": "fita-industrial-33",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 33.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 34",
+    "slug": "fita-industrial-34",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 34.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 35",
+    "slug": "fita-industrial-35",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 35.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 36",
+    "slug": "fita-industrial-36",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 36.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 37",
+    "slug": "fita-industrial-37",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 37.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 38",
+    "slug": "fita-industrial-38",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 38.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 39",
+    "slug": "fita-industrial-39",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 39.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 40",
+    "slug": "fita-industrial-40",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 40.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 41",
+    "slug": "fita-industrial-41",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 41.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 42",
+    "slug": "fita-industrial-42",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 42.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 43",
+    "slug": "fita-industrial-43",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 43.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 44",
+    "slug": "fita-industrial-44",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 44.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 45",
+    "slug": "fita-industrial-45",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 45.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 46",
+    "slug": "fita-industrial-46",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 46.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 47",
+    "slug": "fita-industrial-47",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 47.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 48",
+    "slug": "fita-industrial-48",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 48.png"
+  },
+  {
+    "categoria": "fitas",
+    "nome": "Fita Industrial 49",
+    "slug": "fita-industrial-49",
+    "url_imagem": "/Imagens/Fitas/Fita Industrial 49.png"
+  },
+  {
+    "categoria": "maquinas",
+    "nome": "Ferramenta 01",
+    "slug": "ferramenta-01",
+    "url_imagem": "/Imagens/Máquinas/Ferramenta 01.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 01",
+    "slug": "lancamento-01",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 01.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 02",
+    "slug": "lancamento-02",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 02.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 03",
+    "slug": "lancamento-03",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 03.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 04",
+    "slug": "lancamento-04",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 04.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 05",
+    "slug": "lancamento-05",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 05.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 06",
+    "slug": "lancamento-06",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 06.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 07",
+    "slug": "lancamento-07",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 07.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 08",
+    "slug": "lancamento-08",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 08.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 09",
+    "slug": "lancamento-09",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 09.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 10",
+    "slug": "lancamento-10",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 10.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 11",
+    "slug": "lancamento-11",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 11.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 12",
+    "slug": "lancamento-12",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 12.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 13",
+    "slug": "lancamento-13",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 13.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 14",
+    "slug": "lancamento-14",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 14.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 15",
+    "slug": "lancamento-15",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 15.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 16",
+    "slug": "lancamento-16",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 16.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 17",
+    "slug": "lancamento-17",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 17.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 18",
+    "slug": "lancamento-18",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 18.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 19",
+    "slug": "lancamento-19",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 19.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 20",
+    "slug": "lancamento-20",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 20.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 21",
+    "slug": "lancamento-21",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 21.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 22",
+    "slug": "lancamento-22",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 22.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 23",
+    "slug": "lancamento-23",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 23.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 24",
+    "slug": "lancamento-24",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 24.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 25",
+    "slug": "lancamento-25",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 25.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 26",
+    "slug": "lancamento-26",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 26.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 27",
+    "slug": "lancamento-27",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 27.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 28",
+    "slug": "lancamento-28",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 28.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 29",
+    "slug": "lancamento-29",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 29.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 30",
+    "slug": "lancamento-30",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 30.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 31",
+    "slug": "lancamento-31",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 31.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 32",
+    "slug": "lancamento-32",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 32.png"
+  },
+  {
+    "categoria": "lancamentos",
+    "nome": "Lancamento 33",
+    "slug": "lancamento-33",
+    "url_imagem": "/Imagens/NovosLancamentos/Lancamento 33.png"
+  }
+]

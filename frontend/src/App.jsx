@@ -19,13 +19,19 @@ import Midia from './pages/Midia';
 import Separacoes from './pages/Separacoes';
 import Chat from './pages/Chat';
 import Cubagem from './pages/Cubagem';
+import Ramais from './pages/Ramais';
+import PortariaFila from './pages/PortariaFila';
+import PorteiroCheckin from './pages/PorteiroCheckin';
+import DisplayNameModal from './components/DisplayNameModal';
 
 function PrivateRoute({ children, allowed }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  // TI tem acesso total a todas as rotas (espelha ADMIN)
-  if (user.perfil === 'TI' || user.perfil === 'ADMIN') return children;
-  if (allowed && !allowed.includes(user.perfil)) return <Navigate to="/produtos" replace />;
+  // TI / ADMIN / DIRETORIA têm acesso total
+  if (user.perfil === 'TI' || user.perfil === 'ADMIN' || user.perfil === 'DIRETORIA') return children;
+  // CENTRAL_ATENDIMENTO herda todos os acessos da antiga SUPERVISAO
+  const perfilEfetivo = user.perfil === 'CENTRAL_ATENDIMENTO' ? 'SUPERVISAO' : user.perfil;
+  if (allowed && !allowed.includes(perfilEfetivo)) return <Navigate to="/produtos" replace />;
   return children;
 }
 
@@ -33,6 +39,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        <Route path="/porta/:token" element={<PorteiroCheckin />} />
         <Route path="/login" element={<Login />} />
 
         {/* Dashboard — ADMIN + VISITANTE (modo leitura) */}
@@ -87,7 +94,7 @@ export default function App() {
         {/* Sugestões — todos os perfis */}
         <Route path="/sugestoes" element={
           <PrivateRoute>
-            <LayoutBase><Sugestoes /></LayoutBase>
+            <LayoutBase noPadding><Sugestoes /></LayoutBase>
           </PrivateRoute>
         } />
 
@@ -119,9 +126,9 @@ export default function App() {
           </PrivateRoute>
         } />
 
-        {/* Cubagem — ADMIN, SUPERVISAO, COMERCIAL, VISITANTE */}
+        {/* Cubagem — ADMIN, SUPERVISAO, COMERCIAL, EXPEDICAO, VISITANTE */}
         <Route path="/cubagem" element={
-          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'VISITANTE']}>
+          <PrivateRoute allowed={['ADMIN', 'SUPERVISAO', 'COMERCIAL', 'EXPEDICAO', 'VISITANTE']}>
             <LayoutBase><Cubagem /></LayoutBase>
           </PrivateRoute>
         } />
@@ -133,9 +140,24 @@ export default function App() {
           </PrivateRoute>
         } />
 
+        {/* Ramais — todos os perfis logados */}
+        <Route path="/ramais" element={
+          <PrivateRoute>
+            <LayoutBase noPadding><Ramais /></LayoutBase>
+          </PrivateRoute>
+        } />
+
+        {/* Portaria/Fila — ADMIN, EXPEDICAO, SUPERVISAO */}
+        <Route path="/portaria" element={
+          <PrivateRoute allowed={['ADMIN', 'EXPEDICAO', 'SUPERVISAO']}>
+            <LayoutBase><PortariaFila /></LayoutBase>
+          </PrivateRoute>
+        } />
+
         {/* Redireciona root para /produtos se não tem acesso ao dashboard */}
         <Route path="*" element={<Navigate to="/produtos" replace />} />
       </Routes>
+      <DisplayNameModal />
     </AuthProvider>
   );
 }

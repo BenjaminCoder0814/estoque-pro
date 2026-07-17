@@ -30,3 +30,17 @@ Thumbs.db
 
 # Local Netlify folder
 .netlify
+
+# Pacotes de deploy: sao artefatos de build, nao codigo-fonte. Um zip de 181 MB
+# versionado aqui estourava o limite de 100 MB do GitHub e travava todo push,
+# deixando o Blueprint do Render sem sincronizar por 2 meses.
+*.zip
+
+# Backups deixados por editor
+*.bak
+*.orig
+*~
+
+# Dumps do banco: dados, nao codigo-fonte
+db-dump.json
+db-dump.txt

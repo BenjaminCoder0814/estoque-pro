@@ -15,6 +15,7 @@ import {
   LucideMoreVertical, LucideReply, LucideForward, LucideStar, LucidePin,
   LucideTrash2, LucideCheck, LucideCheckCheck, LucideCopy, LucideMailOpen,
   LucideInfo, LucideImage, LucideFile, LucidePinOff, LucideStarOff,
+  LucidePackage,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
@@ -30,7 +31,9 @@ import {
   renderTextWithLinks, formatTs, formatDataSep, iconeArquivo,
   previewMsg, nomeUsuario, agruparPorDia, tocarSomNotificacao,
   escapeRegex, formatarTempo, gerarMsgId, resumoMsg,
+  aplicarOverridePerfil,
 } from './chat/chatHelpers';
+import Armazem from './chat/Armazem';
 
 // ─────────────────────────────────────────────────────────────────────
 // Persistência Firestore
@@ -57,8 +60,27 @@ function patchConvFirestore(convIdStr, patch) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────
 // Texto com links + highlight de busca
 // ─────────────────────────────────────────────────────────────────────
+
+// Avatar circular: usa foto (avatarUrl) se existir, senão inicial do nome
+// sobre um gradiente determinístico baseado no userId.
+function Avatar({ user, userId, nome, className = 'w-10 h-10 text-base' }) {
+  const id = user?.id ?? userId;
+  const av = user?.avatarUrl || '';
+  const inicial = (user?.nome || nome || '?').charAt(0).toUpperCase();
+  return (
+    <div
+      className={`relative rounded-full overflow-hidden bg-gradient-to-br ${avatarGradient(id)} flex items-center justify-center text-white font-bold shadow flex-shrink-0 ${className}`}
+    >
+      {av
+        ? <img src={av} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        : inicial}
+    </div>
+  );
+}
+
 function RenderText({ text, highlight }) {
   const partes = renderTextWithLinks(text) || [];
   const re = highlight ? new RegExp(`(${escapeRegex(highlight)})`, 'gi') : null;
@@ -227,9 +249,7 @@ function ForwardModal({ open, onClose, onSend, contatos, userId }) {
                   sel ? 'bg-indigo-500/30 ring-1 ring-indigo-400' : 'hover:bg-white/5'
                 }`}
               >
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarGradient(c.id)} flex items-center justify-center text-white font-bold shadow flex-shrink-0`}>
-                  {c.nome.charAt(0).toUpperCase()}
-                </div>
+                <Avatar user={c} className="w-10 h-10 text-base" />
                 <div className="flex-1 text-left min-w-0">
                   <div className="text-sm font-medium text-white truncate flex items-center gap-1.5">
                     {c.nome}
@@ -274,8 +294,9 @@ function MessageBubble({
   m, isMeu, isAdmin, userId, modoAdminTotal,
   highlightId, search, replyTargetId,
   onContextMenu, onJumpTo, onImageClick,
+  contatos = TODOS_USUARIOS,
 }) {
-  const remetente = TODOS_USUARIOS.find(u => u.id === m.de);
+  const remetente = contatos.find(u => u.id === m.de) || TODOS_USUARIOS.find(u => u.id === m.de);
   const apagada   = m.deletedForAll;
   const apagadaPraMim = Array.isArray(m.deletedFor) && m.deletedFor.includes(userId);
 
@@ -316,12 +337,12 @@ function MessageBubble({
       onTouchMove={handleTouchEnd}
     >
       {!isMeu && (
-        <div
-          className={`w-7 h-7 rounded-full bg-gradient-to-br ${avatarGradient(m.de)} flex items-center justify-center text-white font-bold text-xs flex-shrink-0 mb-1`}
-          title={m.deNome}
-        >
-          {remetente?.nome?.charAt(0)?.toUpperCase() || '?'}
-        </div>
+        <Avatar
+          user={remetente}
+          userId={m.de}
+          nome={m.deNome}
+          className="w-7 h-7 text-xs mb-1"
+        />
       )}
 
       <div
@@ -520,7 +541,7 @@ function PinnedBar({ pinned, onJump, onUnpin, canUnpin }) {
 // ─────────────────────────────────────────────────────────────────────
 // Info Panel (3a coluna desktop) — mostra mídia, fixadas e favoritas
 // ─────────────────────────────────────────────────────────────────────
-function InfoPanel({ conv, userId, onJump, onClose, modoAdminTotal }) {
+function InfoPanel({ conv, userId, onJump, onClose, modoAdminTotal, contatos = TODOS_USUARIOS }) {
   const [aba, setAba] = useState('midia'); // midia | fixadas | favoritas
   if (!conv) return null;
 
@@ -530,7 +551,7 @@ function InfoPanel({ conv, userId, onJump, onClose, modoAdminTotal }) {
   const favoritas = visiveis.filter(m => Array.isArray(m.starredBy) && m.starredBy.includes(userId));
 
   const outroId = conv.participantIds.find(id => id !== userId) ?? conv.participantIds[0];
-  const outro = TODOS_USUARIOS.find(u => u.id === outroId);
+  const outro = contatos.find(u => u.id === outroId) || TODOS_USUARIOS.find(u => u.id === outroId);
   const badge = outro ? BADGES_PERFIL[outro.perfil] : null;
 
   return (
@@ -551,13 +572,11 @@ function InfoPanel({ conv, userId, onJump, onClose, modoAdminTotal }) {
             <LucideShield className="w-8 h-8" />
           </div>
         ) : (
-          <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${avatarGradient(outroId)} flex items-center justify-center text-white font-bold text-3xl shadow-lg mb-2`}>
-            {outro?.nome?.charAt(0)?.toUpperCase() || '?'}
-          </div>
+          <Avatar user={outro} userId={outroId} className="w-20 h-20 text-3xl mb-2" />
         )}
         <div className="text-base font-semibold text-white">
           {modoAdminTotal
-            ? conv.participantIds.map(id => nomeUsuario(id)).join(' ↔ ')
+            ? conv.participantIds.map(id => nomeUsuario(id, contatos)).join(' ↔ ')
             : outro?.nome}
         </div>
         {!modoAdminTotal && badge && (
@@ -629,12 +648,26 @@ function InfoPanel({ conv, userId, onJump, onClose, modoAdminTotal }) {
 // COMPONENTE PRINCIPAL
 // ═════════════════════════════════════════════════════════════════════
 export default function Chat() {
-  const { user } = useAuth();
-  const isAdmin = user?.perfil === 'ADMIN' || user?.perfil === 'TI';
+  const { user: userReal, contatos: contatosCtx, refreshContatosFromApi } = useAuth();
+  const user = useMemo(() => userReal ? aplicarOverridePerfil(userReal) : userReal, [userReal]);
+  const isAdmin = ['ADMIN', 'TI', 'DIRETORIA'].includes(userReal?.perfil);
+  const contatos = useMemo(() => {
+    const base = (contatosCtx && contatosCtx.length) ? contatosCtx : TODOS_USUARIOS;
+    return base.map(aplicarOverridePerfil);
+  }, [contatosCtx]);
+
+  // Tenta puxar a lista real de usuários do backend sempre que entrar no chat
+  // (caso o backend estivesse offline no login, ou tenham sido criados novos
+  // logins desde a última sessão). Falha silenciosa: continua usando o cache.
+  useEffect(() => {
+    if (!user || typeof refreshContatosFromApi !== 'function') return;
+    refreshContatosFromApi().catch(() => {});
+  }, [user, refreshContatosFromApi]);
 
   const [conversas, setConversas]   = useState(loadConversas);
   const [readMap, setReadMap]       = useState(loadRead);
   const [convAtiva, setConvAtiva]   = useState(null);
+  const [armazemAberto, setArmazemAberto] = useState(false);
   const [modoAdminTotal, setModoAdminTotal] = useState(false);
   const [textInput, setTextInput]   = useState('');
   const [buscaContato, setBuscaContato] = useState('');
@@ -691,7 +724,7 @@ export default function Chat() {
           if (!jaAberta) {
             tocarSomNotificacao();
             if ('Notification' in window && Notification.permission === 'granted') {
-              const remetente = nomeUsuario(lastMsg.de);
+              const remetente = nomeUsuario(lastMsg.de, contatos);
               const corpo =
                 lastMsg.tipo === 'texto'  ? lastMsg.conteudo :
                 lastMsg.tipo === 'audio'  ? '🎤 Mensagem de voz' :
@@ -772,8 +805,8 @@ export default function Chat() {
   );
 
   const meuContatos = useMemo(
-    () => TODOS_USUARIOS.filter(u => u.id !== user?.id),
-    [user]
+    () => contatos.filter(u => u.id !== user?.id),
+    [contatos, user]
   );
 
   const todasConversas = useMemo(() => {
@@ -810,6 +843,7 @@ export default function Chat() {
       setConversas(novasConvs);
       syncConvFirestore(conv);
     }
+    setArmazemAberto(false);
     setConvAtiva(conv.id);
     setMobileListVisible(false);
     setReplyingTo(null);
@@ -1152,7 +1186,7 @@ export default function Chat() {
     const ts = convAtivaObj.typing?.[outroId];
     if (!ts) return null;
     if (Date.now() - ts > 4000) return null;
-    return nomeUsuario(outroId);
+    return nomeUsuario(outroId, contatos);
   }, [convAtivaObj, user, modoAdminTotal]);
 
   const totalNaoLidos = useMemo(() => {
@@ -1175,9 +1209,7 @@ export default function Chat() {
         {/* Header sidebar */}
         <div className="px-4 py-4 bg-slate-900/60 border-b border-white/10">
           <div className="flex items-center gap-2 mb-3">
-            <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${avatarGradient(user?.id)} flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow`}>
-              {user?.nome?.charAt(0)?.toUpperCase()}
-            </div>
+            <Avatar user={user} className="w-9 h-9 text-sm" />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold text-white truncate">{user?.nome}</div>
               <div className="text-[10px] text-slate-400 uppercase tracking-wider">{user?.perfil}</div>
@@ -1204,7 +1236,7 @@ export default function Chat() {
 
           {isAdmin && (
             <button
-              onClick={() => { setModoAdminTotal(m => !m); setConvAtiva(null); }}
+              onClick={() => { setModoAdminTotal(m => !m); setConvAtiva(null); setArmazemAberto(false); }}
               className={`mt-2 w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 modoAdminTotal
                   ? 'bg-purple-500/30 text-purple-200 border border-purple-500/40'
@@ -1219,6 +1251,38 @@ export default function Chat() {
 
         {/* Lista */}
         <div className="flex-1 overflow-y-auto">
+          {/* Armazém Próprio — fixado no topo de TODOS os logins (não some, não some no admin) */}
+          <button
+            onClick={() => {
+              setArmazemAberto(true);
+              setConvAtiva(null);
+              setModoAdminTotal(false);
+              setMobileListVisible(false);
+            }}
+            className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all border-b border-amber-500/20 ${
+              armazemAberto
+                ? 'bg-amber-500/20 border-l-2 border-l-amber-400'
+                : 'bg-amber-500/5 hover:bg-amber-500/10'
+            }`}
+            title="Seu bloco de notas pessoal — só você vê"
+          >
+            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow flex-shrink-0">
+              <LucidePackage className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className="text-sm font-medium text-white truncate">Armazém Próprio</span>
+                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 flex-shrink-0">
+                  Fixado
+                </span>
+              </div>
+              <div className="text-xs text-amber-300/70 truncate">
+                📁 Suas pastas, notas e anexos
+              </div>
+            </div>
+            <LucidePin className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+          </button>
+
           {modoAdminTotal ? (
             todasConversas.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-40 text-slate-500 text-sm gap-2">
@@ -1231,7 +1295,7 @@ export default function Chat() {
               return (
                 <button
                   key={conv.id}
-                  onClick={() => { setConvAtiva(conv.id); setMobileListVisible(false); }}
+                  onClick={() => { setArmazemAberto(false); setConvAtiva(conv.id); setMobileListVisible(false); }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-all border-b border-white/5 ${
                     isAtiva ? 'bg-indigo-500/20 border-l-2 border-l-indigo-400' : 'hover:bg-white/5'
                   }`}
@@ -1241,7 +1305,7 @@ export default function Chat() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-white truncate">
-                      {conv.participantIds.map(id => nomeUsuario(id)).join(' ↔ ')}
+                      {conv.participantIds.map(id => nomeUsuario(id, contatos)).join(' ↔ ')}
                     </div>
                     <div className="text-xs text-slate-400 truncate">{previewMsg(ultima, user?.id)}</div>
                   </div>
@@ -1269,9 +1333,7 @@ export default function Chat() {
                   }`}
                 >
                   <div className="relative flex-shrink-0">
-                    <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${avatarGradient(contato.id)} flex items-center justify-center text-white font-bold text-base shadow`}>
-                      {contato.nome.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar user={contato} className="w-11 h-11 text-base" />
                     {contato.naoLidas > 0 && (
                       <span className="absolute -top-1 -right-1 bg-indigo-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow">
                         {contato.naoLidas}
@@ -1308,8 +1370,13 @@ export default function Chat() {
       </aside>
 
       {/* ═══ MAIN — Conversa ═══ */}
-      <main className={`flex-1 flex flex-col min-w-0 relative ${mobileListVisible ? 'hidden md:flex' : 'flex'}`}>
-        {convAtiva && convAtivaObj ? (
+      <main className={`flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden relative ${mobileListVisible ? 'hidden md:flex' : 'flex'}`}>
+        {armazemAberto ? (
+          <Armazem
+            user={user}
+            onVoltar={() => { setArmazemAberto(false); setMobileListVisible(true); }}
+          />
+        ) : convAtiva && convAtivaObj ? (
           <>
             {/* Header conversa */}
             <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/80 border-b border-white/10 flex-shrink-0">
@@ -1324,7 +1391,7 @@ export default function Chat() {
                 const outroId = modoAdminTotal
                   ? convAtivaObj.participantIds[0]
                   : convAtivaObj.participantIds.find(id => id !== user?.id);
-                const outro = TODOS_USUARIOS.find(u => u.id === outroId);
+                const outro = contatos.find(u => u.id === outroId) || TODOS_USUARIOS.find(u => u.id === outroId);
                 const badge = outro ? BADGES_PERFIL[outro.perfil] : null;
                 return (
                   <>
@@ -1333,14 +1400,12 @@ export default function Chat() {
                         <LucideShield className="w-4 h-4" />
                       </div>
                     ) : (
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarGradient(outroId)} flex items-center justify-center text-white font-bold shadow flex-shrink-0`}>
-                        {outro?.nome?.charAt(0)?.toUpperCase()}
-                      </div>
+                      <Avatar user={outro} userId={outroId} className="w-10 h-10 text-base" />
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold text-white flex items-center gap-2">
                         {modoAdminTotal
-                          ? convAtivaObj.participantIds.map(id => nomeUsuario(id)).join(' ↔ ')
+                          ? convAtivaObj.participantIds.map(id => nomeUsuario(id, contatos)).join(' ↔ ')
                           : outro?.nome}
                         {badge && !modoAdminTotal && (
                           <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${badge.bg} ${badge.text}`}>
@@ -1417,7 +1482,7 @@ export default function Chat() {
             {/* Área de mensagens */}
             <div
               ref={mensagensRef}
-              className="flex-1 overflow-y-auto px-4 py-4 space-y-1"
+              className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-1"
               style={{ background: 'linear-gradient(180deg, #0f172a 0%, #111827 100%)' }}
             >
               {mensagensVisiveis.length === 0 ? (
@@ -1470,6 +1535,7 @@ export default function Chat() {
                       onContextMenu={(e, msg) => setCtxMenu({ x: e.clientX, y: e.clientY, msg })}
                       onJumpTo={jumpToMsg}
                       onImageClick={setLightboxImg}
+                      contatos={contatos}
                     />
                   );
                 });
@@ -1633,6 +1699,7 @@ export default function Chat() {
           onJump={jumpToMsg}
           onClose={() => setShowInfoPanel(false)}
           modoAdminTotal={modoAdminTotal}
+          contatos={contatos}
         />
       )}
 
@@ -1666,7 +1733,7 @@ export default function Chat() {
       <ForwardModal
         open={!!forwardMsg}
         onClose={() => setForwardMsg(null)}
-        contatos={TODOS_USUARIOS}
+        contatos={meuContatos}
         userId={user?.id}
         onSend={(ids) => {
           if (forwardMsg) encaminharPara(forwardMsg, ids);
