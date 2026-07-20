@@ -50,8 +50,7 @@ const menu = [
     desc: 'Canal de comunicação interna entre equipes.' },
   { label: 'Ramais',     icon: LucidePhone,            to: '/ramais',
     desc: 'Lista compartilhada de ramais internos — edição liberada para todos.' },
-  { label: 'Portaria',   icon: LucideClipboardList,    to: '/portaria',      allowed: ['ADMIN', 'EXPEDICAO', 'SUPERVISAO'],
-    desc: 'Fila de atendimento da portaria via QR code para expedição.' },
+  // Portaria/Porteiro ocultos do menu a pedido; rota /porta/:token (check-in por QR) segue ativa.
 ];
 
 export default function Sidebar() {
