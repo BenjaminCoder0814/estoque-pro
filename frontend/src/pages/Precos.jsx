@@ -14,7 +14,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 const FIRESTORE_DOC = () => doc(db, 'catalogo', 'precos');
 
 const CAT_KEY     = 'zkCatalogo';
-const CAT_VERSION = 'v34';
+const CAT_VERSION = 'v35';
 const CAT_VER_KEY = 'zkCatalogoVersion';
 
 // ── helpers ───────────────────────────────────────────────────────────────
@@ -647,6 +647,19 @@ const CATALOGO_SEED = [
       ]},
       { id: 1704, nome: 'Lacre Etiqueta', variacoes: [
         v(170401,'Único','','', null, null, null, null, '—', 'Sob consulta'),
+      ]},
+    ],
+  },
+  /* ══════════════════════════════════════════════════════
+     18. LACRE ZPINO
+  ══════════════════════════════════════════════════════ */
+  {
+    id: 18, categoria: 'Lacre Zpino', icon: 'zap', color: 'teal',
+    obs: 'Preço por unidade.',
+    produtos: [
+      { id: 1801, nome: 'Lacre Zpino', variacoes: [
+        v(180101,'Promo','PP','', null, null, null, 3.75, 'Pronta entrega', 'Preço promocional por unidade'),
+        v(180102,'Nacional','PP','', null, null, null, 5.30, '—', 'Preço nacional por unidade'),
       ]},
     ],
   },
